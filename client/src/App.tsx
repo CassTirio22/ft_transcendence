@@ -5,16 +5,15 @@ import {
   HashRouter,
   Routes
 } from "react-router-dom";
+
+import Navbar from "./components/nav/navbar";
 import Main from "./Main";
 
 function App() {
 	return (
 		<HashRouter>
 			<div>
-				<ul className="header">
-				<li><NavLink to="/">Home</NavLink></li>
-				<li><NavLink to="/login">Stuff</NavLink></li>
-				</ul>
+				<Navbar/>
 				<div className="content">
 					<Main />
 				</div>

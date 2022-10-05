@@ -2,11 +2,25 @@ import { Injectable, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmOptionsFactory, TypeOrmModuleOptions } from '@nestjs/typeorm';
 
+/**
+  * Class :			TypeOrmConfigService
+ ** Definition :	Custom configuration of TypeORM using environment.
+ ** Priv. Fields :	config
+ ** Publ. Methods :	createTypeOrmOptions()
+**/
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
   @Inject(ConfigService)
+  /**
+    * NestJS default Configuration Service
+	* @type {ConfigService}
+  **/
   private readonly config: ConfigService;
 
+  /**
+    * Return parametered TypORM module options
+    * @returns {TypeOrmModuleOptions}
+  **/
   public createTypeOrmOptions(): TypeOrmModuleOptions {
     return {
       type: 'postgres',

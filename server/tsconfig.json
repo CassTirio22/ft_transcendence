@@ -22,7 +22,8 @@
     "types": ["node", "jest"]
   },
   "typedocOptions": {
-  	"entryPoints" : ["src/common/helper/env.helper.ts"],
+  	"entryPoints" : ["src/common/helper/env.helper.ts",
+					"src/shared/typeorm/typeorm.service.ts"],
   	"out": "docs"
   }
 }

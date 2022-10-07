@@ -22,8 +22,12 @@
     "types": ["node", "jest"]
   },
   "typedocOptions": {
+	"validation":	{
+		"notExported": false
+	}, 
   	"entryPoints" : ["src/common/helper/env.helper.ts",
-					"src/shared/typeorm/typeorm.service.ts"],
+					"src/shared/typeorm/typeorm.service.ts",
+					"src/app.module.ts"],
   	"out": "docs"
   }
 }

@@ -4,16 +4,18 @@ import { TypeOrmOptionsFactory, TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 /**
   * Custom configuration of TypeORM using environment.
-  * @property {ConfigService} config	-NestJS default Configuration Service
 **/
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
-  @Inject(ConfigService)
-  private readonly config: ConfigService;
+	/**
+  	  * NestJS default Configuration Service
+	**/
+	@Inject(ConfigService)
+	private readonly config: ConfigService;
 
   /**
     * Create TypORM module options.
-	* Please note that the synchronize value set to TRUE.
+	* Please note that the synchronize value is set to TRUE.
     * @returns {TypeOrmModuleOptions} parametered TypORM module options.
   **/
   public createTypeOrmOptions(): TypeOrmModuleOptions {

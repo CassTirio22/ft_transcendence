@@ -15,6 +15,7 @@ const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
 
 /**
 * Modified root module from NestJS. Parameters are defined by the ModuleMetadata interface.
+* Documentation : https://docs.nestjs.com/modules
  @parameters 
  * imports: List of imported modules exporting the required providers.
  * controllers: Set of controllers which must be instantiated.

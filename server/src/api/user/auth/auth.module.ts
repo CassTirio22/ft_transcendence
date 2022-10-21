@@ -9,6 +9,15 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './auth.strategy';
 import { ConfigService } from '@nestjs/config';
 
+/**
+* The authentification module. Imports Passport, JWT and TypeORM modules as they are needed.
+* Documentation : https://docs.nestjs.com/modules
+ @parameters 
+ * imports: List of imported modules exporting the required providers.
+ * controllers: Set of controllers which must be instantiated.
+ * providers: List of providers that will be instantiaed and can be shared across this module.
+ * exports: Subset of providers in this module that should be available in modules which import this module.
+**/
 @Module({
 	imports: [
 		PassportModule.register({ defaultStrategy: 'jwt', property: 'user' }),

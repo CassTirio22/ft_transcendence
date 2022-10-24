@@ -15,25 +15,34 @@ export function createCtx() {
 
 	const signIn = async (email: string, password: string) => "null";
 	const signOut = async () => "null";
+	const profile = async () => "null";
 
 	const ctx = createContext({
 		user: default_user,
 		setUser: defaultUpdate,
 		signIn: signIn,
 		signOut: signOut,
+		profile: profile,
 	});
 
 	function AuthProvider(props: PropsWithChildren<{}>) {
 		const [user, setUser] = useState(default_user);
 
 		const signIn = async (email: string, password: string) => {
-			const token = await axios.post("/api-token-auth/", {
-				username: email,
+			const token = await axios.post("auth/login", {
+				email: email,
 				password: password,
-			});
-			if (token.status == 200) {
-				storeData("token", token.data);
-			}
+			})
+			.then(response => {
+				console.log(response.data)
+				return response.data;
+			})
+			.catch(e => {
+				console.log(e)
+				return null;
+			})
+			set_instance_token(token);
+			setUser({...user, token: token});
 			return "";
 		}
 
@@ -49,6 +58,21 @@ export function createCtx() {
 			});
 			storeData("token", "");
 			unset_instance_token();
+		}
+
+		const profile = async () => {
+			const token = await axios.post("auth/refresh")
+			.then(response => {
+				console.log(response.data)
+				return response.data;
+			})
+			.catch(e => {
+				console.log(e)
+				return null;
+			})
+			setUser({...user, token: token});
+			return "";
+			return "";
 		}
 
 		const storeData = (key: string, data: string) => {
@@ -70,6 +94,7 @@ export function createCtx() {
 				setUser,
 				signIn,
 				signOut,
+				profile,
 			}}
 			{...props} />
 		);

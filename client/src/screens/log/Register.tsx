@@ -1,8 +1,27 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
+import { AuthContext } from '../..';
 
 function Register() {
+	const [userMail, setUserMail] = useState("");
+	const [password, setPassword] = useState("");
+	const [userName, setUserName] = useState("");
+	const {user, register, profile} = useContext(AuthContext)
+	const handleSubmit = () => {
+		register(userMail, password, userName);
+		profile();
+	}
   return (
-	<div>Register</div>
+	<section>
+		<div className='center_div'>
+			<h2>Register to create an account!</h2>
+		</div>
+		<div className="form" onClick={handleSubmit}>
+			<input placeholder='Mail' type="text" value={userMail} onChange={(e) => setUserMail(e.target.value)} />
+			<input placeholder='Username' type="text" value={userName} onChange={(e) => setUserName(e.target.value)} />
+			<input placeholder='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+			<button>Register</button>
+		</div>
+	</section>
   )
 }
 

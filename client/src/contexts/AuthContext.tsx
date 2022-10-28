@@ -13,6 +13,7 @@ export function createCtx() {
 
 	const defaultUpdate: UpdateType = () => default_user;
 
+	const register = async(email: string, password: string, name?: string) => "null";
 	const signIn = async (email: string, password: string) => "null";
 	const signOut = async () => "null";
 	const profile = async () => "null";
@@ -20,6 +21,7 @@ export function createCtx() {
 	const ctx = createContext({
 		user: default_user,
 		setUser: defaultUpdate,
+		register: register,
 		signIn: signIn,
 		signOut: signOut,
 		profile: profile,
@@ -27,6 +29,26 @@ export function createCtx() {
 
 	function AuthProvider(props: PropsWithChildren<{}>) {
 		const [user, setUser] = useState(default_user);
+
+		const register = async (email: string, password: string, name?: string) =>
+		{
+			const token = await axios.post("auth/register", {
+				email: email,
+				password: password,
+				name: name
+			})
+			.then(response => {
+				console.log(response.data)
+				return response.data;
+			})
+			.catch(e => {
+				console.log(e)
+				return null;
+			})
+			set_instance_token(token);
+			setUser({...user, token: token});
+			return "";
+		}
 
 		const signIn = async (email: string, password: string) => {
 			const token = await axios.post("auth/login", {
@@ -72,7 +94,6 @@ export function createCtx() {
 			})
 			setUser({...user, token: token});
 			return "";
-			return "";
 		}
 
 		const storeData = (key: string, data: string) => {
@@ -92,6 +113,7 @@ export function createCtx() {
 			<ctx.Provider value={{ 
 				user,
 				setUser,
+				register,
 				signIn,
 				signOut,
 				profile,

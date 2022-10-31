@@ -1,6 +1,10 @@
 import { Trim } from 'class-sanitizer';
 import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 
+/**
+ * Data Transfer Object for User registration.
+ * Documentation about DTOs : https://docs.nestjs.com/controllers
+ */
 export class RegisterDto {
 	@Trim()
 	@IsEmail()
@@ -15,6 +19,10 @@ export class RegisterDto {
 	public readonly name?: string;
 }
 
+/**
+ * Data Transfer Object for User login.
+ * Documentation about DTOs : https://docs.nestjs.com/controllers
+ */
 export class LoginDto {
 	@Trim()
 	@IsEmail()

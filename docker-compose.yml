@@ -18,7 +18,7 @@ services:
         ports:
             - "3000:3000"
         networks:
-            -transcendence
+            - transcendence
         restart: unless-stopped
 
     postgres:
@@ -26,7 +26,7 @@ services:
         image: postgres
         restart: unless-stopped
         networks:
-            -transcendence
+            - transcendence
 
 networks:
     transcendence:

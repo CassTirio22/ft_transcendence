@@ -7,8 +7,8 @@ function Login() {
 	const [userName, setUserName] = useState("test201@test.com");
 	const [password, setPassword] = useState("test1234");
 	const {user, signIn, profile} = useContext(AuthContext)
-	const handleSubmit = () => {
-		signIn(userName, password);
+	const handleSubmit = async () => {
+		await signIn(userName, password);
 		profile();
 	}
 	return (

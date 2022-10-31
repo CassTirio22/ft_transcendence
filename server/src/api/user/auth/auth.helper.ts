@@ -5,6 +5,7 @@ import { NoVersionOrUpdateDateColumnError, Repository } from 'typeorm';
 import { User } from '@/api/user/user.entity';
 import * as bcrypt from 'bcryptjs';
 import { ARRAY_MAX_SIZE } from 'class-validator';
+import { RegisterDto } from './auth.dto';
 
 /**
  * Contains many methods to help with user's authentification.
@@ -45,7 +46,8 @@ export class AuthHelper {
 	 * @returns {User} The user with the corresponding id found in the JWT. null if there is none.
 	 */
 	public async validateUser(decoded: any): Promise<User> {
-		return this.repository.findOne(decoded.id);
+		const { email }: RegisterDto = decoded;
+		return this.repository.findOne({ where: { email } });
 	}
 
 	/**

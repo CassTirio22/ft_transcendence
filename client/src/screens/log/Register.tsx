@@ -1,13 +1,15 @@
 import React, { useContext, useState } from 'react'
 import { AuthContext } from '../..';
+import Login from './Login';
 
 function Register() {
 	const [userMail, setUserMail] = useState("");
 	const [password, setPassword] = useState("");
 	const [userName, setUserName] = useState("");
-	const {user, register, profile} = useContext(AuthContext)
+	const {user, signIn, register, profile} = useContext(AuthContext)
 	const handleSubmit = async () => {
 		await register(userMail, password, userName);
+		await signIn(userMail, password);
 		profile();
 	}
   return (

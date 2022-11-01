@@ -16,7 +16,11 @@ export type Props = {
 	fetchMessages?: any,
 };
 
-
+/**
+ * React Component
+ * Use the HashRouter to keep the UI in sync with the URL.
+ * Call of the NavBar with Main as child.
+ */
 const App: React.FC<Props> = ({messages, fetchMessages}) => {
 
 	return (

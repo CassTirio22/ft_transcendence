@@ -1,5 +1,6 @@
 import React, { Dispatch, PropsWithChildren, SetStateAction, useEffect }  from 'react'
 import { createContext, useState } from 'react';
+import { isCompositeComponent } from 'react-dom/test-utils';
 import axios, { set_instance_token, unset_instance_token } from "../service/axios"
 
 export function createCtx() {
@@ -13,22 +14,47 @@ export function createCtx() {
 
 	const defaultUpdate: UpdateType = () => default_user;
 
+	const register = async(email: string, password: string, name?: string) => "null";
 	const signIn = async (email: string, password: string) => "null";
 	const signOut = async () => "null";
 	const profile = async () => "null";
+	const isLoggedIn = () => false;
 
 	const ctx = createContext({
 		user: default_user,
 		setUser: defaultUpdate,
+		register: register,
 		signIn: signIn,
 		signOut: signOut,
 		profile: profile,
+		isLoggedIn: isLoggedIn
 	});
 
 	function AuthProvider(props: PropsWithChildren<{}>) {
 		const [user, setUser] = useState(default_user);
 
+		const register = async (email: string, password: string, name?: string) =>
+		{
+			const token = await axios.post("auth/register", {
+				email: email,
+				password: password,
+				name: name
+			})
+			.then(response => {
+				console.log(response.data)
+				return response.data;
+			})
+			.catch(e => {
+				console.log(e)
+				return null;
+			})
+			set_instance_token(token);
+			setUser({...user, token: token});
+			return "";
+		}
+
 		const signIn = async (email: string, password: string) => {
+			console.log("try to sign in!");
 			const token = await axios.post("auth/login", {
 				email: email,
 				password: password,
@@ -61,7 +87,8 @@ export function createCtx() {
 		}
 
 		const profile = async () => {
-			const token = await axios.post("auth/refresh")
+			console.log("try to register!");
+			const token = await axios.post("auth/refresh"/*, {user}, { withCredentials: true }*/)
 			.then(response => {
 				console.log(response.data)
 				return response.data;
@@ -72,7 +99,10 @@ export function createCtx() {
 			})
 			setUser({...user, token: token});
 			return "";
-			return "";
+		}
+
+		const isLoggedIn = () => {
+			return (user.token != null);
 		}
 
 		const storeData = (key: string, data: string) => {
@@ -92,9 +122,11 @@ export function createCtx() {
 			<ctx.Provider value={{ 
 				user,
 				setUser,
+				register,
 				signIn,
 				signOut,
 				profile,
+				isLoggedIn
 			}}
 			{...props} />
 		);

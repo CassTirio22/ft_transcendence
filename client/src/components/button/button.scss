@@ -15,9 +15,13 @@
 	p {
 		font-size: 1rem;
 		font-weight: bold;
+		transition: .3s;
 	}
 }
 
 .base_button:hover {
 	background-color: transparent;
+	p {
+		color: var(--primary);
+	}
 }

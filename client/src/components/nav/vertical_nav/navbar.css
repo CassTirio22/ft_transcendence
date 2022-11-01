@@ -124,6 +124,8 @@ aside.active nav ul {
 
 .logo img {
 	width: 40px;
+	height: 40px;
+	border-radius: 20px;
 }
 
 .nav_button {
@@ -174,8 +176,6 @@ aside.active nav ul {
 
 	aside:hover {
 		box-shadow: var(--box_shadow);
-		border-radius: var(--border_radius);
-		border: none;
 	}
 
 }

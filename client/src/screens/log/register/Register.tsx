@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { AuthContext } from '../../..';
-import Login from '../login/Login';
+import logo from "../../../assets/images/test.png"
+import Button from '../../../components/button/Button';
 
 function AlreadyRegistered() {
 	return (
@@ -24,18 +25,17 @@ function RegistrationForm() {
 		profile();
 	}
 	return (
-		<section>
+		<section className='login'>
 			<div className='center_div'>
-				<h2>Register to create an account!</h2>
+				<img src={logo} />
+				<h2>Sign up</h2>
 			</div>
 			<div className="form">
-				<input placeholder='Mail' type="text" value={userMail} onChange={(e) => setUserMail(e.target.value)} />
-				<input placeholder='Username' type="text" value={userName} onChange={(e) => setUserName(e.target.value)} />
+				<input placeholder='Email' type="email" value={userMail} onChange={(e) => setUserMail(e.target.value)} />
+				<input placeholder='Username' type="name" value={userName} onChange={(e) => setUserName(e.target.value)} />
 				<input placeholder='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 			</div>
-			<div className="submition" onClick={handleSubmit}>
-				<button>Register</button>
-			</div>
+			<Button title="Sign up" onPress={handleSubmit} width="300px" />
 		</section>
 	)
 }

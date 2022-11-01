@@ -1,11 +1,15 @@
 
 import React, { useContext, useState } from 'react'
-import "./landing.css"
+import LandingPong from '../../components/landing_pong/LandingPong'
+import "./landing.scss"
 
 
 function Landing() {
 	return (
-		<div>hey tu dois te connecter</div>
+		<section className='landing'>
+			<h1>Let's PONG!</h1>
+			<LandingPong/>
+		</section>
 	)
 }
 

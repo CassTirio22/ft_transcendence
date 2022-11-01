@@ -4,13 +4,13 @@ import {
 	NavLink, useLocation,
 } from "react-router-dom";
 import './navbar.css'
-import logo from "../../../assets/images/balle.png"
+import logo from "../../../assets/images/test.png"
 import { AuthContext } from '../../..';
 
 function Navbar() {
 
 	const location = useLocation();
-	const {user} = useContext(AuthContext);
+	const {user, signOut} = useContext(AuthContext);
 
 	console.log(user.token)
 
@@ -58,6 +58,27 @@ function Navbar() {
 							<div className="navigation_elem">
 								<i className="fas fa-eye"></i>
 								<p>Watch match</p>
+							</div>
+						</Link>
+					</li>
+					<li>
+						<div className="separator">
+							<h2 className="separator_title">Account</h2>
+						</div>
+					</li>
+					<li className={location.pathname === "/profile" ? "active hov" : "hov" }>
+						<Link to='/profile'>
+							<div className="navigation_elem">
+								<i className="fas fa-user"></i>
+								<p>Profile</p>
+							</div>
+						</Link>
+					</li>
+					<li className={location.pathname === "/watch" ? "active hov" : "hov" }>
+						<Link to='/logout' onClick={signOut}>
+							<div className="navigation_elem">
+								<i className="fas fa-sign-out-alt"></i>
+								<p>Logout</p>
 							</div>
 						</Link>
 					</li>

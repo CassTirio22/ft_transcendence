@@ -7,7 +7,7 @@ export function createCtx() {
 	const default_user = {
 		first_name: "Anonymous",
 		last_name: "User",
-		token: null,
+		token: "",
 		profile_picture: "https://avatars.dicebear.com/api/avataaars/your-custom-seed.png",
 	}
 	type UpdateType = Dispatch<SetStateAction<typeof default_user>>;
@@ -69,12 +69,14 @@ export function createCtx() {
 			})
 			set_instance_token(token);
 			setUser({...user, token: token});
+			sessionStorage.setItem("token", token);
 			return "";
 		}
 
 		const signOut = async () => {
-			console.log("first")
-
+			unset_instance_token();
+			setUser(default_user);
+			sessionStorage.setItem("token", "");
 			return "";
 		}
 
@@ -94,7 +96,7 @@ export function createCtx() {
 		}
 
 		const isLoggedIn = () => {
-			return (user.token != null);
+			return (user.token != "");
 		}
 
 		const storeData = (key: string, data: string) => {
@@ -104,6 +106,14 @@ export function createCtx() {
 		const setup = async () => {
 			
 		}
+
+		useEffect(() => {
+			const token = sessionStorage.getItem("token");
+			if (token) {
+				setUser({...user, token: token})
+			}
+		}, [])
+		
 	
 		useEffect(() => {
 			setup();

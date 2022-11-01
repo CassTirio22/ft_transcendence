@@ -18,8 +18,8 @@ function AlreadyLogged() {
 
 function LogInForm()
 {
-	const [userName, setUserName] = useState("test201@test.com");
-	const [password, setPassword] = useState("test1234");
+	const [userName, setUserName] = useState("");
+	const [password, setPassword] = useState("");
 	const {user, signIn, profile} = useContext(AuthContext)
 	const handleSubmit = async () => {
 		await signIn(userName, password);
@@ -31,7 +31,7 @@ function LogInForm()
 				<h2>Sign in</h2>
 			</div>
 			<div className="form">
-				<input placeholder='Username' type="text" value={userName} onChange={(e) => setUserName(e.target.value)} />
+				<input placeholder='Email' type="email" value={userName} onChange={(e) => setUserName(e.target.value)} />
 				<input placeholder='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 			</div>
 			<Button title="Sign in" onPress={handleSubmit} width="300px" />

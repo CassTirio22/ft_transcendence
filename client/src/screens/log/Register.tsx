@@ -7,7 +7,7 @@ function AlreadyRegistered() {
 		<section>
 			<div className='registered'>
 				<h2>You are already logged in</h2>
-				<p>Please log out if you want to register a new account.</p>
+				<p>Please log out if you want to use another account.</p>
 			</div>
 		</section>
 	)

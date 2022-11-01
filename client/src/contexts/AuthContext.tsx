@@ -76,14 +76,6 @@ export function createCtx() {
 			console.log("first")
 
 			return "";
-			setUser({
-				first_name: "Anonymous",
-				last_name: "User",
-				token: null,
-				profile_picture: "https://avatars.dicebear.com/api/avataaars/your-custom-seed.png",
-			});
-			storeData("token", "");
-			unset_instance_token();
 		}
 
 		const profile = async () => {

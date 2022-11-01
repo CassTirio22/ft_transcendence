@@ -1,7 +1,7 @@
 
 import React, { useContext, useState } from 'react'
-import { AuthContext } from '../..';
-import "../../assets/stylesheets/log/login.css"
+import { AuthContext } from '../../..';
+import "./login.css"
 
 function AlreadyLogged() {
 	return (

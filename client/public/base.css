@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Lato');
 
 html {
-	--background: #F2F8FD;
+	--background: #fff;
+	--background_transparent: rgba(255, 255, 255, 0.6);
 	--surface: #fff;
 	--text: #424242;
 	--strong_text: #000;

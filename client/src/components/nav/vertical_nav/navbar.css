@@ -4,12 +4,12 @@ body {
 
 aside.navigation {
 	position: fixed;
-	left: 10px;
-	top: 10px;
-	height: calc(100% - 20px);
-	border-radius: var(--border_radius);
-	background-color: var(--surface);
-	box-shadow: var(--box_shadow);
+	left: 0;
+	top: 0;
+	height: 100%;
+	background-color: var(--background_transparent);
+	border-right: 1px solid var(--divider_light);
+	backdrop-filter: blur(8px);
 	padding: 10px;
 	z-index: 1000;
 	overflow-y: scroll;
@@ -170,6 +170,12 @@ aside.active nav ul {
 
 	aside:hover nav {
 		width: 300px;
+	}
+
+	aside:hover {
+		box-shadow: var(--box_shadow);
+		border-radius: var(--border_radius);
+		border: none;
 	}
 
 }

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
-import { AuthContext } from '../..';
-import Login from './Login';
+import { AuthContext } from '../../..';
+import Login from '../login/Login';
 
 function AlreadyRegistered() {
 	return (

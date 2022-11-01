@@ -1,26 +1,38 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component, useContext, useEffect } from "react";
+import {
+  Route,
+  NavLink,
+  HashRouter,
+  Routes
+} from "react-router-dom";
+import { connect } from 'react-redux';
+import Navbar from "./components/nav/Navbar";
+import Main from "./Main";
+import { mapDispatchToProps, mapStateToProps } from "./store/dispatcher";
+import { fetchMessages } from "./store/slices/messages";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export type Props = {
+	messages?: any,
+	fetchMessages?: any,
+};
+
+/**
+ * React Component
+ * Use the HashRouter to keep the UI in sync with the URL.
+ * Call of the NavBar with Main as child.
+ */
+const App: React.FC<Props> = ({messages, fetchMessages}) => {
+
+	return (
+		<HashRouter>
+			<div>
+				<Navbar/>
+				<div className="content">
+					<Main />
+				</div>
+			</div>
+		</HashRouter>
+	);
 }
 
-export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(App);

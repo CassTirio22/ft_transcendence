@@ -54,7 +54,7 @@ export function createCtx() {
 		}
 
 		const signIn = async (email: string, password: string) => {
-			console.log("try to sign in!");
+			unset_instance_token();
 			const token = await axios.post("auth/login", {
 				email: email,
 				password: password,

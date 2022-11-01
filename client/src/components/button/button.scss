@@ -1,0 +1,23 @@
+
+
+.base_button {
+	width: 100%;
+	border-radius: var(--border_radius);
+	background-color: var(--primary);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3px;
+	transition: .3s;
+	border: 2px solid var(--primary);
+	cursor: pointer;
+
+	p {
+		font-size: 1rem;
+		font-weight: bold;
+	}
+}
+
+.base_button:hover {
+	background-color: transparent;
+}

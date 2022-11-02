@@ -1,37 +1,44 @@
 import React, { Dispatch, PropsWithChildren, SetStateAction, useEffect }  from 'react'
 import { createContext, useState } from 'react';
+import { isCompositeComponent } from 'react-dom/test-utils';
 import axios, { set_instance_token, unset_instance_token } from "../service/axios"
 
 export function createCtx() {
 	const default_user = {
 		first_name: "Anonymous",
 		last_name: "User",
-		token: null,
+		token: "",
 		profile_picture: "https://avatars.dicebear.com/api/avataaars/your-custom-seed.png",
 	}
 	type UpdateType = Dispatch<SetStateAction<typeof default_user>>;
 
 	const defaultUpdate: UpdateType = () => default_user;
 
+	const register = async(email: string, password: string, name?: string) => "null";
 	const signIn = async (email: string, password: string) => "null";
 	const signOut = async () => "null";
 	const profile = async () => "null";
+	const isLoggedIn = () => false;
 
 	const ctx = createContext({
 		user: default_user,
 		setUser: defaultUpdate,
+		register: register,
 		signIn: signIn,
 		signOut: signOut,
 		profile: profile,
+		isLoggedIn: isLoggedIn
 	});
 
 	function AuthProvider(props: PropsWithChildren<{}>) {
 		const [user, setUser] = useState(default_user);
 
-		const signIn = async (email: string, password: string) => {
-			const token = await axios.post("auth/login", {
+		const register = async (email: string, password: string, name?: string) =>
+		{
+			const token = await axios.post("auth/register", {
 				email: email,
 				password: password,
+				name: name
 			})
 			.then(response => {
 				console.log(response.data)
@@ -46,22 +53,39 @@ export function createCtx() {
 			return "";
 		}
 
-		const signOut = async () => {
-			console.log("first")
-
-			return "";
-			setUser({
-				first_name: "Anonymous",
-				last_name: "User",
-				token: null,
-				profile_picture: "https://avatars.dicebear.com/api/avataaars/your-custom-seed.png",
-			});
-			storeData("token", "");
+		const signIn = async (email: string, password: string) => {
 			unset_instance_token();
+			const token = await axios.post("auth/login", {
+				email: email,
+				password: password,
+			})
+			.then(response => {
+				console.log(response.data)
+				return response.data;
+			})
+			.catch(e => {
+				console.log(e)
+				return null;
+			})
+			if (!token) {
+				return "error";
+			}
+			set_instance_token(token);
+			setUser({...user, token: token});
+			sessionStorage.setItem("token", token);
+			return token;
+		}
+
+		const signOut = async () => {
+			unset_instance_token();
+			setUser(default_user);
+			sessionStorage.setItem("token", "");
+			return "";
 		}
 
 		const profile = async () => {
-			const token = await axios.post("auth/refresh")
+			console.log("try to register!");
+			const token = await axios.post("auth/refresh"/*, {user}, { withCredentials: true }*/)
 			.then(response => {
 				console.log(response.data)
 				return response.data;
@@ -72,7 +96,10 @@ export function createCtx() {
 			})
 			setUser({...user, token: token});
 			return "";
-			return "";
+		}
+
+		const isLoggedIn = () => {
+			return (user.token != "");
 		}
 
 		const storeData = (key: string, data: string) => {
@@ -82,6 +109,15 @@ export function createCtx() {
 		const setup = async () => {
 			
 		}
+
+		useEffect(() => {
+			const token = sessionStorage.getItem("token");
+			if (token) {
+				set_instance_token(token);
+				setUser({...user, token: token})
+			}
+		}, [])
+		
 	
 		useEffect(() => {
 			setup();
@@ -92,9 +128,11 @@ export function createCtx() {
 			<ctx.Provider value={{ 
 				user,
 				setUser,
+				register,
 				signIn,
 				signOut,
 				profile,
+				isLoggedIn
 			}}
 			{...props} />
 		);

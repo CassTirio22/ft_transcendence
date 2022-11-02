@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Lato');
 
 html {
-	--background: #F2F8FD;
+	--background: #fff;
+	--background_transparent: rgba(255, 255, 255, 0.6);
 	--surface: #fff;
 	--text: #424242;
 	--strong_text: #000;
@@ -39,6 +40,7 @@ html {
 
 html.dark {
 	--background: #082032;
+	--background_transparent: rgba(8, 32, 50, 0.6);
 	--surface: #2C394B;
 	--text: #fff;
 	--strong_text: #fff;
@@ -60,8 +62,8 @@ html.dark {
 	--on_success: #2C394B;
 	--border_radius: 6px;
 	--divider: #616B78;
-	--divider_light: #EFF2F2;
-	--deactivate: #EFF2F2;
+	--divider_light: #616B78;
+	--deactivate: #85929E;
 	--box_shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	--light_shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 	--scroll_bar: #BFDEFF;

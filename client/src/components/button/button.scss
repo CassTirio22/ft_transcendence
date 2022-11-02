@@ -1,0 +1,41 @@
+
+
+.base_button {
+	width: 100%;
+	border-radius: var(--border_radius);
+	background-color: var(--primary);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3px;
+	transition: .3s;
+	border: 2px solid var(--primary);
+	cursor: pointer;
+
+	p {
+		font-size: 1rem;
+		font-weight: bold;
+		transition: .3s;
+	}
+}
+
+.base_button.disable {
+	background-color: var(--deactivate);
+	border-color: var(--deactivate);
+	cursor: default;
+}
+
+.base_button:hover {
+	background-color: transparent;
+	p {
+		color: var(--primary);
+	}
+}
+
+.base_button.disable:hover {
+	background-color: var(--deactivate);
+	border-color: var(--deactivate);
+	p {
+		color: var(--on_primary);
+	}
+}

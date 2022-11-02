@@ -8,10 +8,27 @@ body {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	padding-top: 120px;
+	padding-top: 200px;
+	min-height: 200vh;
 
-	h1 {
-		font-size: 4rem;
-		position: absolute;
+	.main_text {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		h1 {
+			font-size: 4rem;
+			margin-bottom: 20px;
+		}
+
+		p {
+			font-size: 1.1rem;
+			text-align: center;
+			margin: 4px 0;
+		}
+	}
+
+	.fixed_pong {
+		position: fixed;
 	}
 }

@@ -7,8 +7,14 @@ import "./landing.scss"
 function Landing() {
 	return (
 		<section className='landing'>
-			<h1>Let's PONG!</h1>
+			<div className='main_text'>
+				<h1>Let's PONG!</h1>
+				<p>Challenge your friend online in the first game of the video game industry</p>
+				<p>You'll see it's trancendent</p>
+			</div>
+			<div className='fixed_pong'>
 			<LandingPong/>
+			</div>
 		</section>
 	)
 }

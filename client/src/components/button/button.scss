@@ -19,9 +19,23 @@
 	}
 }
 
+.base_button.disable {
+	background-color: var(--deactivate);
+	border-color: var(--deactivate);
+	cursor: default;
+}
+
 .base_button:hover {
 	background-color: transparent;
 	p {
 		color: var(--primary);
+	}
+}
+
+.base_button.disable:hover {
+	background-color: var(--deactivate);
+	border-color: var(--deactivate);
+	p {
+		color: var(--on_primary);
 	}
 }

@@ -10,7 +10,7 @@ import { AuthContext } from '../../..';
 function Navbar() {
 
 	const location = useLocation();
-	const {user, signOut} = useContext(AuthContext);
+	const {user, signOut, isLoggedIn} = useContext(AuthContext);
 
 	console.log(user.token)
 
@@ -22,7 +22,7 @@ function Navbar() {
 						<div className="navigation_elem">
 							<img alt="Pong logo" src={logo} />
 							{
-								user.token ?
+								isLoggedIn() ?
 								null :
 								<div className="log_div">
 									<Link className='nav_button outline' to='/login'><p>Sign in</p></Link>
@@ -74,8 +74,8 @@ function Navbar() {
 							</div>
 						</Link>
 					</li>
-					<li className={location.pathname === "/watch" ? "active hov" : "hov" }>
-						<Link to='/logout' onClick={signOut}>
+					<li className={location.pathname === "/logout" ? "active hov" : "hov" }>
+						<Link to='/' onClick={signOut}>
 							<div className="navigation_elem">
 								<i className="fas fa-sign-out-alt"></i>
 								<p>Logout</p>

@@ -5,11 +5,12 @@ type ButtonProps = {
 	title: string;
 	onPress: any;
 	width: string;
+	disable?: boolean;
 };
 
-const Button = ({title, onPress, width}: ButtonProps) => {
+const Button = ({title, onPress, width, disable=false}: ButtonProps) => {
 	return (
-		<div onClick={onPress} className='base_button' style={{width: width}}>
+		<div onClick={() => disable ? null : onPress()} className={`base_button ${disable ? "disable" : ""}`} style={{width: width}}>
 			<p>{title}</p>
 		</div>
 	)

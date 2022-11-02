@@ -21,20 +21,37 @@ function LogInForm()
 	const [userName, setUserName] = useState("");
 	const [password, setPassword] = useState("");
 	const {user, signIn, profile} = useContext(AuthContext)
+
 	const handleSubmit = async () => {
-		await signIn(userName, password);
+		const response = await signIn(userName, password);
+		if (response == "error") {
+			alert("error");
+		}
 	}
+
+	const validateEntry = () => {
+		if (password == "" || userName == "")
+			return false;
+		return true;
+	}
+
+	const handleKeyDown = (event: any) => {
+		if (event.key === 'Enter' && validateEntry()) {
+			handleSubmit();
+		}
+	  };
+
 	return (
 		<section className='login'>
 			<div className='center_div'>
 				<img src={logo} />
 				<h2>Sign in</h2>
 			</div>
-			<div className="form">
-				<input placeholder='Email' type="email" value={userName} onChange={(e) => setUserName(e.target.value)} />
-				<input placeholder='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-			</div>
-			<Button title="Sign in" onPress={handleSubmit} width="300px" />
+			<form className="form" onSubmit={() => console.log("first")}>
+				<input autoComplete='username' placeholder='Email or username' type="username" value={userName} onChange={(e) => setUserName(e.target.value)} />
+				<input onKeyDown={handleKeyDown} placeholder='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+			</form>
+			<Button disable={!validateEntry()} title="Sign in" onPress={handleSubmit} width="300px" />
 		</section>
 	)
 }

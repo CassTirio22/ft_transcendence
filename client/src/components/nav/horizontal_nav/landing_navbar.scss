@@ -8,6 +8,8 @@
 	padding: 20px;
 	position: fixed;
 	z-index: 2;
+	background-color: var(--background_transparent);
+	backdrop-filter: blur(8px);
 
 	.logo_div {
 		flex-direction: row;

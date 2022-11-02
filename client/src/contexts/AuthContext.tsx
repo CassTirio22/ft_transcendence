@@ -67,10 +67,13 @@ export function createCtx() {
 				console.log(e)
 				return null;
 			})
+			if (!token) {
+				return "error";
+			}
 			set_instance_token(token);
 			setUser({...user, token: token});
 			sessionStorage.setItem("token", token);
-			return "";
+			return token;
 		}
 
 		const signOut = async () => {
@@ -110,6 +113,7 @@ export function createCtx() {
 		useEffect(() => {
 			const token = sessionStorage.getItem("token");
 			if (token) {
+				set_instance_token(token);
 				setUser({...user, token: token})
 			}
 		}, [])

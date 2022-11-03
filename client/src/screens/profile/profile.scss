@@ -1,0 +1,27 @@
+
+
+section.profile {
+	display: flex;
+	flex-direction: column;
+	align-items: start;
+	width: 100%;
+	min-height: 100vh;
+	padding-left: 100px;
+	padding-top: 100px;
+
+	.changeProfile {
+		padding-top: 10%;
+		display: flex;
+		flex-direction: column;
+
+		.fillChanges {
+			display: flex;
+			float: left;
+		}
+
+		// .button {
+		// 	padding-top : 10px;
+		// }
+	}
+	
+}

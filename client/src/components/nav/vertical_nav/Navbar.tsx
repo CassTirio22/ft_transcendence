@@ -66,8 +66,8 @@ function Navbar() {
 							<h2 className="separator_title">Account</h2>
 						</div>
 					</li>
-					<li className={location.pathname === "/profile" ? "active hov" : "hov" }>
-						<Link to='/profile'>
+					<li className={location.pathname === "/me/profile" ? "active hov" : "hov" }>
+						<Link to='/me/profile'>
 							<div className="navigation_elem">
 								<i className="fas fa-user"></i>
 								<p>Profile</p>

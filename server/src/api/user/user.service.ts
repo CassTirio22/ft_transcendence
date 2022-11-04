@@ -17,4 +17,8 @@ export class UserService {
 
     return this.repository.save(user);
   }
+
+  public async profile(user: User): Promise<User | never> {
+	return user;
+  } 
 }

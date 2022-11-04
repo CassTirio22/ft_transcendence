@@ -5,8 +5,10 @@ import axios, { set_instance_token, unset_instance_token } from "../service/axio
 
 export function createCtx() {
 	const default_user = {
+		pseudo: "Pseudo",
 		first_name: "Anonymous",
 		last_name: "User",
+		email: "email",
 		token: "",
 		profile_picture: "https://avatars.dicebear.com/api/avataaars/your-custom-seed.png",
 	}
@@ -14,7 +16,8 @@ export function createCtx() {
 
 	const defaultUpdate: UpdateType = () => default_user;
 
-	const register = async(email: string, password: string, name?: string) => "null";
+	const register = async(email: string, password: string, name: string) => "null";
+	const rename = async(name: string) => "null";
 	const signIn = async (email: string, password: string) => "null";
 	const signOut = async () => "null";
 	const profile = async () => "null";
@@ -24,6 +27,7 @@ export function createCtx() {
 		user: default_user,
 		setUser: defaultUpdate,
 		register: register,
+		rename: rename,
 		signIn: signIn,
 		signOut: signOut,
 		profile: profile,
@@ -33,7 +37,7 @@ export function createCtx() {
 	function AuthProvider(props: PropsWithChildren<{}>) {
 		const [user, setUser] = useState(default_user);
 
-		const register = async (email: string, password: string, name?: string) =>
+		const register = async (email: string, password: string, name: string) =>
 		{
 			const token = await axios.post("auth/register", {
 				email: email,
@@ -50,6 +54,21 @@ export function createCtx() {
 			})
 			set_instance_token(token);
 			setUser({...user, token: token});
+			return "";
+		}
+
+		const rename = async (name: string) =>
+		{
+			const user = await axios.put("user/name", { name: name })
+			.then(response => {
+				console.log(response.data);
+				return response.data;
+			})
+			.catch(e => {
+				console.log(e);
+				return null;
+			})
+			setUser({...user, pseudo: user.name});
 			return "";
 		}
 
@@ -73,6 +92,7 @@ export function createCtx() {
 			set_instance_token(token);
 			setUser({...user, token: token});
 			sessionStorage.setItem("token", token);
+			await profile();
 			return token;
 		}
 
@@ -84,8 +104,7 @@ export function createCtx() {
 		}
 
 		const profile = async () => {
-			console.log("try to register!");
-			const token = await axios.post("auth/refresh"/*, {user}, { withCredentials: true }*/)
+			const user = await axios.get("user/profile"/*, {user}, { withCredentials: true }*/)
 			.then(response => {
 				console.log(response.data)
 				return response.data;
@@ -94,7 +113,7 @@ export function createCtx() {
 				console.log(e)
 				return null;
 			})
-			setUser({...user, token: token});
+			setUser({...user, pseudo: user.name, email: user.email});
 			return "";
 		}
 
@@ -129,6 +148,7 @@ export function createCtx() {
 				user,
 				setUser,
 				register,
+				rename,
 				signIn,
 				signOut,
 				profile,

@@ -28,6 +28,7 @@ function RegistrationForm() {
 	const validateEntry = () => {
 		if (password == "" || userName == "" || userMail == "")
 			return false;
+		console.log("REGISTERED : " + user.pseudo);
 		return true;
 	}
 

@@ -23,18 +23,6 @@ function ProfileCustomization() {
 		return true;
 	}
 
-	function ChangeProfileForm() {
-		return (
-			<section className='changeProfile'>
-				<form className='fillChanges'>
-					<div>Name : </div>
-					<input autoComplete='name' placeholder="pseudo" type="name" value={pseudo} onChange={(e) => setPseudo(e.target.value)} />
-				</form>
-				<Button disable={!validateEntry()} title="Update my profile" onPress={handleSubmit} width="300px" />
-			</section>
-		)
-	}
-
 	let change;
 	if (changing == false) {
 		return (
@@ -43,7 +31,13 @@ function ProfileCustomization() {
 	}
 	else {
 		return (
-			<ChangeProfileForm />
+			<section className='changeProfile'>
+				<form className='fillChanges'>
+					<div>Name : </div>
+					<input autoComplete='name' placeholder="pseudo" type="name" value={pseudo} onChange={(e) => setPseudo(e.target.value)} />
+				</form>
+				<Button disable={!validateEntry()} title="Update my profile" onPress={handleSubmit} width="300px" />
+			</section>
 		)
 	}
 }

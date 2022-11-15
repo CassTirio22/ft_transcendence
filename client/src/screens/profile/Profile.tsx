@@ -7,9 +7,9 @@ import { debug } from 'console';
 
 
 function ProfileCustomization() {
+	const {user, rename} = useContext(AuthContext)
 	const [changing, setChanging] = useState(false);
-	const [pseudo, setPseudo] = useState("");
-	const {rename} = useContext(AuthContext)
+	const [pseudo, setPseudo] = useState(user.pseudo);
 
 	const handleSubmit = async () => {
 		await rename(pseudo);

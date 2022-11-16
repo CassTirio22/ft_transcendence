@@ -7,7 +7,7 @@ function AlreadyRegistered() {
 	return (
 		<section>
 			<div className='registered'>
-				<h2>You are already logged in</h2>
+				<h2>You are already logged in.</h2>
 				<p>Please log out if you want to use another account.</p>
 			</div>
 		</section>
@@ -21,14 +21,23 @@ function RegistrationForm() {
 	const {user, signIn, register, profile} = useContext(AuthContext)
 
 	const handleSubmit = async () => {
-		await register(userMail, password, userName);
-		const response = await signIn(userMail, password);
+		const register_response = await register(userMail, password, userName);
+		if (register_response == "error") {
+			console.log("ERROR WHILE REGISTERING");
+			alert("error");
+		}
+		else {
+			const login_response = await signIn(userMail, password);
+			if (login_response == "error") {
+				console.log("ERROR WHILE LOGGING");
+				alert("error");
+			}
+		}
 	}
 
 	const validateEntry = () => {
 		if (password == "" || userName == "" || userMail == "")
 			return false;
-		console.log("REGISTERED : " + user.pseudo);
 		return true;
 	}
 

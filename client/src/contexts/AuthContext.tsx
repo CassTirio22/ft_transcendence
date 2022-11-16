@@ -46,12 +46,17 @@ export function createCtx() {
 			})
 			.then(response => {
 				console.log(response.data)
+				console.log("SUCCESSFUL REGISTERING");
 				return response.data;
 			})
 			.catch(e => {
-				console.log(e)
-				return null;
+				console.log(e);
+				console.log(null);
+				return "error";
 			})
+			if (!token) {
+				return "error";
+			}
 			set_instance_token(token);
 			setUser({...user, token: token});
 			return "";

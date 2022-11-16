@@ -51,8 +51,7 @@ export function createCtx() {
 			})
 			.catch(e => {
 				console.log(e);
-				console.log(null);
-				return "error";
+				return null;
 			})
 			if (!token) {
 				return "error";

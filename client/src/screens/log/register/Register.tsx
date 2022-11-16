@@ -23,13 +23,11 @@ function RegistrationForm() {
 	const handleSubmit = async () => {
 		const register_response = await register(userMail, password, userName);
 		if (register_response == "error") {
-			console.log("ERROR WHILE REGISTERING");
 			alert("error");
 		}
 		else {
 			const login_response = await signIn(userMail, password);
 			if (login_response == "error") {
-				console.log("ERROR WHILE LOGGING");
 				alert("error");
 			}
 		}

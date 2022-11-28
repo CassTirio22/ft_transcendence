@@ -22,19 +22,19 @@ function RegistrationForm() {
 
 	const handleSubmit = async () => {
 		const register_response = await register(userMail, password, userName);
-		if (register_response == "error") {
+		if (register_response === "error") {
 			alert("error");
 		}
 		else {
 			const login_response = await signIn(userMail, password);
-			if (login_response == "error") {
+			if (login_response === "error") {
 				alert("error");
 			}
 		}
 	}
 
 	const validateEntry = () => {
-		if (password == "" || userName == "" || userMail == "")
+		if (password === "" || userName === "" || userMail === "")
 			return false;
 		return true;
 	}
@@ -49,7 +49,7 @@ function RegistrationForm() {
 	return (
 		<section className='login'>
 			<div className='center_div'>
-				<img src={logo} />
+				<img src={logo} alt="logo" />
 				<h2>Sign up</h2>
 			</div>
 			<div className="form">

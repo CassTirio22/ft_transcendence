@@ -46,7 +46,6 @@ export function createCtx() {
 			})
 			.then(response => {
 				console.log(response.data)
-				console.log("SUCCESSFUL REGISTERING");
 				return response.data;
 			})
 			.catch(e => {
@@ -122,7 +121,7 @@ export function createCtx() {
 		}
 
 		const isLoggedIn = () => {
-			return (user.token != "");
+			return (user.token !== "");
 		}
 
 		const storeData = (key: string, data: string) => {

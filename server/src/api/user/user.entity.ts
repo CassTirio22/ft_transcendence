@@ -2,10 +2,10 @@ import { Exclude } from 'class-transformer';
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 
-enum Status {
+export enum UserStatus {
 	online,
 	offline,
-	inGame,
+	inGame
 }
 
 /**
@@ -42,16 +42,17 @@ export class User extends BaseEntity {
 	/**
 	 * The User's ELO score
 	 */
-	@Column({ type: 'number'})
+	@Column({ type: 'int'})
 	public score: number;
 	/**
 	 * How many games did the User played
 	 */
-	@Column({ type: 'number'})
+	@Column({ type: 'int'})
 	public gamesNumber: number;
 	/**
 	 * Is the User online, offline or playing a game 
 	 */
-	@Column({ type: 'enum'})
-	public status: Status;
+	@Column({ type: 'enum', enum: UserStatus, default: pending})
+	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.online})
+	public status!: UserStatus;
 }

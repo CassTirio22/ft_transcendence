@@ -20,5 +20,5 @@ export class UserService {
 
   public async profile(user: User): Promise<User | never> {
 	return user;
-  } 
+  }
 }

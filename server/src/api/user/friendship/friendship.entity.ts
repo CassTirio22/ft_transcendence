@@ -1,6 +1,6 @@
 import { BaseEntity, Column, Entity } from 'typeorm';
 
-enum Status {
+export enum FriendshipStatus {
 	pending,
 	accepted,
 	rejected
@@ -15,16 +15,16 @@ export class Friendship extends BaseEntity {
 	/**
 	 * Has the request been accepted, rejected or is still pending.
 	 */
-	@Column({ type: 'enum'})
-	public status!: Status;
+	@Column({ type: 'enum', enum: FriendshipStatus, default: FriendshipStatus.pending})
+	public status!: FriendshipStatus;
 	/**
 	 * The ID of the User who made the friend request.
 	 */
-	@Column({ type: 'number'})
+	@Column({ type: 'int'})
 	public applicant!: number;
 	/**
 	 * The ID of the User who received the friend request and who will decide its status.
 	 */
-	@Column({ type: 'number'})
+	@Column({ type: 'int'})
 	public solicited!: number;
 }

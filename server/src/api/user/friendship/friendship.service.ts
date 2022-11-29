@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Friendship, FriendshipStatus } from './friendship.entity';
 import { User } from '../user.entity';
-import { RequestFriendDto, ResponseFriendDto } from './friendship.dto';
+import { RequestFriendDto, ResponseFriendDto, DeleteFriendDto } from './friendship.dto';
 import { Request } from 'express';
 
 @Injectable()
@@ -55,5 +55,19 @@ export class FriendshipService {
 		else
 			friendship.status = FriendshipStatus.rejected;
 		return this.friendshipRepository.update({applicant: applicant, solicited: user.id }, {status: friendship.status})[0];
+	}
+
+	public async deleteFriend(body: DeleteFriendDto, req: Request): Promise<number> {
+		const { applicant } : DeleteFriendDto = body;
+		const user: User = <User>req.user;
+
+		let friendship: Friendship = await this.friendshipRepository.findOne({ where: [
+			{ applicant: applicant, solicited: user.id, status: FriendshipStatus.accepted },
+			{ applicant: user.id, solicited: applicant, status: FriendshipStatus.accepted }
+		]});
+		if (!friendship)
+			return 0;
+		this.friendshipRepository.remove(friendship);
+		return 1;
 	}
 }

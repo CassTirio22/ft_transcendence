@@ -15,3 +15,8 @@ export class ResponseFriendDto {
 	@IsNumber()
 	public readonly applicant: number;
 }
+
+export class DeleteFriendDto {
+	@IsNumber()
+	public readonly applicant: number;
+}

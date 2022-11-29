@@ -1,6 +1,6 @@
-import { ClassSerializerInterceptor, Controller, Req, UseGuards, UseInterceptors, Get, Put, Body, Inject, Post } from '@nestjs/common';
+import { ClassSerializerInterceptor, Controller, Req, UseGuards, UseInterceptors, Get, Put, Delete, Body, Inject, Post } from '@nestjs/common';
 import { Friendship } from './friendship.entity';
-import { RequestFriendDto, ResponseFriendDto } from './friendship.dto';
+import { DeleteFriendDto, RequestFriendDto, ResponseFriendDto } from './friendship.dto';
 import { JwtAuthGuard } from '..//auth/auth.guard';
 import { FriendshipService } from './friendship.service';
 import { Request } from 'express';
@@ -24,4 +24,11 @@ export class FriendshipController {
 	private responseFriend(@Body() body: ResponseFriendDto, @Req() req: Request): Promise<Friendship>{
 		return this.service.responseFriend(body, req);
 	}
+
+	@Delete('delete')
+	@UseGuards(JwtAuthGuard)
+	private deleteFriend(@Body() body: DeleteFriendDto, @Req() req: Request): Promise<number>{
+		return this.service.deleteFriend(body, req);
+	}
+
 }

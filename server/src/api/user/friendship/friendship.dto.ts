@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class RequestFriendDto {
 	/**
@@ -6,4 +6,12 @@ export class RequestFriendDto {
 	 */
 	@IsString()
 	public readonly pseudo: string;
+}
+
+export class ResponseFriendDto {
+	@IsBoolean()
+	public readonly didAccept: boolean;
+
+	@IsNumber()
+	public readonly applicant: number;
 }

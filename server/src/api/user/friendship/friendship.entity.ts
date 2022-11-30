@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity } from 'typeorm';
+import { BaseEntity, Column, PrimaryColumn, Entity, PrimaryGeneratedColumn, PrimaryColumnOptions, JoinColumn } from 'typeorm';
 
 export enum FriendshipStatus {
 	pending,
@@ -13,18 +13,18 @@ export enum FriendshipStatus {
 @Entity()
 export class Friendship extends BaseEntity {
 	/**
-	 * Has the request been accepted, rejected or is still pending.
-	 */
-	@Column({ type: 'enum', enum: FriendshipStatus, default: FriendshipStatus.pending})
-	public status!: FriendshipStatus;
-	/**
 	 * The ID of the User who made the friend request.
 	 */
-	@Column({ type: 'int'})
+	@PrimaryColumn({ type: 'integer', name: "applicantId"})
 	public applicant!: number;
 	/**
 	 * The ID of the User who received the friend request and who will decide its status.
 	 */
-	@Column({ type: 'int'})
+	@PrimaryColumn({ type: 'integer', name: "solicitedId"})
 	public solicited!: number;
+	/**
+	 * Has the request been accepted, rejected or is still pending.
+	 */
+	@Column({ type: 'enum', enum: FriendshipStatus, default: FriendshipStatus.pending})
+	public status!: FriendshipStatus;
 }

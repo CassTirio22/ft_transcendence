@@ -42,12 +42,12 @@ export class User extends BaseEntity {
 	/**
 	 * The User's ELO score
 	 */
-	@Column({ type: 'int'})
+	@Column({ type: 'int', default: 0})
 	public score: number;
 	/**
 	 * How many games did the User played
 	 */
-	@Column({ type: 'int'})
+	@Column({ type: 'int', default: 0})
 	public gamesNumber: number;
 	/**
 	 * Is the User online, offline or playing a game 

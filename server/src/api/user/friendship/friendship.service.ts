@@ -16,9 +16,9 @@ export class FriendshipService {
 
 	public async requestFriend(body: RequestFriendDto, req: Request): Promise<Friendship | never> {
 		const user: User = <User>req.user;
-		const { pseudo }: RequestFriendDto = body;
+		const { id }: RequestFriendDto = body;
 
-		let friend: User = await this.userRepository.findOne( { where: { name: pseudo}} );
+		let friend: User = await this.userRepository.findOne( { where: { id: id}} );
 		if (!friend) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 		}

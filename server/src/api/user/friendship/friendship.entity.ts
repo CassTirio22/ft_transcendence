@@ -1,4 +1,4 @@
-import { BaseEntity, Column, PrimaryColumn, Entity, PrimaryGeneratedColumn, PrimaryColumnOptions, JoinColumn } from 'typeorm';
+import { BaseEntity, Column, PrimaryColumn, Entity, PrimaryGeneratedColumn, JoinColumn } from 'typeorm';
 
 export enum FriendshipStatus {
 	pending,

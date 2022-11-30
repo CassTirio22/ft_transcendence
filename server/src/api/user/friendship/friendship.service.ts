@@ -58,12 +58,12 @@ export class FriendshipService {
 	}
 
 	public async deleteFriend(body: DeleteFriendDto, req: Request): Promise<number> {
-		const { applicant } : DeleteFriendDto = body;
+		const { friend } : DeleteFriendDto = body;
 		const user: User = <User>req.user;
 
 		let friendship: Friendship = await this.friendshipRepository.findOne({ where: [
-			{ applicant: applicant, solicited: user.id, status: FriendshipStatus.accepted },
-			{ applicant: user.id, solicited: applicant, status: FriendshipStatus.accepted }
+			{ applicant: friend, solicited: user.id, status: FriendshipStatus.accepted },
+			{ applicant: user.id, solicited: friend, status: FriendshipStatus.accepted }
 		]});
 		if (!friendship)
 			return 0;

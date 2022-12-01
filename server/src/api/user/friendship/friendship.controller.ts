@@ -28,7 +28,7 @@ export class FriendshipController {
 
 	@Get('friends')
 	@UseGuards(JwtAuthGuard)
-	private friends(@Req() { user }: Request): Promise< Friendship[] | never> {
+	private friends(@Req() { user }: Request): Promise< User[] | never> {
 		return this.service.friends(<User>user);
 	}
 

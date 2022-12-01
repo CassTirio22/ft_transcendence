@@ -92,6 +92,14 @@ export class GameService {
 		return this.gameRepository.save(game);
 	}
 
+	public async games(user: User): Promise< Game[] | never> {
+		let games: Game[] = await this.gameRepository.find( { where: [
+							{ winner: user.id },
+							{ loser: user.id}
+						]});
+		return games;
+	}
+
 	public async deleteGame(body: DeleteGameDto): Promise<number> {
 		const { gameId }: DeleteGameDto = body;
 

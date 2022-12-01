@@ -57,6 +57,14 @@ export class FriendshipService {
 		return this.friendshipRepository.update({applicant: applicant, solicited: user.id }, {status: friendship.status})[0];
 	}
 
+	public async friends(user: User): Promise< Friendship[] | never > {
+		let friends: Friendship[] = await this.friendshipRepository.find( { where: [
+			{applicant: user.id},
+			{solicited: user.id}
+		]});
+		return friends;
+	}
+
 	public async deleteFriend(body: DeleteFriendDto, req: Request): Promise<number> {
 		const { friend } : DeleteFriendDto = body;
 		const user: User = <User>req.user;

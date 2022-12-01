@@ -2,12 +2,17 @@ import { Exclude } from 'class-transformer';
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 
+export enum UserStatus {
+	online,
+	offline,
+	inGame
+}
+
 /**
  * A custom User Entity which will be a table in our DB created by TypeORM.
  */
 @Entity()
 export class User extends BaseEntity {
-
 	/**
 	 * The User's id
 	 */
@@ -34,4 +39,19 @@ export class User extends BaseEntity {
 	 */
 	@Column({ type: 'timestamp', nullable: true, default: null })
 	public lastLoginAt: Date | null;
+	/**
+	 * The User's ELO score
+	 */
+	@Column({ type: 'int', default: 0})
+	public score: number;
+	/**
+	 * How many games did the User played
+	 */
+	@Column({ type: 'int', default: 0})
+	public gamesNumber: number;
+	/**
+	 * Is the User online, offline or playing a game 
+	 */
+	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.online})
+	public status!: UserStatus;
 }

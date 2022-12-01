@@ -4,7 +4,7 @@ export class RequestFriendDto {
 	/**
 	 * The User's pseudo that has been asked as a friend.
 	 */
-	@IsString()
+	@IsNumber()
 	public readonly id: number;
 }
 

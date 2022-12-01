@@ -87,8 +87,8 @@ export class FriendshipService {
 		const user: User = <User>req.user;
 
 		let friendship: Friendship = await this.friendshipRepository.findOne({ where: [
-			{ applicant: friend, solicited: user.id, status: FriendshipStatus.accepted },
-			{ applicant: user.id, solicited: friend, status: FriendshipStatus.accepted }
+			{ applicant: friend, solicited: user.id/*, status: FriendshipStatus.accepted*/ },
+			{ applicant: user.id, solicited: friend/*, status: FriendshipStatus.accepted*/ }
 		]});
 		if (!friendship)
 			return 0;

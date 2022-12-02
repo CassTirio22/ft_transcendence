@@ -42,7 +42,7 @@ export class User extends BaseEntity {
 	/**
 	 * The User's ELO score
 	 */
-	@Column({ type: 'int', default: 0})
+	@Column({ type: 'int', default: 1000})
 	public score: number;
 	/**
 	 * How many games did the User played

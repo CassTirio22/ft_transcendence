@@ -4,7 +4,7 @@ import { GameService } from './game.service';
 import { Game } from './game.entity'
 import { User } from '../user/user.entity'
 import { Request } from 'express';
-import { ClassSerializerInterceptor, Controller, Inject, Post, Put, UseGuards, UseInterceptors, HttpStatus, Delete, Get, Req } from '@nestjs/common';
+import { ClassSerializerInterceptor, Controller, Inject, Post, Put, UseGuards, UseInterceptors, HttpStatus, Delete, Get, Req, Body } from '@nestjs/common';
 
 @Controller('game')
 export class GameController {
@@ -14,20 +14,20 @@ export class GameController {
 	@Post('startCompetitive')
 	@UseGuards(JwtAuthGuard)
 	@UseInterceptors(ClassSerializerInterceptor)
-	private startCompetitiveGame(body: StartCompetitiveGameDto, req: Request): Promise<Game | never> {
+	private startCompetitiveGame(@Body() body: StartCompetitiveGameDto, @Req() req: Request): Promise<Game | never> {
 		return this.service.startCompetitiveGame(body, req);
 	}
 
 	@Post('startFriendly')
 	@UseGuards(JwtAuthGuard)
 	@UseInterceptors(ClassSerializerInterceptor)
-	private startFriendlyGame(body: StartFriendlyGameDto, req: Request): Promise<Game | never> {
+	private startFriendlyGame(@Body() body: StartFriendlyGameDto, @Req() req: Request): Promise<Game | never> {
 		return this.service.startFriendlyGame(body, req);
 	}
 
 	@Put('update')
 	@UseInterceptors(ClassSerializerInterceptor)
-	private updateGame(body: UpdateGameDto): Promise<Game> {
+	private updateGame(@Body() body: UpdateGameDto): Promise<Game> {
 		return this.service.updateGame(body);
 	}
 
@@ -38,7 +38,7 @@ export class GameController {
 	}
 
 	@Delete('delete')
-	private deleteGame(body: DeleteGameDto): Promise<number> {
+	private deleteGame(@Body() body: DeleteGameDto): Promise<number> {
 		return this.service.deleteGame(body);
 	}
 }

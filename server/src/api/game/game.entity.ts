@@ -19,10 +19,10 @@ export class Game extends BaseEntity {
 	@CreateDateColumn({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", name: "gameDate" })
 	public date!: Date;
 
-	@PrimaryColumn({ type: 'integer', name: "winnerId" })
+	@Column({ type: 'integer' })
 	public winner!: number;
 
-	@PrimaryColumn({ type: 'integer', name: "loserId" })
+	@Column({ type: 'integer' })
 	public loser!: number;
 
 	@Column({ type: 'integer', default: 0 })

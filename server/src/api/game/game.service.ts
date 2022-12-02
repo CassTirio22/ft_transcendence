@@ -63,7 +63,7 @@ export class GameService {
 
 		let game: Game = await this.gameRepository.findOne( { where: { id: gameId } } );
 		if (!game) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Game not found', HttpStatus.NOT_FOUND);
 		}
 		else if (game.status != GameStatus.ongoing) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
@@ -75,18 +75,16 @@ export class GameService {
 		game.loserScore = loserScore;
 
 		if (!didInterrupt) {
-			let winner = await this.userRepository.findOne( {where: {id: game.winner} } );
-			let loser = await this.userRepository.findOne( {where: {id: game.loser} } );
+			let users: User[] = await this.userRepository.find( {where: [{id: game.winner}, {id: game.loser}]} );
+			let winner = (users[0].id == winnerId) ? users[0] : users[1];
+			let loser = (users[0].id == winnerId) ? users[1] : users[0];
 			if (!winner || !loser) {
-				throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+				throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 			}
 			++winner.gamesNumber;
 			++loser.gamesNumber;
-			let tmp: number = winner.score;
-			winner.score = this.recalculateELO(winner.score, loser.score, true);
-			loser.score = this.recalculateELO(loser.score, tmp, false);
-			this.userRepository.save(winner);
-			this.userRepository.save(loser);
+			users = this.recalculateELO(winner, loser);
+			this.userRepository.save(users);
 		}
 	
 		return this.gameRepository.save(game);
@@ -117,12 +115,15 @@ export class GameService {
 		elo >= 2100 && <= 2400 -> K = 24
 		elo > 2400 -> K = 16
 	*/
-	private recalculateELO(main: number, opponent: number, didWin: boolean): number {
-		let delta: number =  Math.abs(opponent - main) / 400;
-		let total: number = 1.0 / (1.0 + Math.pow(10, delta));
-		let k: number = (main < 2100 && opponent < 2100) ? 32 : ( (main <= 2400 && opponent <= 2400) ? 24 : 16);
-		if (didWin)
-			return main + ( k * (1 - total) );
-		return main + ( k * (-total) );
+	private recalculateELO(winner: User, loser: User): User[] {
+		if (loser.score == 0)
+			return [winner, loser];
+		let delta: number =  (loser.score - winner.score) / 400;
+		let total: number = 1 / (1 + Math.pow(10, delta));
+		let k: number = (winner.id < 2100 && loser.id < 2100) ? 32 : ( (winner.id <= 2400 && loser.id <= 2400) ? 24 : 16);
+		total = k * (1 - total);
+		winner.score += Math.floor(total);
+		loser.score -= Math.floor(total);
+		return [winner, loser];
 	}
 }

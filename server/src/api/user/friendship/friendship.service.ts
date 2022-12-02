@@ -1,10 +1,11 @@
+import { debug } from 'console';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In, Not, QueryResult, QueryBuilder } from 'typeorm';
 import { Friendship, FriendshipStatus } from './friendship.entity';
 import { User } from '../user.entity';
 import { RequestFriendDto, ResponseFriendDto, DeleteFriendDto } from './friendship.dto';
-import { Request } from 'express';
+import { query, Request } from 'express';
 
 @Injectable()
 export class FriendshipService {
@@ -57,13 +58,41 @@ export class FriendshipService {
 		return this.friendshipRepository.update({applicant: applicant, solicited: user.id }, {status: friendship.status})[0];
 	}
 
+	public async friends(user: User): Promise< User[] | never > {
+		let friends: User[] = await this.userRepository.find ({
+			where: {
+				id: In(
+					(await this.friendshipRepository.find({
+						select: ["applicant"],
+						where: {
+							"solicited": user.id,
+							"status": FriendshipStatus.accepted,
+						}
+					})).map(Friendship => Friendship.applicant)
+					
+					.concat(
+					(await this.friendshipRepository.find({
+						select: ["solicited"],
+						where: {
+							"applicant": user.id,
+							"status": FriendshipStatus.accepted,
+						}
+					})).map(Friendship => Friendship.solicited))
+				),
+			}
+		})
+		return friends;
+	}
+
+	
+
 	public async deleteFriend(body: DeleteFriendDto, req: Request): Promise<number> {
 		const { friend } : DeleteFriendDto = body;
 		const user: User = <User>req.user;
 
 		let friendship: Friendship = await this.friendshipRepository.findOne({ where: [
-			{ applicant: friend, solicited: user.id, status: FriendshipStatus.accepted },
-			{ applicant: user.id, solicited: friend, status: FriendshipStatus.accepted }
+			{ applicant: friend, solicited: user.id/*, status: FriendshipStatus.accepted*/ },
+			{ applicant: user.id, solicited: friend/*, status: FriendshipStatus.accepted*/ }
 		]});
 		if (!friendship)
 			return 0;

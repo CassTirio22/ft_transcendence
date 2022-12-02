@@ -15,12 +15,12 @@ export class Friendship extends BaseEntity {
 	/**
 	 * The ID of the User who made the friend request.
 	 */
-	@PrimaryColumn({ name: "applicantId"})
+	@PrimaryColumn({ type: "integer", name: "applicantId"})
 	public applicant!: number;
 	/**
 	 * The ID of the User who received the friend request and who will decide its status.
 	 */
-	@PrimaryColumn({ name: "solicitedId"})
+	@PrimaryColumn({ type: "integer", name: "solicitedId"})
 	public solicited!: number;
 	/**
 	 * Has the request been accepted, rejected or is still pending.

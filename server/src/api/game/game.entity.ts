@@ -13,7 +13,7 @@ export enum GameStatus {
 
 @Entity()
 export class Game extends BaseEntity {
-	@PrimaryGeneratedColumn()
+	@PrimaryGeneratedColumn( { type: "integer" } )
 	public id!: number;
 
 	@CreateDateColumn({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", name: "gameDate" })

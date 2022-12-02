@@ -16,7 +16,7 @@ export class User extends BaseEntity {
 	/**
 	 * The User's id
 	 */
-	@PrimaryGeneratedColumn()
+	@PrimaryGeneratedColumn( {type: 'integer'} )
 	public id!: number;
 	/**
 	 * The User's email 

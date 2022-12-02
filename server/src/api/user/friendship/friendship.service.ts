@@ -1,10 +1,11 @@
+import { debug } from 'console';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, Not } from 'typeorm';
+import { Repository, In, Not, QueryResult, QueryBuilder } from 'typeorm';
 import { Friendship, FriendshipStatus } from './friendship.entity';
 import { User } from '../user.entity';
 import { RequestFriendDto, ResponseFriendDto, DeleteFriendDto } from './friendship.dto';
-import { Request } from 'express';
+import { query, Request } from 'express';
 
 @Injectable()
 export class FriendshipService {
@@ -57,35 +58,30 @@ export class FriendshipService {
 		return this.friendshipRepository.update({applicant: applicant, solicited: user.id }, {status: friendship.status})[0];
 	}
 
-	//SELECT USER WHERE id IN ( (SELECT applicant FROM Friendship WHERE solicited = User.id) AND (...) )
 	public async friends(user: User): Promise< User[] | never > {
 		let friends: User[] = await this.userRepository.find ({
 			where: {
-				id: In([
-					{ applicants: await this.friendshipRepository.find({
+				id: In(
+					(await this.friendshipRepository.find({
 						select: ["applicant"],
 						where: {
 							"solicited": user.id,
 							"status": FriendshipStatus.accepted,
 						}
-					})},
-					{  soliciteds: await this.friendshipRepository.find({
+					})).map(Friendship => Friendship.applicant)
+					
+					.concat(
+					(await this.friendshipRepository.find({
 						select: ["solicited"],
 						where: {
 							"applicant": user.id,
 							"status": FriendshipStatus.accepted,
 						}
-					})}
-				]),
+					})).map(Friendship => Friendship.solicited))
+				),
 			}
 		})
 		return friends;
-		// let a: number[] = [12, 16, 18];
-		// let b: number[] = [13, 15, 17];
-		// let x: User[] = await this.userRepository.find( { where: {id: In( 
-		// 											{ a, b }
-			// ) }});
-		// return x;
 	}
 
 	

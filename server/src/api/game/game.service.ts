@@ -1,10 +1,10 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, getConnection, Repository } from 'typeorm';
 import {Game, GameType, GameStatus} from './game.entity';
 import { DeleteGameDto, StartCompetitiveGameDto, StartFriendlyGameDto, UpdateGameDto} from './game.dto';
 import { User } from '../user/user.entity';
-import { Request } from 'express';
+import { Request, query } from 'express';
 import { channel } from 'diagnostics_channel';
 
 
@@ -20,12 +20,14 @@ export class GameService {
 		const user: User = <User>req.user;
 		const { opponentId }: StartCompetitiveGameDto = body;
 
-		let game: Game = await this.gameRepository.findOne( {where: [
-			{ winner: opponentId, status: GameStatus.ongoing },
-			{ loser: opponentId, status: GameStatus.ongoing},
-			{ winner: user.id, status: GameStatus.ongoing},
-			{ loser: user.id, status: GameStatus.ongoing}
-		]});
+		let game: Game = await this.gameRepository.createQueryBuilder()
+													.select()
+													.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
+													.andWhere(new Brackets( query => { query
+														.where("winner IN (:...winnerIds)", {winnerIds: [opponentId, user.id]})
+														.orWhere("loser IN (:...loserIds)", {loserIds: [opponentId, user.id]})
+													}))
+													.getOne();
 		if (game) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
@@ -42,10 +44,14 @@ export class GameService {
 		const user: User = <User>req.user;
 		const { channelId }: StartFriendlyGameDto = body;
 
-		let game: Game = await this.gameRepository.findOne( {where: [
-			{ winner: user.id, status: GameStatus.ongoing },
-			{ loser: user.id, status: GameStatus.ongoing}
-		]})
+		let game: Game = await this.gameRepository.createQueryBuilder()
+													.select()
+													.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
+													.andWhere(new Brackets( query => { query
+														.where("winner = :winnerId", {winnerId: user.id})
+														.orWhere("loser = :loserId", {loserId: user.id})
+													}))
+													.getOne();
 		if (game) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
@@ -61,7 +67,10 @@ export class GameService {
 	public async updateGame(body: UpdateGameDto): Promise<Game> {
 		const { gameId, winnerId, winnerScore, loserScore, didInterrupt}: UpdateGameDto = body;
 
-		let game: Game = await this.gameRepository.findOne( { where: { id: gameId } } );
+		let game: Game = await this.gameRepository.createQueryBuilder()
+													.select()
+													.where("id = :gameId", {gameId: gameId})
+													.getOne();
 		if (!game) {
 			throw new HttpException('Game not found', HttpStatus.NOT_FOUND);
 		}
@@ -75,7 +84,10 @@ export class GameService {
 		game.loserScore = loserScore;
 
 		if (!didInterrupt) {
-			let users: User[] = await this.userRepository.find( {where: [{id: game.winner}, {id: game.loser}]} );
+			let users: User[] = await this.userRepository.createQueryBuilder()
+															.select()
+															.where("id IN (:...gamerIds)", {gamerIds: [game.winner, game.loser]})
+															.getMany();
 			let winner = (users[0].id == winnerId) ? users[0] : users[1];
 			let loser = (users[0].id == winnerId) ? users[1] : users[0];
 			if (!winner || !loser) {
@@ -91,17 +103,21 @@ export class GameService {
 	}
 
 	public async games(user: User): Promise< Game[] | never> {
-		let games: Game[] = await this.gameRepository.find( { where: [
-							{ winner: user.id },
-							{ loser: user.id}
-						]});
+		let games: Game[] = await this.gameRepository.createQueryBuilder()
+														.select()
+														.where("winner = :winnerId", {winnerId: user.id})
+														.orWhere("loser = :loserId", {loserId: user.id})
+														.getMany();
 		return games;
 	}
 
 	public async deleteGame(body: DeleteGameDto): Promise<number> {
 		const { gameId }: DeleteGameDto = body;
 
-		let game: Game = await this.gameRepository.findOne({ where: {id: gameId} });
+		let game: Game = await this.gameRepository.createQueryBuilder()
+													.select()
+													.where("id = :gameId", {gameId: gameId})
+													.getOne()
 		if (!game) {
 			return 0;
 		}

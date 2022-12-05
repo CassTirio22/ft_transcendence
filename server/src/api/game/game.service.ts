@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, getConnection, Repository } from 'typeorm';
+import { Brackets, DeleteResult, getConnection, InsertResult, Repository, Not } from 'typeorm';
 import {Game, GameType, GameStatus} from './game.entity';
 import { DeleteGameDto, StartCompetitiveGameDto, StartFriendlyGameDto, UpdateGameDto} from './game.dto';
 import { User } from '../user/user.entity';
@@ -19,6 +19,24 @@ export class GameService {
 	public async startCompetitiveGame(body: StartCompetitiveGameDto, req: Request): Promise<Game | never> {
 		const user: User = <User>req.user;
 		const { opponentId }: StartCompetitiveGameDto = body;
+
+		// let qb = await this.gameRepository.createQueryBuilder();
+		// let insertGame: string = await qb
+		// 	.insert()
+		// 	.into( qb => { const subQuery = qb
+		// 		.subQuery()
+		// 		.select()
+		// 		.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
+		// 		.andWhere(new Brackets( query => { query
+		// 			.where("winner IN (:...winnerIds)", {winnerIds: [opponentId, user.id]})
+		// 			.orWhere("loser IN (:...loserIds)", {loserIds: [opponentId, user.id]})
+		// 		}))
+		// 		.getQuery()
+		// 	})
+		// 	.values({winner: user.id, loser:opponentId, type: GameType.competitive})
+		// 	.orIgnore()
+		// 	.getQuery();
+
 
 		let game: Game = await this.gameRepository.createQueryBuilder()
 													.select()
@@ -45,13 +63,13 @@ export class GameService {
 		const { channelId }: StartFriendlyGameDto = body;
 
 		let game: Game = await this.gameRepository.createQueryBuilder()
-													.select()
-													.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
-													.andWhere(new Brackets( query => { query
-														.where("winner = :winnerId", {winnerId: user.id})
-														.orWhere("loser = :loserId", {loserId: user.id})
-													}))
-													.getOne();
+			.select()
+			.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
+			.andWhere(new Brackets( query => { query
+				.where("winner = :winnerId", {winnerId: user.id})
+				.orWhere("loser = :loserId", {loserId: user.id})
+			}))
+			.getOne();
 		if (game) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
@@ -68,9 +86,9 @@ export class GameService {
 		const { gameId, winnerId, winnerScore, loserScore, didInterrupt}: UpdateGameDto = body;
 
 		let game: Game = await this.gameRepository.createQueryBuilder()
-													.select()
-													.where("id = :gameId", {gameId: gameId})
-													.getOne();
+			.select()
+			.where("id = :gameId", {gameId: gameId})
+			.getOne();
 		if (!game) {
 			throw new HttpException('Game not found', HttpStatus.NOT_FOUND);
 		}
@@ -85,9 +103,9 @@ export class GameService {
 
 		if (!didInterrupt) {
 			let users: User[] = await this.userRepository.createQueryBuilder()
-															.select()
-															.where("id IN (:...gamerIds)", {gamerIds: [game.winner, game.loser]})
-															.getMany();
+				.select()
+				.where("id IN (:...gamerIds)", {gamerIds: [game.winner, game.loser]})
+				.getMany();
 			let winner = (users[0].id == winnerId) ? users[0] : users[1];
 			let loser = (users[0].id == winnerId) ? users[1] : users[0];
 			if (!winner || !loser) {
@@ -103,26 +121,21 @@ export class GameService {
 	}
 
 	public async games(user: User): Promise< Game[] | never> {
-		let games: Game[] = await this.gameRepository.createQueryBuilder()
-														.select()
-														.where("winner = :winnerId", {winnerId: user.id})
-														.orWhere("loser = :loserId", {loserId: user.id})
-														.getMany();
-		return games;
+		return await this.gameRepository.createQueryBuilder()
+			.select()
+			.where("winner = :winnerId", {winnerId: user.id})
+			.orWhere("loser = :loserId", {loserId: user.id})
+			.getMany();
 	}
 
-	public async deleteGame(body: DeleteGameDto): Promise<number> {
+	public async deleteGame(body: DeleteGameDto): Promise<number | null> {
 		const { gameId }: DeleteGameDto = body;
 
-		let game: Game = await this.gameRepository.createQueryBuilder()
-													.select()
-													.where("id = :gameId", {gameId: gameId})
-													.getOne()
-		if (!game) {
-			return 0;
-		}
-		this.gameRepository.remove(game);
-		return 1;
+		let deleteGame: DeleteResult = await this.gameRepository.createQueryBuilder()
+			.delete()
+			.where("id = :gameId", {gameId: gameId})
+			.execute();
+		return deleteGame.affected;
 	}
 
 	/*

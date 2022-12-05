@@ -4,6 +4,6 @@ import { GameModule } from './game/game.module';
 import { BlockedModule } from './user/blocked/blocked.module'
 
 @Module({
-  imports: [UserModule, GameModule, BlockedModule]
+  imports: [UserModule, GameModule]
 })
 export class ApiModule {}

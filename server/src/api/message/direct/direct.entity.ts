@@ -1,13 +1,16 @@
-import { BaseEntity, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, BaseEntity, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { channelType } from "../message.entity";
 
 @Entity('direct')
 export class Direct extends BaseEntity{
 	@PrimaryGeneratedColumn({type: 'integer', name: 'directId'})
 	id: string;
+
+	@PrimaryColumn({type: 'enum', enum: channelType, default: channelType.direct})
 	
-	@PrimaryColumn({type: 'integer', name: 'user1Id'})
+	@Column({type: 'integer', name: 'user1Id'})
 	user1!: number;
 
-	@PrimaryColumn({type: 'integer', name: 'user2Id'})
+	@Column({type: 'integer', name: 'user2Id'})
 	user2!: number;
 }

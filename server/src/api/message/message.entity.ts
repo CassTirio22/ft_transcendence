@@ -1,12 +1,24 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "../user/user.entity";
+
+export enum channelType {
+	direct,
+	channel
+}
 
 @Entity('message')
 export class Message extends BaseEntity {
-	@PrimaryColumn({name: 'originId'})
+	@PrimaryGeneratedColumn({name: 'messageId'})
+	id!: number;
+	
+	@Column({name: 'originId'})
 	origin!: string;
 
-	@PrimaryColumn({name: 'userId'})
-	author!: number;
+	@ManyToOne(() => User)
+	author!: User;
+
+	@Column({name: 'type'})
+	type!: string;
 
 	@CreateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
 	date!: Date;

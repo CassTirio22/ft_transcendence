@@ -7,9 +7,10 @@ import { User } from '../user/user.entity';
 import { Request, query } from 'express';
 import { channel } from 'diagnostics_channel';
 
-
 @Injectable()
 export class GameService {
+
+
 	@InjectRepository(User)
 	private readonly userRepository: Repository<User>;
 
@@ -19,24 +20,12 @@ export class GameService {
 	public async startCompetitiveGame(body: StartCompetitiveGameDto, req: Request): Promise<Game | never> {
 		const user: User = <User>req.user;
 		const { opponentId }: StartCompetitiveGameDto = body;
-
-		// let qb = await this.gameRepository.createQueryBuilder();
-		// let insertGame: string = await qb
-		// 	.insert()
-		// 	.into( qb => { const subQuery = qb
-		// 		.subQuery()
-		// 		.select()
-		// 		.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
-		// 		.andWhere(new Brackets( query => { query
-		// 			.where("winner IN (:...winnerIds)", {winnerIds: [opponentId, user.id]})
-		// 			.orWhere("loser IN (:...loserIds)", {loserIds: [opponentId, user.id]})
-		// 		}))
-		// 		.getQuery()
-		// 	})
-		// 	.values({winner: user.id, loser:opponentId, type: GameType.competitive})
-		// 	.orIgnore()
+		// let insertGame: string = this.gameRepository.createQueryBuilder()
+		// 	.select("1")
+		// 	.where(`winner = 0`)
 		// 	.getQuery();
-
+		// console.log(`INSERT INTO game(winner, loser) SELECT 15, 16 WHERE NOT EXISTS (${insertGame})`);
+		// await this.gameRepository.query(`INSERT INTO game(winner, loser) SELECT 15, 16 WHERE NOT EXISTS (${insertGame})`);
 
 		let game: Game = await this.gameRepository.createQueryBuilder()
 													.select()

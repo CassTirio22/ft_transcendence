@@ -1,11 +1,10 @@
-import { debug } from 'console';
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Catch } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, Not, QueryResult, QueryBuilder } from 'typeorm';
+import { Repository, In, Not, QueryResult, QueryBuilder, InsertResult, Brackets } from 'typeorm';
 import { Friendship, FriendshipStatus } from './friendship.entity';
 import { User } from '../user.entity';
 import { RequestFriendDto, ResponseFriendDto, DeleteFriendDto } from './friendship.dto';
-import { query, Request } from 'express';
+import { Request } from 'express';
 
 @Injectable()
 export class FriendshipService {
@@ -19,47 +18,53 @@ export class FriendshipService {
 		const user: User = <User>req.user;
 		const { id }: RequestFriendDto = body;
 
-		let friend: User = await this.userRepository.findOne( { where: { id: id}} );
+		let friend: User = await this.userRepository.createQueryBuilder()
+			.select()
+			.where("id = :friendId", {friendId: id})
+			.getOne();
+		let friendship: Friendship = await this.friendshipRepository.createQueryBuilder()
+			.select()
+			.where("applicantid = :userId", {userId: user.id})
+			.andWhere("solicitedid = :friendId", {friendId: id})
+			.getOne();
 		if (!friend) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 		}
-		let friendship: Friendship = await this.friendshipRepository.findOne({ where: [
-			{applicant: friend.id, solicited: user.id},
-			{applicant: user.id, solicited: friend.id},
-		]})
-		if (friendship) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		else if (user.id == id || friendship) {
+			throw new HttpException("Conflict", HttpStatus.CONFLICT);
 		}
-
-		friendship = new Friendship();
-		friendship.applicant = user.id;
-		friendship.solicited = friend.id;
-		// friendship.status = Status.pending; //default
-		
-		return this.friendshipRepository.save(friendship);
+		return (await this.friendshipRepository.createQueryBuilder()
+			.insert()
+			.values({applicant: user.id, solicited: friend.id})
+			.execute()).generatedMaps[0] as Friendship;
 	}
 
 	public async responseFriend(body: ResponseFriendDto, req: Request): Promise<Friendship> {
 		const { didAccept, applicant }: ResponseFriendDto = body;
 		const user: User = <User>req.user;
 
-		let friendship: Friendship = await this.friendshipRepository.findOne({ where: { applicant: applicant, solicited: user.id } });
+		let friendship: Friendship = await this.friendshipRepository.createQueryBuilder()
+			.select()
+			.where("applicantid = :friendId", {friendId: applicant})
+			.andWhere("solicitedid = :userId", {userId: user.id})
+			.getOne();
 		if (!friendship) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 		}
 		else if (friendship.status != FriendshipStatus.pending) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT)
 		}
-
-		if (didAccept)
-			friendship.status = FriendshipStatus.accepted;
-		else
-			friendship.status = FriendshipStatus.rejected;
-		return this.friendshipRepository.update({applicant: applicant, solicited: user.id }, {status: friendship.status})[0];
+		return (await this.friendshipRepository.createQueryBuilder()
+			.update()
+			.set( { status: didAccept ? FriendshipStatus.accepted : FriendshipStatus.rejected } )
+			.where( "solicitedid = :userId", {userId: user.id} )
+			.andWhere( "applicantid = :friendId", {friendId: applicant})
+			.execute()).generatedMaps[0] as Friendship;
 	}
 
+	// SELECT * FROM User WHERE Id IN ( SELECT applicant FROM Friendship WHERE solicited = user.id) AND ( SELECT solicited FROM Friendship WHERE applicant = user.id)
 	public async friends(user: User): Promise< User[] | never > {
-		let friends: User[] = await this.userRepository.find ({
+		return (await this.userRepository.find ({
 			where: {
 				id: In(
 					(await this.friendshipRepository.find({
@@ -80,23 +85,23 @@ export class FriendshipService {
 					})).map(Friendship => Friendship.solicited))
 				),
 			}
-		})
-		return friends;
+		}));
 	}
-
-	
 
 	public async deleteFriend(body: DeleteFriendDto, req: Request): Promise<number> {
 		const { friend } : DeleteFriendDto = body;
 		const user: User = <User>req.user;
 
-		let friendship: Friendship = await this.friendshipRepository.findOne({ where: [
-			{ applicant: friend, solicited: user.id/*, status: FriendshipStatus.accepted*/ },
-			{ applicant: user.id, solicited: friend/*, status: FriendshipStatus.accepted*/ }
-		]});
-		if (!friendship)
-			return 0;
-		this.friendshipRepository.remove(friendship);
-		return 1;
+		return (await this.friendshipRepository.createQueryBuilder()
+			.delete()
+			.where( new Brackets (query => { query
+				.where("applicantid = :applicantFriendId", {applicantFriendId: friend})
+				.andWhere("solicitedid = :solicitedUserId", {solicitedUserId: user.id})
+			}))
+			.orWhere( new Brackets (query => { query
+				.where("solicitedid = :solicitedFriendId", {solicitedFriendId: friend})
+				.andWhere("applicantid = :applicantUserId", {applicantUserId: user.id})
+			}))
+			.execute()).affected;
 	}
 }

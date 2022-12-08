@@ -18,10 +18,12 @@ export class FriendshipService {
 		const user: User = <User>req.user;
 		const { id }: RequestFriendDto = body;
 
+		//if really want to get friend and friendship, maybe use a join to get both in only one query
 		let friend: User = await this.userRepository.createQueryBuilder()
 			.select()
 			.where("id = :friendId", {friendId: id})
 			.getOne();
+		//if friendship already exists just return an empty JSON using an orIgnore() method, no need for query
 		let friendship: Friendship = await this.friendshipRepository.createQueryBuilder()
 			.select()
 			.where("applicantid = :userId", {userId: user.id})
@@ -36,6 +38,7 @@ export class FriendshipService {
 		return (await this.friendshipRepository.createQueryBuilder()
 			.insert()
 			.values({applicant: user.id, solicited: friend.id})
+			//add the orIgnore here
 			.execute()).generatedMaps[0] as Friendship;
 	}
 
@@ -54,6 +57,7 @@ export class FriendshipService {
 		else if (friendship.status != FriendshipStatus.pending) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT)
 		}
+		//probably can be done without the select at first, will return empty JSON if nothing is updated
 		return (await this.friendshipRepository.createQueryBuilder()
 			.update()
 			.set( { status: didAccept ? FriendshipStatus.accepted : FriendshipStatus.rejected } )
@@ -62,8 +66,9 @@ export class FriendshipService {
 			.execute()).generatedMaps[0] as Friendship;
 	}
 
-	// SELECT * FROM User WHERE Id IN ( SELECT applicant FROM Friendship WHERE solicited = user.id) AND ( SELECT solicited FROM Friendship WHERE applicant = user.id)
+	// SELECT * FROM User WHERE Id IN CONCAT( ( SELECT applicant FROM Friendship WHERE solicited = user.id), ( SELECT solicited FROM Friendship WHERE applicant = user.id) )
 	public async friends(user: User): Promise< User[] | never > {
+		//must be done using querybuilder and probably inner joins
 		return (await this.userRepository.find ({
 			where: {
 				id: In(

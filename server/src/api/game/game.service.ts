@@ -25,12 +25,12 @@ export class GameService {
 			.getOne();
 		let game: Game = await this.gameRepository.createQueryBuilder()
 			.select()
-			.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
-			.andWhere(new Brackets( query => { query
-				.where("winner IN (:...winnerIds)", {winnerIds: [opponentId, user.id]})
-				.orWhere("loser IN (:...loserIds)", {loserIds: [opponentId, user.id]})
-			}))
-			.getOne();
+				.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
+				.andWhere(new Brackets( query => { query
+					.where("winner IN (:...winnerIds)", {winnerIds: [opponentId, user.id]})
+					.orWhere("loser IN (:...loserIds)", {loserIds: [opponentId, user.id]})
+				}))
+				.getOne();
 		if (!opponent) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
@@ -68,6 +68,7 @@ export class GameService {
 	public async updateGame(body: UpdateGameDto): Promise<Game> {
 		const { gameId, winnerId, winnerScore, loserScore, didInterrupt}: UpdateGameDto = body;
 
+		//this query could be nested/game could be joined in the select user query as its only purpose is to check if exist, get winner loser
 		let game: Game = await this.gameRepository.createQueryBuilder()
 			.select()
 			.where("id = :gameId", {gameId: gameId})
@@ -77,7 +78,7 @@ export class GameService {
 		}
 		let users: User[] = await this.userRepository.createQueryBuilder()
 			.select()
-			.where("id IN (:...gamerIds)", {gamerIds: [game.winner, game.loser]})
+			.where("id IN (:...gamerIds)", {gamerIds: [game.winner, game.loser] })
 			.getMany();
 		if (!users || users.length < 2) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);

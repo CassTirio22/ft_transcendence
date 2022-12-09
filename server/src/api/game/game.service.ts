@@ -27,8 +27,8 @@ export class GameService {
 			.select()
 				.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
 				.andWhere(new Brackets( query => { query
-					.where("winner IN (:...winnerIds)", {winnerIds: [opponentId, user.id]})
-					.orWhere("loser IN (:...loserIds)", {loserIds: [opponentId, user.id]})
+					.where("winner_id IN (:...winnerIds)", {winnerIds: [opponent.id, user.id]})
+					.orWhere("loser_id IN (:...loserIds)", {loserIds: [opponent.id, user.id]})
 				}))
 				.getOne();
 		if (!opponent) {
@@ -39,7 +39,7 @@ export class GameService {
 		}
 		return (await this.gameRepository.createQueryBuilder()
 			.insert()
-			.values({winner: user.id, loser: opponentId, type: GameType.competitive})
+			.values({winner: user, loser: opponent, type: GameType.competitive})
 			.execute()).generatedMaps[0] as Game;
 	}
 
@@ -52,8 +52,8 @@ export class GameService {
 			.select()
 			.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
 			.andWhere(new Brackets( query => { query
-				.where("winner = :winnerId", {winnerId: user.id})
-				.orWhere("loser = :loserId", {loserId: user.id})
+				.where("winner_id = :winnerId", {winnerId: user.id})
+				.orWhere("loser_id = :loserId", {loserId: user.id})
 			}))
 			.getOne();
 		if (game) {
@@ -61,14 +61,13 @@ export class GameService {
 		}
 		return (await this.gameRepository.createQueryBuilder()
 			.insert()
-			.values({winner: user.id, type: GameType.friendly, channel: channelId})
+			.values({winner: user, type: GameType.friendly, channel: channelId})
 			.execute()).generatedMaps[0] as Game;
 	}
 
 	public async updateGame(body: UpdateGameDto): Promise<Game> {
 		const { gameId, winnerId, winnerScore, loserScore, didInterrupt}: UpdateGameDto = body;
 
-		//this query could be nested/game could be joined in the select user query as its only purpose is to check if exist, get winner loser
 		let game: Game = await this.gameRepository.createQueryBuilder()
 			.select()
 			.where("id = :gameId", {gameId: gameId})
@@ -76,27 +75,18 @@ export class GameService {
 		if (!game) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
-		let users: User[] = await this.userRepository.createQueryBuilder()
-			.select()
-			.where("id IN (:...gamerIds)", {gamerIds: [game.winner, game.loser] })
-			.getMany();
-		if (!users || users.length < 2) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-		}
-		else if (game.status != GameStatus.ongoing || ( winnerId != game.winner && winnerId != game.loser) ) {
+		else if (game.status != GameStatus.ongoing || ( winnerId != game.winner.id && winnerId != game.loser.id) ) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
 		if (!didInterrupt) {
-			users = this.recalculateELO(users[0].id == winnerId ? users[0] : users[1],
-										users[0].id == winnerId ? users[1] : users[0]);
-			this.userRepository.save(users);
+			this.userRepository.save(this.recalculateELO(game.winner, game.loser));
 		}
 		return (await this.gameRepository.createQueryBuilder()
 			.update()
 			.set({
 				status: didInterrupt ? GameStatus.interrupted : GameStatus.done,
-				loser: (game.winner == winnerId) ? game.loser : game.winner,
-				winner: winnerId,
+				loser: (game.winner.id == winnerId) ? game.loser : game.winner,
+				winner: (game.winner.id == winnerId) ? game.winner : game.loser,
 				winnerScore: winnerScore,
 				loserScore: loserScore})
 			.execute()).generatedMaps[0] as Game;
@@ -105,8 +95,8 @@ export class GameService {
 	public async games(user: User): Promise< Game[] | never> {
 		return await this.gameRepository.createQueryBuilder()
 			.select()
-			.where("winner = :winnerId", {winnerId: user.id})
-			.orWhere("loser = :loserId", {loserId: user.id})
+			.where("winner = :winnerId", {winnerId: user})
+			.orWhere("loser = :loserId", {loserId: user})
 			.getMany();
 	}
 

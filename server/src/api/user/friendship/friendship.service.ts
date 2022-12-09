@@ -26,20 +26,22 @@ export class FriendshipService {
 		//if friendship already exists just return an empty JSON using an orIgnore() method, no need for query
 		let friendship: Friendship = await this.friendshipRepository.createQueryBuilder()
 			.select()
-			.where("applicantid = :userId", {userId: user.id})
-			.andWhere("solicitedid = :friendId", {friendId: id})
+			.where("applicant_id = :userId", {userId: user.id})
+			.andWhere("solicited_id = :friendId", {friendId: id})
 			.getOne();
 		if (!friend) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 		}
 		else if (user.id == id || friendship) {
 			throw new HttpException("Conflict", HttpStatus.CONFLICT);
+		
 		}
 		return (await this.friendshipRepository.createQueryBuilder()
 			.insert()
-			.values({applicant: user.id, solicited: friend.id})
+			.values({applicant: user, solicited: friend})
 			//add the orIgnore here
 			.execute()).generatedMaps[0] as Friendship;
+		
 	}
 
 	public async responseFriend(body: ResponseFriendDto, req: Request): Promise<Friendship> {
@@ -48,8 +50,8 @@ export class FriendshipService {
 
 		let friendship: Friendship = await this.friendshipRepository.createQueryBuilder()
 			.select()
-			.where("applicantid = :friendId", {friendId: applicant})
-			.andWhere("solicitedid = :userId", {userId: user.id})
+			.where("applicant_id = :friendId", {friendId: applicant})
+			.andWhere("solicited_id = :userId", {userId: user.id})
 			.getOne();
 		if (!friendship) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
@@ -61,8 +63,8 @@ export class FriendshipService {
 		return (await this.friendshipRepository.createQueryBuilder()
 			.update()
 			.set( { status: didAccept ? FriendshipStatus.accepted : FriendshipStatus.rejected } )
-			.where( "solicitedid = :userId", {userId: user.id} )
-			.andWhere( "applicantid = :friendId", {friendId: applicant})
+			.where( "solicited_id = :userId", {userId: user.id} )
+			.andWhere( "applicant_id = :friendId", {friendId: applicant})
 			.execute()).generatedMaps[0] as Friendship;
 	}
 
@@ -75,7 +77,7 @@ export class FriendshipService {
 					(await this.friendshipRepository.find({
 						select: ["applicant"],
 						where: {
-							"solicited": user.id,
+							"solicited_id": user.id,
 							"status": FriendshipStatus.accepted,
 						}
 					})).map(Friendship => Friendship.applicant)
@@ -84,7 +86,7 @@ export class FriendshipService {
 					(await this.friendshipRepository.find({
 						select: ["solicited"],
 						where: {
-							"applicant": user.id,
+							"applicant_id": user.id,
 							"status": FriendshipStatus.accepted,
 						}
 					})).map(Friendship => Friendship.solicited))
@@ -100,12 +102,12 @@ export class FriendshipService {
 		return (await this.friendshipRepository.createQueryBuilder()
 			.delete()
 			.where( new Brackets (query => { query
-				.where("applicantid = :applicantFriendId", {applicantFriendId: friend})
-				.andWhere("solicitedid = :solicitedUserId", {solicitedUserId: user.id})
+				.where("applicant_id = :applicantFriendId", {applicantFriendId: friend})
+				.andWhere("solicited_id = :solicitedUserId", {solicitedUserId: user.id})
 			}))
 			.orWhere( new Brackets (query => { query
-				.where("solicitedid = :solicitedFriendId", {solicitedFriendId: friend})
-				.andWhere("applicantid = :applicantUserId", {applicantUserId: user.id})
+				.where("solicited_id = :solicitedFriendId", {solicitedFriendId: friend})
+				.andWhere("applicant_id = :applicantUserId", {applicantUserId: user.id})
 			}))
 			.execute()).affected;
 	}

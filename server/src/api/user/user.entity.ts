@@ -1,5 +1,7 @@
+import { Friendship } from './friendship/friendship.entity';
 import { Exclude } from 'class-transformer';
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Game } from '../game/game.entity'
 
 
 export enum UserStatus {
@@ -54,4 +56,16 @@ export class User extends BaseEntity {
 	 */
 	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.online})
 	public status!: UserStatus;
+
+	@OneToMany(type => Game, game => game.winner)
+	won: Game[];
+
+	@OneToMany(type => Game, game => game.loser)
+	lost: Game[];
+
+	@OneToMany(type => Friendship, friendship => friendship.solicited)
+	askers:  Friendship[];
+
+	@OneToMany(type => Friendship, friendship => friendship.applicant)
+	askees: Friendship[];
 }

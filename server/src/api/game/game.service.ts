@@ -1,3 +1,4 @@
+import { IsNumber } from 'class-validator';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, DeleteResult, Repository, InsertResult } from 'typeorm';
@@ -68,14 +69,20 @@ export class GameService {
 	public async updateGame(body: UpdateGameDto): Promise<Game> {
 		const { gameId, winnerId, winnerScore, loserScore, didInterrupt}: UpdateGameDto = body;
 
-		let game: Game = await this.gameRepository.createQueryBuilder()
-			.select()
-			.where("id = :gameId", {gameId: gameId})
+		let game: any = await this.gameRepository.createQueryBuilder('game')
+			.innerJoinAndSelect("game.winner", "winner")
+			.innerJoinAndSelect("game.loser", "loser")
+			.where("game.id = :gameId", {gameId: gameId})
+			.andWhere("game.status = :ongoingStatus", {ongoingStatus: GameStatus.ongoing})
+			.andWhere(":winnerId IN (winner.id, loser.id)", {winnerId: winnerId})
 			.getOne();
+		console.log(game);
+
 		if (!game) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
-		else if (game.status != GameStatus.ongoing || ( winnerId != game.winner.id && winnerId != game.loser.id) ) {
+		//ces conditions peuvent etre rajoutées dans la query donc a delete une fois fonctionnel et verifié
+		else if (game.status != GameStatus.ongoing || ( winnerId != game.winner.id && winnerId != game.loser.id ) ) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
 		if (!didInterrupt) {

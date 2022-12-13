@@ -1,24 +1,34 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Channel } from "diagnostics_channel";
+import { type } from "os";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../user/user.entity";
+import { Direct } from "./direct/direct.entity";
 
-export enum channelType {
+export enum ChannelType {
 	direct,
 	channel
 }
 
 @Entity('message')
 export class Message extends BaseEntity {
-	@PrimaryGeneratedColumn({name: 'messageId'})
+	@PrimaryGeneratedColumn({type: 'integer'})
 	id!: number;
 	
-	@Column({name: 'originId'})
-	origin!: string;
+	// @PrimaryColumn({type: 'enum', enum: ChannelType})
+	// origin_type!: ChannelType;
 
-	@ManyToOne(() => User)
-	author!: User;
+	// @ManyToOne(() => User)
+	// author!: User;
 
-	@Column({name: 'type'})
-	type!: string;
+	// @ManyToOne(type => Direct, direct => direct.messages)
+	// @JoinColumn({name: "direct_id"})
+	// directId: Direct;
+
+	// @ManyToOne(() => Channel)
+	// channelId: Channel;
+
+	// @Column({name: 'type'})
+	// type!: string;
 
 	@CreateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
 	date!: Date;

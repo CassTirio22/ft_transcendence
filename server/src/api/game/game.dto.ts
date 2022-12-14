@@ -1,8 +1,12 @@
-import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator'
+import { IsBoolean, IsDefined, IsNotEmpty, IsNumber, IsString } from 'class-validator'
+import { User } from '../user/user.entity';
 
 export class StartCompetitiveGameDto {
 	@IsNumber()
-	public readonly opponentId: number;
+	public readonly player1Id: number;
+
+	@IsNumber()
+	public readonly player2Id: number;
 }
 
 export class StartFriendlyGameDto {

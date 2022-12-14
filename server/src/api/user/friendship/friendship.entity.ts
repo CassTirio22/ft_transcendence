@@ -21,13 +21,13 @@ export class Friendship extends BaseEntity {
 	/**
 	 * The ID of the User who made the friend request.
 	 */
-	@ManyToOne( type => User, user => user.askees)
+	@ManyToOne( type => User, user => user.sent)
 	@JoinColumn({name: "applicant_id"})
 	public applicant!: User;
 	/**
 	 * The ID of the User who received the friend request and who will decide its status.
 	 */
-	@ManyToOne( type => User, user => user.askers)
+	@ManyToOne( type => User, user => user.received)
 	@JoinColumn({name: "solicited_id"})
 	public solicited!: User;
 	/**

@@ -18,30 +18,27 @@ export class FriendshipService {
 		const user: User = <User>req.user;
 		const { id }: RequestFriendDto = body;
 
-		//if really want to get friend and friendship, maybe use a join to get both in only one query
-		let friend: User = await this.userRepository.createQueryBuilder()
+		let friend: User = await this.userRepository.createQueryBuilder('user')
 			.select()
+			.leftJoinAndSelect("user.sent", "sent", "sent.solicited = :solicitedId", {solicitedId: user.id})
+			.leftJoinAndSelect("user.received", "received", "received.applicant = :applicantId", {applicantId: user.id})
 			.where("id = :friendId", {friendId: id})
 			.getOne();
-		//if friendship already exists just return an empty JSON using an orIgnore() method, no need for query
-		let friendship: Friendship = await this.friendshipRepository.createQueryBuilder()
-			.select()
-			.where("applicant_id = :userId", {userId: user.id})
-			.andWhere("solicited_id = :friendId", {friendId: id})
-			.getOne();
+		console.log(this.userRepository.createQueryBuilder('user')
+		.select()
+		.leftJoinAndSelect("user.sent", "sent", "sent.solicited = :solicitedId", {solicitedId: id})
+		.leftJoinAndSelect("user.received", "received", "received.applicant = :applicantId", {applicantId: id})
+		.where("id = :friendId", {friendId: id}).getQuery());
 		if (!friend) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 		}
-		else if (user.id == id || friendship) {
+		else if (user.id == id || friend.sent.length > 0 || friend.received.length > 0) {
 			throw new HttpException("Conflict", HttpStatus.CONFLICT);
-		
 		}
 		return (await this.friendshipRepository.createQueryBuilder()
 			.insert()
 			.values({applicant: user, solicited: friend})
-			//add the orIgnore here
 			.execute()).generatedMaps[0] as Friendship;
-		
 	}
 
 	public async responseFriend(body: ResponseFriendDto, req: Request): Promise<Friendship> {

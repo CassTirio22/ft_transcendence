@@ -64,8 +64,8 @@ export class User extends BaseEntity {
 	lost: Game[];
 
 	@OneToMany(type => Friendship, friendship => friendship.solicited)
-	askers:  Friendship[];
+	received:  Friendship[];
 
 	@OneToMany(type => Friendship, friendship => friendship.applicant)
-	askees: Friendship[];
+	sent: Friendship[];
 }

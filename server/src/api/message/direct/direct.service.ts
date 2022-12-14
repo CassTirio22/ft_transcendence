@@ -27,8 +27,8 @@ export class DirectService {
 		//vérifier que la relation n'existe pas
 			//Conflict
 		let direct: Direct = await this.directRepository.findOne({where: [
-			{ user1: user1.id, user2: user2.id},
-			{ user1: user2.id, user2: user1.id},
+			{ user1: {id: user1.id}, user2: {id: user2.id}},
+			{ user1: {id: user2.id}, user2: {id: user1.id}},
 		]})
 		if (direct)
 		{
@@ -36,8 +36,8 @@ export class DirectService {
 		}
 
 		direct = new Direct();
-		direct.user1 = user1.id;
-		direct.user2 = user2.id;
+		direct.user1 = user1;
+		direct.user2 = user2;
 		return this.directRepository.save(direct); // retourné le direct créé
 		
 	}
@@ -47,8 +47,8 @@ export class DirectService {
 		const listdirect: Direct[] = await this.directRepository.find(
 			{
 				where:[
-					{user1: user.id},
-					{user2: user.id}
+					{user1: {id: user.id}},
+					{user2: {id: user.id}}
 				]
 			}
 		)

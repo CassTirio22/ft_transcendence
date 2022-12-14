@@ -1,5 +1,6 @@
 import { Exclude } from 'class-transformer';
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Direct } from '../message/direct/direct.entity';
 
 
 export enum UserStatus {
@@ -54,4 +55,10 @@ export class User extends BaseEntity {
 	 */
 	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.online})
 	public status!: UserStatus;
+
+	@OneToMany(type => Direct, direct => direct.user1)
+	directuser1: Direct[];
+
+	@OneToMany(type => Direct, direct => direct.user2)
+	directuser2: Direct[];
 }

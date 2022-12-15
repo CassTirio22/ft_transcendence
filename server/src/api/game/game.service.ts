@@ -122,7 +122,7 @@ export class GameService {
 			winnerScore: settings.winnerScore,
 			loserScore: settings.loserScore})
 		.where("id = :gameId", {gameId: settings.id})
-		.execute()).raw as Promise<number>;
+		.execute()).affected;
 	}
 
 	private async _updatePlayers(players: UpdateGameSettings): Promise<number> {
@@ -134,7 +134,7 @@ export class GameService {
 				gamesNumber: () => `CASE WHEN id = ${players.loser.id} THEN ${players.loser.gamesNumber} ELSE ${players.winner.gamesNumber} END`,
 				score: () => `CASE WHEN id = ${players.loser.id} THEN ${players.loser.score} ELSE ${players.winner.score} END`})
 			.where("id IN (:...playerIds)", {playerIds: [players.loser.id, players.winner.id]})
-			.execute()).raw;
+			.execute()).affected;
 	}
 
 	private _recalculateELO(players: UpdateGameSettings): UpdateGameSettings {

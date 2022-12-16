@@ -1,3 +1,4 @@
+import { Block } from './block/block.entity';
 import { Friendship } from './friendship/friendship.entity';
 import { Exclude } from 'class-transformer';
 import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
@@ -68,4 +69,10 @@ export class User extends BaseEntity {
 
 	@OneToMany(type => Friendship, friendship => friendship.applicant)
 	sent: Friendship[];
+
+	@OneToMany(type => Block, block => block.blocked)
+	blockTo: Block[]
+
+	@OneToMany(type => Block, block => block.blocker)
+	blockedBy: Block[]
 }

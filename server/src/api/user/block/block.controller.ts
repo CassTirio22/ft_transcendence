@@ -10,13 +10,13 @@ import { User } from "../user.entity";
 export class BlockController{
     constructor(private blockedService: BlockService) {}
 
-    @Post('blockUser')
+    @Post('block')
     @UseGuards(JwtAuthGuard)
-    private requestBlocked(@Body() body: BlockDto, @Req() req: Request): Promise<Block> {
+    private block(@Body() body: BlockDto, @Req() req: Request): Promise<Block> {
         return this.blockedService.block(body, req);
     }
 
-    @Get('block')
+    @Get('blocked')
     @UseGuards(JwtAuthGuard)
     private getBlocked(@Req() { user }: Request): Promise<User[]> {
         return this.blockedService.getBlocked(<User>user);
@@ -24,7 +24,7 @@ export class BlockController{
 
     @Delete('delete')
     @UseGuards(JwtAuthGuard)
-    private deleteBlocked(@Body() body: DeleteBlockDto, @Req() req: Request): Promise<number> {
+    private deleteBlock(@Body() body: DeleteBlockDto, @Req() req: Request): Promise<number> {
         return this.blockedService.deleteBlock(body, req);
     }
 }

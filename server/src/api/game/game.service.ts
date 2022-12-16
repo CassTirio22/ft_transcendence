@@ -96,10 +96,12 @@ export class GameService {
 	}
 
 	public async games(user: User): Promise< Game[] | never> {
-		return await this.gameRepository.createQueryBuilder()
+		return await this.gameRepository.createQueryBuilder("game")
+			.innerJoinAndSelect("game.winner", "winner")
+			.innerJoinAndSelect("game.loser", "loser")
 			.select()
-			.where(":player IN (winner_id, loser_id)", {player: user.id})
-			.andWhere("status = :gameStatus", {gameStatus: GameStatus.done})
+			.where(":player IN (winner.id, loser.id)", {player: user.id})
+			.andWhere("game.status = :gameStatus", {gameStatus: GameStatus.done})
 			.getMany();
 	}
 

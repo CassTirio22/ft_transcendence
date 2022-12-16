@@ -1,6 +1,8 @@
 import { Block } from './block/block.entity';
 import { Friendship } from './friendship/friendship.entity';
 import { Exclude } from 'class-transformer';
+import { Game } from '../game/game.entity';
+import { Direct } from '../message/direct/direct.entity';
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
 
 

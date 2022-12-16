@@ -4,7 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Request } from "express";
 import { Repository } from "typeorm";
 import { User } from "../user/user.entity";
-import { SendDto } from "./message.dto";
+import { SendDto, MessagesDto } from "./message.dto";
 import { Message } from "./message.entity";
 
 @Injectable()
@@ -35,10 +35,13 @@ export class MessageService {
 			.execute()).generatedMaps[0] as Message;
 	}
 
-	//get all the conversation
-	// getMessages(req: Request) {
-	// 	const user: User = <User>req.user;
+	public async getMessages(body: MessagesDto): Promise<Message[]> {
+		const { origin }: MessagesDto = body;
 
-
-	// }
+		return (await this.messageRepository().createQueryBuilder()
+			.innerJoind("")
+			.select()
+			.where("")
+			.getMany());
+	}
 }

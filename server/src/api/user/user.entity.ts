@@ -34,7 +34,7 @@ export class User extends BaseEntity {
 	/**
 	 * The User's name
 	 */
-	@Column({ type: 'varchar', nullable: true })
+	@Column({ type: 'varchar', nullable: true, unique: true })
 	public name: string | null;	
 	/**
 	 * The User's last connection date.

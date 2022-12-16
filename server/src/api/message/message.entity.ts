@@ -17,8 +17,8 @@ export class Message extends BaseEntity {
 	// @PrimaryColumn({type: 'enum', enum: ChannelType})
 	// origin_type!: ChannelType;
 
-	// @ManyToOne(() => User)
-	// author!: User;
+	@ManyToOne(type => User, user => user.wrote)
+	author!: User;
 
 	// @ManyToOne(type => Direct, direct => direct.messages)
 	// @JoinColumn({name: "direct_id"})

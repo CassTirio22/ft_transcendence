@@ -7,18 +7,17 @@ import { Request } from 'express';
 
 @Controller('message')
 export class MessageController{
-	constructor(private messageService: MessageService){}
+	constructor(private service: MessageService){}
 
-	//creer le message 
 	@Post('send')
 	@UseGuards(JwtAuthGuard)
-	sendmessage(@Body() body: SendDto, @Req() req: Request) {
-		return this.messageService.sendmessage(body, req);
+	send(@Body() body: SendDto, @Req() req: Request): Promise <Message> {
+		return this.service.send(body, req);
 	}
-	//recupérer une liste de message d'un channel ou d'un direct dans un ordre chronologique
-	@Get('conversation')
-	@UseGuards(JwtAuthGuard)
-	getconversation() {
-		return this.messageService.getconversation();
-	}
+
+	// @Get('conversation')
+	// @UseGuards(JwtAuthGuard)
+	// getMessages(@Req() req: Request) {
+	// 	return this.service.getMessages(req);
+	// }
 }

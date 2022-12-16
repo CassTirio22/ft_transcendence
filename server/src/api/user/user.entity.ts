@@ -1,3 +1,4 @@
+import { Message } from './../message/message.entity';
 import { Block } from './block/block.entity';
 import { Friendship } from './friendship/friendship.entity';
 import { Exclude } from 'class-transformer';
@@ -82,4 +83,7 @@ export class User extends BaseEntity {
 
 	@OneToMany(type => Direct, direct => direct.user2)
 	directuser2: Direct[];
+
+	@OneToMany(type => Message, message => message.author)
+	wrote: Message[];
 }

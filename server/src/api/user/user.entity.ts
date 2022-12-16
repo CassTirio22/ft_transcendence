@@ -1,5 +1,7 @@
+import { Friendship } from './friendship/friendship.entity';
 import { Exclude } from 'class-transformer';
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Game } from '../game/game.entity'
 
 
 export enum UserStatus {
@@ -16,7 +18,7 @@ export class User extends BaseEntity {
 	/**
 	 * The User's id
 	 */
-	@PrimaryGeneratedColumn()
+	@PrimaryGeneratedColumn( {type: 'integer'} )
 	public id!: number;
 	/**
 	 * The User's email 
@@ -32,7 +34,7 @@ export class User extends BaseEntity {
 	/**
 	 * The User's name
 	 */
-	@Column({ type: 'varchar', nullable: true })
+	@Column({ type: 'varchar', nullable: true, unique: true })
 	public name: string | null;	
 	/**
 	 * The User's last connection date.
@@ -42,7 +44,7 @@ export class User extends BaseEntity {
 	/**
 	 * The User's ELO score
 	 */
-	@Column({ type: 'int', default: 0})
+	@Column({ type: 'int', default: 1000})
 	public score: number;
 	/**
 	 * How many games did the User played
@@ -54,4 +56,16 @@ export class User extends BaseEntity {
 	 */
 	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.online})
 	public status!: UserStatus;
+
+	@OneToMany(type => Game, game => game.winner)
+	won: Game[];
+
+	@OneToMany(type => Game, game => game.loser)
+	lost: Game[];
+
+	@OneToMany(type => Friendship, friendship => friendship.solicited)
+	received:  Friendship[];
+
+	@OneToMany(type => Friendship, friendship => friendship.applicant)
+	sent: Friendship[];
 }

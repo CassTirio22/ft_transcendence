@@ -8,11 +8,13 @@ import { Request } from 'express';
 
 @Injectable()
 export class FriendshipService {
-	@InjectRepository(User)
-	private readonly userRepository: Repository<User>;
+	constructor(
+		@InjectRepository(User)
+		private readonly userRepository: Repository<User>,
 
-	@InjectRepository(Friendship)
-	private readonly friendshipRepository: Repository<Friendship>
+		@InjectRepository(Friendship)
+		private readonly friendshipRepository: Repository<Friendship>
+	){}
 
 	public async requestFriend(body: RequestFriendDto, req: Request): Promise<Friendship | never> {
 		const user: User = <User>req.user;

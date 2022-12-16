@@ -20,12 +20,13 @@ interface UpdateGameSettings {
 
 @Injectable()
 export class GameService {
+	constructor(
+		@InjectRepository(User)
+		private readonly userRepository: Repository<User>,
 
-	@InjectRepository(User)
-	private readonly userRepository: Repository<User>;
-
-	@InjectRepository(Game)
-	private readonly gameRepository: Repository<Game>;
+		@InjectRepository(Game)
+		private readonly gameRepository: Repository<Game>
+	){}
 
 	public async startCompetitiveGame(body: StartCompetitiveGameDto): Promise<Game | never> {
 		const { player1Id, player2Id }: StartCompetitiveGameDto = body;

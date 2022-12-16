@@ -10,8 +10,11 @@ import { NOTFOUND } from "dns";
 @Injectable({})
 export class BlockService {
 	constructor(
-		@InjectRepository(Block) private blockRepository: Repository<Block>,
-		@InjectRepository(User) private userRepository: Repository<User>
+		@InjectRepository(Block)
+		private blockRepository: Repository<Block>,
+		
+		@InjectRepository(User)
+		private userRepository: Repository<User>
 	){}
 
 	public async block(body: BlockDto, req: Request): Promise<Block>

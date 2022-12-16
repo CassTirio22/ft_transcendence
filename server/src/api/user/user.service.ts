@@ -7,8 +7,10 @@ import { User } from './user.entity';
 
 @Injectable()
 export class UserService {
-  @InjectRepository(User)
-  private readonly repository: Repository<User>;
+	constructor(
+		@InjectRepository(User)
+		private readonly repository: Repository<User>
+	){}	
 
   public async updateName(body: UpdateNameDto, req: Request): Promise<number> {
     const user: User = <User>req.user;

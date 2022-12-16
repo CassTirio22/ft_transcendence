@@ -2,68 +2,65 @@ import { HttpException, HttpStatus, Injectable, Post } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { In, Repository } from "typeorm";
 import { User } from "../user.entity";
-import { BlockedDto, DeleteBlockedDto } from "./blocked.dto";
-import { Blocked } from "./blocked.entity";
+import { BlockDto, DeleteBlockDto } from "./block.dto";
+import { Block } from "./block.entity";
 import { Request } from 'express';
 import { NOTFOUND } from "dns";
 
 @Injectable({})
-export class BlockedService {
+export class BlockService {
 	constructor(
-		@InjectRepository(Blocked) private blockedRepository: Repository<Blocked>,
+		@InjectRepository(Block) private blockedRepository: Repository<Block>,
 		@InjectRepository(User) private userRepository: Repository<User>
 	){}
 
-	//create
-	public async blocked(body: BlockedDto, req: Request): Promise<Blocked>
+	public async block(body: BlockDto, req: Request): Promise<Block>
 	{
 		const user: User = <User>req.user;
-		const { id }: BlockedDto = body;
+		const { id }: BlockDto = body;
 
 		//regarder si la relation a bloqué existe
 			//si elle existe pas exception not find ()
-		const blocked: User = await this.userRepository.findOne( { where: {id: id} } );
-		if (!blocked)
+		const block: User = await this.userRepository.findOne( { where: {id: id} } );
+		if (!block)
 		{
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
 		
 		//regarder que le blocage n'existe pas encore (dans se sens la)
 			//Si existe conflit
-		let relation: Blocked = await this.blockedRepository.findOne( {where: {requester: user.id, blocked: blocked.id}})
+		let relation: Block = await this.blockedRepository.findOne( {where: {requester: user.id, block: block.id}})
 		if (relation)
 		{
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
 
 		//mettre les informations dans un objet 
-		relation = new Blocked;
+		relation = new Block;
 		relation.requester = user.id;
-		relation.blocked = blocked.id;
+		relation.block = block.id;
 		
 		return this.blockedRepository.save(relation);//sauver l'object dans la base de donnée; 
 	}
 
-	//get
 	public async getBlocked(user: User): Promise<User[]> 
 	{
 		const listblocked: User[] = await this.userRepository.find( 
 			{where: 
 				{id: In(
-					(await this.blockedRepository.find({ select: ["blocked"], where: {requester: user.id}})).map(Blocked => Blocked.blocked)
+					(await this.blockedRepository.find({ select: ["block"], where: {requester: user.id}})).map(Block => Block.block)
 				)}});
 		return listblocked;
 	}
 
-	// //delete
-	public async deleteBlocked(body: DeleteBlockedDto, req: Request): Promise<number> 
+	public async deleteBlock(body: DeleteBlockDto, req: Request): Promise<number> 
 	{
 		const user: User = <User>req.user;
-		const { id }: DeleteBlockedDto = body;
+		const { id }: DeleteBlockDto = body;
 
 		//regarde que la relation existe
 			//si elle n'existe pas retourne not found 
-		const relation: Blocked = await this.blockedRepository.findOne( { where: {requester: user.id, blocked: id}})
+		const relation: Block = await this.blockedRepository.findOne( { where: {requester: user.id, block: id}})
 		if (!relation)
 			return 0;
 		this.blockedRepository.remove(relation);

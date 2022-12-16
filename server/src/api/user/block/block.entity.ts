@@ -1,12 +1,12 @@
 import { BaseEntity, Entity, PrimaryColumn, CreateDateColumn } from "typeorm";
 
-@Entity('blocked')
-export class Blocked extends BaseEntity {
+@Entity('block')
+export class Block extends BaseEntity {
     @PrimaryColumn({type: 'integer', name: 'requesterId'})
-    requester!: number;
+    public requester!: number;
 
     @PrimaryColumn({type: 'integer', name: 'blockedId'})
-    blocked!: number;
+    public block!: number;
 
     @CreateDateColumn({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", name: "blockedDate" })
 	public date!: Date;

@@ -1,18 +1,12 @@
 import { IsNotEmpty, IsNumber } from "class-validator";
 
-export class BlockedDto {
-	/*
-	** The user's id who is blocked
-	*/
+export class BlockDto {
 	@IsNumber()
 	@IsNotEmpty()
 	public readonly id: number
 }
 
-export class DeleteBlockedDto{
-	/*
-	** The user's id who i blocked
-	*/
+export class DeleteBlockDto{
 	@IsNumber()
 	@IsNotEmpty()
 	public readonly id: number

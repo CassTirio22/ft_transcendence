@@ -4,10 +4,9 @@ import { UserController } from './user.controller';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 import { AuthModule } from './auth/auth.module';
-import { BlockedModule } from './blocked/blocked.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), AuthModule, BlockedModule],
+  imports: [TypeOrmModule.forFeature([User]), AuthModule],
   controllers: [UserController],
   providers: [UserService],
 })

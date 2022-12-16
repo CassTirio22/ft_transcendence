@@ -8,14 +8,12 @@ export class Direct extends BaseEntity{
 	@PrimaryGeneratedColumn( {type: 'integer'} )
 	public id!: number;
 	
-	@ManyToOne(type => User, user => user.directuser1)
-	@JoinColumn()
+	@ManyToOne(type => User, user => user.directUser1)
 	public user1!: User;
 
-	@ManyToOne(type => User, user => user.directuser2)
-	@JoinColumn()
+	@ManyToOne(type => User, user => user.directUser2)
 	public user2!: User;
 
-	// @OneToMany(type => Message, message => message.direct)
-	// public allmessages: Message[];
+	@OneToMany(type => Message, message => message.direct)
+	public messages: Message[];
 }

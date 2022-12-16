@@ -1,9 +1,9 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class SendDto {
-	// @IsString()
-	// @IsNotEmpty()
-	// public readonly origin: string;
+	@IsNumber()
+	@IsNotEmpty()
+	public readonly origin: number;
 
 	@IsString()
 	@IsNotEmpty()

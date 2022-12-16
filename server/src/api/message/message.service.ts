@@ -1,4 +1,5 @@
-import { Injectable } from "@nestjs/common";
+import { Direct } from './direct/direct.entity';
+import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Request } from "express";
 import { Repository } from "typeorm";
@@ -12,17 +13,25 @@ export class MessageService {
 		@InjectRepository(User)
 		private readonly userRepository : Repository<User>,
 		@InjectRepository(Message)
-		private readonly messageRepository: Repository<Message>
+		private readonly messageRepository: Repository<Message>,
+		@InjectRepository(Direct)
+		private readonly directRepository: Repository<Direct>
 	){}
 
-	//create message
 	public async send(body: SendDto, req: Request): Promise <Message> {
 		const user: User = <User>req.user;
-		const { content }: SendDto = body;
+		const { content, origin }: SendDto = body;
 
+		let discussion: Direct = await this.directRepository.createQueryBuilder()
+			.select()
+			.where("id = :directId", {directId: origin})
+			.getOne();
+		if (!discussion) {
+			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
+		}
 		return (await this.messageRepository.createQueryBuilder()
 			.insert()
-			.values({content: content, author: user})
+			.values({content: content, author: user , direct: discussion})
 			.execute()).generatedMaps[0] as Message;
 	}
 

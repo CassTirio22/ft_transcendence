@@ -10,15 +10,15 @@ import { User } from "@/api/user/user.entity";
 export class DirectController {
 	constructor(private directService: DirectService) {}
 	
-	@Post('create')
-	@UseGuards(JwtAuthGuard)
-	private create(@Body() body: DirectDto, @Req() req: Request): Promise<Direct> {
-		return this.directService.create(body, req);
-	}
+	// @Post('create')
+	// @UseGuards(JwtAuthGuard)
+	// private create(@Body() body: DirectDto, @Req() req: Request): Promise<Direct> {
+	// 	return this.directService.create(body, req);
+	// }
 
-	@Get('getalldirect')
-	@UseGuards(JwtAuthGuard)
-	private getAllDirect(@Req() { user }: Request): Promise<Direct[]> {
-		return this.directService.getAllDirect(<User>user);
-	}
+	// @Get('getalldirect')
+	// @UseGuards(JwtAuthGuard)
+	// private getAllDirect(@Req() { user }: Request): Promise<Direct[]> {
+	// 	return this.directService.getAllDirect(<User>user);
+	// }
 }

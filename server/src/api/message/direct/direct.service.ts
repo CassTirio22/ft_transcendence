@@ -9,49 +9,52 @@ import { Direct } from "./direct.entity";
 @Injectable({})
 export class DirectService {
 	constructor(
-		@InjectRepository(User) private userRepository: Repository<User>,
-		@InjectRepository(Direct) private directRepository: Repository<Direct>
+		@InjectRepository(User)
+		private userRepository: Repository<User>,
+
+		@InjectRepository(Direct)
+		private directRepository: Repository<Direct>
 	) {}
 
-	public async create(body: DirectDto, req: Request): Promise<Direct> {
-		const user1: User = <User>req.user;
+	// public async create(body: DirectDto, req: Request): Promise<Direct> {
+	// 	const user1: User = <User>req.user;
 		
-		//vérifier que le userid existe
-			//Not found()
-		const user2: User = await this.userRepository.findOne({where: {id: body.user2}})
-		if (!user2)
-		{
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-		}
+	// 	//vérifier que le userid existe
+	// 		//Not found()
+	// 	const user2: User = await this.userRepository.findOne({where: {id: body.user2}})
+	// 	if (!user2)
+	// 	{
+	// 		throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+	// 	}
 
-		//vérifier que la relation n'existe pas
-			//Conflict
-		let direct: Direct = await this.directRepository.findOne({where: [
-			{ user1: {id: user1.id}, user2: {id: user2.id}},
-			{ user1: {id: user2.id}, user2: {id: user1.id}},
-		]})
-		if (direct)
-		{
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
-		}
+	// 	//vérifier que la relation n'existe pas
+	// 		//Conflict
+	// 	let direct: Direct = await this.directRepository.findOne({where: [
+	// 		{ user1: {id: user1.id}, user2: {id: user2.id}},
+	// 		{ user1: {id: user2.id}, user2: {id: user1.id}},
+	// 	]})
+	// 	if (direct)
+	// 	{
+	// 		throw new HttpException('Conflict', HttpStatus.CONFLICT);
+	// 	}
 
-		direct = new Direct();
-		direct.user1 = user1;
-		direct.user2 = user2;
-		return this.directRepository.save(direct); // retourné le direct créé
+	// 	direct = new Direct();
+	// 	direct.user1 = user1;
+	// 	direct.user2 = user2;
+	// 	return this.directRepository.save(direct); // retourné le direct créé
 		
-	}
+	// }
 
-	public async getAllDirect( user: User): Promise<Direct[]> {
+	// public async getAllDirect( user: User): Promise<Direct[]> {
 
-		const listdirect: Direct[] = await this.directRepository.find(
-			{
-				where:[
-					{user1: {id: user.id}},
-					{user2: {id: user.id}}
-				]
-			}
-		)
-		return listdirect;
-	}
+	// 	const listdirect: Direct[] = await this.directRepository.find(
+	// 		{
+	// 			where:[
+	// 				{user1: {id: user.id}},
+	// 				{user2: {id: user.id}}
+	// 			]
+	// 		}
+	// 	)
+	// 	return listdirect;
+	// }
 }

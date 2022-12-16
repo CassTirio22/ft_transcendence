@@ -20,9 +20,12 @@ export class Message extends BaseEntity {
 	@ManyToOne(type => User, user => user.wrote)
 	author!: User;
 
-	// @ManyToOne(type => Direct, direct => direct.messages)
-	// @JoinColumn({name: "direct_id"})
-	// directId: Direct;
+	@Column({type: 'integer'})
+	direct_id: number;
+
+	@ManyToOne(type => Direct, direct => direct.messages)
+	@JoinColumn({name: "direct_id"})
+	direct: Direct;
 
 	// @ManyToOne(() => Channel)
 	// channelId: Channel;

@@ -1,3 +1,4 @@
+import { Direct } from './direct/direct.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
@@ -9,7 +10,7 @@ import { MessageService } from './message.service';
 
 @Module({
 	controllers: [MessageController],
-	imports: [TypeOrmModule.forFeature([User]), TypeOrmModule.forFeature([Message]), DirectModule, ChannelModule], 
+	imports: [TypeOrmModule.forFeature([User, Message, Direct]), DirectModule , ChannelModule], 
 	providers: [MessageService]
 })
 export class MessageModule{}

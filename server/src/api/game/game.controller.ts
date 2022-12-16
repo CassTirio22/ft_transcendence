@@ -12,10 +12,9 @@ export class GameController {
 	private readonly service: GameService;
 
 	@Post('startCompetitive')
-	@UseGuards(JwtAuthGuard)
 	@UseInterceptors(ClassSerializerInterceptor)
-	private startCompetitiveGame(@Body() body: StartCompetitiveGameDto, @Req() req: Request): Promise<Game | never> {
-		return this.service.startCompetitiveGame(body, req);
+	private startCompetitiveGame(@Body() body: StartCompetitiveGameDto): Promise<Game | never> {
+		return this.service.startCompetitiveGame(body);
 	}
 
 	@Post('startFriendly')
@@ -27,7 +26,7 @@ export class GameController {
 
 	@Put('update')
 	@UseInterceptors(ClassSerializerInterceptor)
-	private updateGame(@Body() body: UpdateGameDto): Promise<Game> {
+	private updateGame(@Body() body: UpdateGameDto): Promise<number> {
 		return this.service.updateGame(body);
 	}
 

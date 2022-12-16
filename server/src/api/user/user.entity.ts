@@ -1,6 +1,7 @@
+import { Block } from './block/block.entity';
+import { Friendship } from './friendship/friendship.entity';
 import { Exclude } from 'class-transformer';
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Direct } from '../message/direct/direct.entity';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
 
 
 export enum UserStatus {
@@ -33,7 +34,7 @@ export class User extends BaseEntity {
 	/**
 	 * The User's name
 	 */
-	@Column({ type: 'varchar', nullable: true })
+	@Column({ type: 'varchar', nullable: true, unique: true })
 	public name: string | null;	
 	/**
 	 * The User's last connection date.
@@ -55,6 +56,24 @@ export class User extends BaseEntity {
 	 */
 	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.online})
 	public status!: UserStatus;
+
+	@OneToMany(type => Game, game => game.winner)
+	won: Game[];
+
+	@OneToMany(type => Game, game => game.loser)
+	lost: Game[];
+
+	@OneToMany(type => Friendship, friendship => friendship.solicited)
+	received:  Friendship[];
+
+	@OneToMany(type => Friendship, friendship => friendship.applicant)
+	sent: Friendship[];
+
+	@OneToMany(type => Block, block => block.blocked)
+	blockTo: Block[]
+
+	@OneToMany(type => Block, block => block.blocker)
+	blockedBy: Block[]
 
 	@OneToMany(type => Direct, direct => direct.user1)
 	directuser1: Direct[];

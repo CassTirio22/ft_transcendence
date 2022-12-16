@@ -13,7 +13,7 @@ export class UserController {
   @Put('name')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
-  private updateName(@Body() body: UpdateNameDto, @Req() req: Request): Promise<User> {
+  private updateName(@Body() body: UpdateNameDto, @Req() req: Request): Promise<number> {
     return this.service.updateName(body, req);
   }
 

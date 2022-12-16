@@ -22,7 +22,7 @@ export class FriendshipController {
 	@Put('response')
 	@UseGuards(JwtAuthGuard)
 	@UseInterceptors(ClassSerializerInterceptor)
-	private responseFriend(@Body() body: ResponseFriendDto, @Req() req: Request): Promise<Friendship>{
+	private responseFriend(@Body() body: ResponseFriendDto, @Req() req: Request): Promise<number>{
 		return this.service.responseFriend(body, req);
 	}
 

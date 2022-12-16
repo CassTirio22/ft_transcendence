@@ -49,37 +49,14 @@ export class FriendshipService {
 			.execute()).affected;
 	}
 
-	// SELECT * FROM User WHERE Id IN CONCAT( ( SELECT applicant FROM Friendship WHERE solicited = user.id), ( SELECT solicited FROM Friendship WHERE applicant = user.id) )
 	public async friends(user: User): Promise< User[] | never > {
 		return (await this.userRepository.createQueryBuilder('user')
+			.leftJoin("user.received", "rec", "rec.status = :recStatus", {recStatus: FriendshipStatus.accepted})
+			.leftJoin("user.sent", "sent", "sent.status = :sentStatus", {sentStatus: FriendshipStatus.accepted})
 			.select()
-			.innerJoin("user.received", "rec", "rec.status = :recStatus AND rec.applicant = :appId", {recStatus: FriendshipStatus.accepted, appId: user.id})
-			.innerJoin("user.sent", "sent", "sent.status = :sentStatus AND rec.solicited = :solId", {sentStatus: FriendshipStatus.accepted, solId: user.id})
+			.where("rec.applicant = :appId", {appId: user.id})
+			.orWhere("sent.solicited = :solId", {solId: user.id})
 			.getMany());
-
-		//must be done using querybuilder and probably inner joins
-		// return (await this.userRepository.find ({
-		// 	where: {
-		// 		id: In(
-		// 			(await this.friendshipRepository.find({
-		// 				select: ["applicant"],
-		// 				where: {
-		// 					"solicited_id": user.id,
-		// 					"status": FriendshipStatus.accepted,
-		// 				}
-		// 			})).map(Friendship => Friendship.applicant)
-					
-		// 			.concat(
-		// 			(await this.friendshipRepository.find({
-		// 				select: ["solicited"],
-		// 				where: {
-		// 					"applicant_id": user.id,
-		// 					"status": FriendshipStatus.accepted,
-		// 				}
-		// 			})).map(Friendship => Friendship.solicited))
-		// 		),
-		// 	}
-		// }));
 	}
 
 	public async deleteFriend(body: DeleteFriendDto, req: Request): Promise<number> {

@@ -1,4 +1,5 @@
-import { Channel } from "diagnostics_channel";
+import { channel } from 'diagnostics_channel';
+import { Channel } from "./channel/channel.entity";
 import { type } from "os";
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../user/user.entity";
@@ -24,15 +25,19 @@ export class Message extends BaseEntity {
 	@JoinColumn({name: "author_id"})
 	author!: User;
 
-	@Column({type: 'integer'})
+	@Column({type: 'integer', nullable: true})
 	direct_id: number;
+
+	@Column({type: 'integer', nullable: true})
+	channel_id: number;
 
 	@ManyToOne(type => Direct, direct => direct.messages)
 	@JoinColumn({name: "direct_id"})
 	direct: Direct;
 
-	// @ManyToOne(() => Channel)
-	// channelId: Channel;
+	@ManyToOne(() => Channel, channel => channel.messages)
+	@JoinColumn({name: "channel_id"})
+	channel: Channel;
 
 	// @Column({name: 'type'})
 	// type!: string;

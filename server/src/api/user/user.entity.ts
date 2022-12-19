@@ -1,10 +1,13 @@
+import { Member } from './../message/channel/member/member.entity';
+import { channel } from 'diagnostics_channel';
 import { Message } from './../message/message.entity';
 import { Block } from './block/block.entity';
 import { Friendship } from './friendship/friendship.entity';
 import { Exclude } from 'class-transformer';
 import { Game } from '../game/game.entity';
 import { Direct } from '../message/direct/direct.entity';
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Channel } from '../message/channel/channel.entity';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, ManyToMany } from 'typeorm';
 
 
 export enum UserStatus {
@@ -86,4 +89,7 @@ export class User extends BaseEntity {
 
 	@OneToMany(type => Message, message => message.author)
 	wrote: Message[];
+
+	@OneToMany(type => Member, member => member.user)
+	membership: Member[];
 }

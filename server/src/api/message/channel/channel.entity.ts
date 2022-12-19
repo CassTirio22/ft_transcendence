@@ -1,7 +1,7 @@
 import { Message } from './../message.entity';
 import { Member } from './member/member.entity';
 import { User } from '@/api/user/user.entity';
-import { BaseEntity, Column, Entity, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, OneToMany, CreateDateColumn, PrimaryGeneratedColumn } from "typeorm";
 
 export enum ChannelStatus {
 	public, 
@@ -25,4 +25,7 @@ export class Channel extends BaseEntity {
 
 	@Column({type: 'enum', enum: ChannelStatus, default: ChannelStatus.public})
 	status: ChannelStatus;
+
+	@CreateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
+	date!: Date;
 }

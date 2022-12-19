@@ -3,6 +3,8 @@ import { JwtAuthGuard } from "../user/auth/auth.guard";
 import { SendDto, MessagesDto } from "./message.dto";
 import { MessageService } from "./message.service";
 import { Message } from "./message.entity";
+import { Direct } from "./direct/direct.entity";
+import { Channel } from "./channel/channel.entity";
 import { Request } from 'express';
 
 @Controller('message')
@@ -29,7 +31,14 @@ export class MessageController{
 
 	@Get('channelMessages')
 	@UseGuards(JwtAuthGuard)
-	channelMessages(@Body() body: MessagesDto, @Req() req: Request):  Promise<Message[]>{
+	channelMessages(@Body() body: MessagesDto, @Req() req: Request):  Promise<Message[]> {
 		return this.service.channelMessages(body, req);
 	}
+
+	@Get('discussions')
+	@UseGuards(JwtAuthGuard)
+	dicussions(@Req() req: Request): Promise<(Direct | Channel)[]> {
+		return this.service.discussions(req);
+	}
+
 }

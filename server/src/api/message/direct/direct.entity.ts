@@ -1,5 +1,5 @@
 import { User } from "@/api/user/user.entity";
-import { BaseEntity, Entity, PrimaryGeneratedColumn, ManyToOne, JoinTable, OneToMany, JoinColumn, Column, Unique } from "typeorm";
+import { CreateDateColumn, BaseEntity, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from "typeorm";
 import { Message } from "../message.entity";
 
 @Entity('direct')
@@ -16,4 +16,7 @@ export class Direct extends BaseEntity{
 
 	@OneToMany(type => Message, message => message.direct)
 	public messages: Message[];
+
+	@CreateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
+	date!: Date;
 }

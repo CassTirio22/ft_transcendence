@@ -27,7 +27,8 @@ export class MessageService {
 		@InjectRepository(Channel)
 		private readonly channelRepository: Repository<Channel>
 	){}
-
+	
+	//should update channel date
 	//will not be able if blocked or not friend
 	public async sendDirect(body: SendDto, req: Request): Promise <Message> {
 		const user: User = <User>req.user;
@@ -43,6 +44,7 @@ export class MessageService {
 			return this._insert(settings);
 		}
 
+	//should update channel date
 	//will not be able if blocked or muted
 	public async sendChannel(body: SendDto, req: Request): Promise <Message> {
 		const user: User = <User>req.user;
@@ -79,6 +81,21 @@ export class MessageService {
 			.innerJoin("channel.members", "members", "members.user_id = :userId", {userId: user.id})
 			.select()
 			.getMany());
+	}
+
+	//should not give direct with blocked users
+	public async discussions(req: Request): Promise<(Direct | Channel)[]> {
+		const user: User = <User>req.user;
+
+		let directs: (Channel | Direct)[] = (await this.directRepository.createQueryBuilder('direct')
+			.select()
+			.where(":userId IN (direct.user1Id, direct.user2Id)", {userId: user.id})
+			.getMany());
+		let channels: (Channel | Direct)[] = ( await this.channelRepository.createQueryBuilder('channel')
+			.select()
+			.innerJoin("channel.members", "members", "members.id = :memberId", {memberId: user.id})
+			.getMany());
+		return (directs.concat(channels).sort( (A, B) => A.date.getTime() - B.date.getTime()));
 	}
 
 	private async _direct(directId: number, userId: number): Promise<Direct> {

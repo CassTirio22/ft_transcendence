@@ -1,4 +1,4 @@
-import{ Channel } from './channel/channel.entity'
+import { Channel } from './channel/channel.entity'
 import { Direct } from './direct/direct.entity';
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -8,6 +8,12 @@ import { User } from "../user/user.entity";
 import { SendDto, MessagesDto } from "./message.dto";
 import { Message } from "./message.entity";
 import { disconnect } from 'process';
+
+interface MessageSettings {
+	author:		User;
+	origin:		Channel | Direct;
+	content:	string;
+}
 
 @Injectable()
 export class MessageService {
@@ -22,30 +28,38 @@ export class MessageService {
 		private readonly channelRepository: Repository<Channel>
 	){}
 
-	//will not be able if blocked or muted
-	public async send(body: SendDto, req: Request): Promise <Message> {
+	//will not be able if blocked or not friend
+	public async sendDirect(body: SendDto, req: Request): Promise <Message> {
 		const user: User = <User>req.user;
-		const { content, origin, isDirect }: SendDto = body;
+		const { content, origin }: SendDto = body;
+		
+		let settings: MessageSettings = {
+			author: user,
+			content: content,
+			origin: (await this._direct(origin, user.id))};
+			if (!settings.origin) {
+				throw new HttpException('Not found', HttpStatus.NOT_FOUND)
+			}
+			return this._insert(settings);
+		}
 
-		let discussion: Direct | Channel = isDirect ? 
-			(await this._direct(origin, user.id)) : 
-			(await this._channel(origin, user.id));
-		if (!discussion) {
+	//will not be able if blocked or muted
+	public async sendChannel(body: SendDto, req: Request): Promise <Message> {
+		const user: User = <User>req.user;
+		const { content, origin }: SendDto = body;
+
+		let settings: MessageSettings = {
+			author: user,
+			content: content,
+			origin: (await this._channel(origin, user.id))};
+		if (!settings.origin) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 		}
-		return (await this.messageRepository.createQueryBuilder()
-			.insert()
-			.values({
-				content: content,
-				author: user ,
-				direct: isDirect ? discussion as Direct : null,
-				channel: isDirect ? null : discussion as Channel
-			})
-			.execute()).generatedMaps[0] as Message;
+		return this._insert(settings);
 	}
 
-	//will need to select only non muted messages
-	public async getMessages(body: MessagesDto, req: Request): Promise<Message[]> {
+	//will need to select only non blocked messages
+	public async directMessages(body: MessagesDto, req: Request): Promise<Message[]> {
 		const user: User = <User>req.user;
 		const { origin }: MessagesDto = body;
 
@@ -55,7 +69,19 @@ export class MessageService {
 			.getMany());
 	}
 
-	private async _direct(directId: number, userId: number) {
+	//will need to select only non blocked messages
+	public async channelMessages(body: MessagesDto, req: Request): Promise<Message[]> {
+		const user: User = <User>req.user;
+		const { origin }: MessagesDto = body;
+
+		return (await this.messageRepository.createQueryBuilder('message')
+			.innerJoin("message.channel", "channel", "channel.id = :channelId", {channelId: origin})
+			.innerJoin("channel.members", "members", "members.user_id = :userId", {userId: user.id})
+			.select()
+			.getMany());
+	}
+
+	private async _direct(directId: number, userId: number): Promise<Direct> {
 		return (await this.directRepository.createQueryBuilder('direct')
 			.select()
 			.where("direct.id = :directId", {directId: directId})
@@ -63,11 +89,23 @@ export class MessageService {
 			.getOne());
 	}
 
-	private async _channel(channelId: number, userId: number) {
+	private async _channel(channelId: number, userId: number): Promise<Channel> {
 		return (await this.channelRepository.createQueryBuilder('channel')
 			.select()
-			.innerJoin("channel.members", "members", "members.id = :userId", {userId: userId})
+			.innerJoin("channel.members", "members", "members.user_id = :userId", {userId: userId})
 			.where("channel.id = :channelId", {channelId: channelId})
 			.getOne());
+	}
+
+	private async _insert(settings: MessageSettings): Promise<Message> {
+		return (await this.messageRepository.createQueryBuilder()
+		.insert()
+		.values({
+			content: settings.content,
+			author: settings.author ,
+			direct: settings.origin instanceof Direct ? settings.origin : null,
+			channel: settings.origin instanceof Channel ? settings.origin : null
+		})
+		.execute()).generatedMaps[0] as Message;
 	}
 }

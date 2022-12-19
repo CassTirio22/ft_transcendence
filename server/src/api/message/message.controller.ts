@@ -9,15 +9,27 @@ import { Request } from 'express';
 export class MessageController{
 	constructor(private service: MessageService){}
 
-	@Post('send')
+	@Post('sendDirect')
 	@UseGuards(JwtAuthGuard)
-	send(@Body() body: SendDto, @Req() req: Request): Promise<Message> {
-		return this.service.send(body, req);
+	sendDirect(@Body() body: SendDto, @Req() req: Request): Promise<Message> {
+		return this.service.sendDirect(body, req);
 	}
 
-	@Get('conversation')
+	@Post('sendChannel')
 	@UseGuards(JwtAuthGuard)
-	getMessages(@Body() body: MessagesDto, @Req() req: Request):  Promise<Message[]>{
-		return this.service.getMessages(body, req);
+	sendChannel(@Body() body: SendDto, @Req() req: Request): Promise<Message> {
+		return this.service.sendChannel(body, req);
+	}
+
+	@Get('directMessages')
+	@UseGuards(JwtAuthGuard)
+	directMessages(@Body() body: MessagesDto, @Req() req: Request):  Promise<Message[]>{
+		return this.service.directMessages(body, req);
+	}
+
+	@Get('channelMessages')
+	@UseGuards(JwtAuthGuard)
+	channelMessages(@Body() body: MessagesDto, @Req() req: Request):  Promise<Message[]>{
+		return this.service.channelMessages(body, req);
 	}
 }

@@ -1,4 +1,4 @@
-import { Channel } from 'diagnostics_channel';
+import { Channel } from './channel/channel.entity';
 import { Direct } from './direct/direct.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';

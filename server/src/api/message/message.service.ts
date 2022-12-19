@@ -18,13 +18,15 @@ export class MessageService {
 		private readonly directRepository: Repository<Direct>
 	){}
 
+	//will not be able if blocked or muted
 	public async send(body: SendDto, req: Request): Promise <Message> {
 		const user: User = <User>req.user;
 		const { content, origin }: SendDto = body;
 
-		let discussion: Direct = await this.directRepository.createQueryBuilder()
+		let discussion: Direct = await this.directRepository.createQueryBuilder('direct')
 			.select()
-			.where("id = :directId", {directId: origin})
+			.where("direct.id = :directId", {directId: origin})
+			.andWhere(":userId IN (direct.user1Id, direct.user2Id)", {userId: user.id})
 			.getOne();
 		if (!discussion) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
@@ -35,13 +37,14 @@ export class MessageService {
 			.execute()).generatedMaps[0] as Message;
 	}
 
-	public async getMessages(body: MessagesDto): Promise<Message[]> {
+	//will need to select only non muted messages
+	public async getMessages(body: MessagesDto, req: Request): Promise<Message[]> {
+		const user: User = <User>req.user;
 		const { origin }: MessagesDto = body;
 
-		return (await this.messageRepository().createQueryBuilder()
-			.innerJoind("")
+		return (await this.messageRepository.createQueryBuilder('message')
+			.innerJoin("message.direct", "direct", "direct.id = :directId AND :userId IN (direct.user1Id, direct.user2Id)", {directId: origin, userId: user.id})
 			.select()
-			.where("")
 			.getMany());
 	}
 }

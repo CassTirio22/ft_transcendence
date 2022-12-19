@@ -17,7 +17,7 @@ export class MessageController{
 
 	@Get('conversation')
 	@UseGuards(JwtAuthGuard)
-	getMessages(@Body() body: MessagesDto):  Promise<Message[]>{
-		return this.service.getMessages(body);
+	getMessages(@Body() body: MessagesDto, @Req() req: Request):  Promise<Message[]>{
+		return this.service.getMessages(body, req);
 	}
 }

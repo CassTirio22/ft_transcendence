@@ -17,7 +17,11 @@ export class Message extends BaseEntity {
 	// @PrimaryColumn({type: 'enum', enum: ChannelType})
 	// origin_type!: ChannelType;
 
+	@Column({type: 'integer'})
+	author_id: number;
+
 	@ManyToOne(type => User, user => user.wrote)
+	@JoinColumn({name: "author_id"})
 	author!: User;
 
 	@Column({type: 'integer'})

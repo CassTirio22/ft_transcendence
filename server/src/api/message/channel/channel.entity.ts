@@ -3,7 +3,6 @@ import { channel } from 'diagnostics_channel';
 import { Member } from './member/member.entity';
 import { User } from '@/api/user/user.entity';
 import { BaseEntity, Column, Entity, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { ChannelType } from "../message.entity";
 
 // export enum ChannelStatus {
 // 	public, 

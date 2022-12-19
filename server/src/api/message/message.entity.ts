@@ -1,21 +1,25 @@
-import { channel } from 'diagnostics_channel';
 import { Channel } from "./channel/channel.entity";
 import { type } from "os";
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Unique, BaseEntity, BeforeInsert, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../user/user.entity";
 import { Direct } from "./direct/direct.entity";
 
-export enum ChannelType {
-	direct,
-	channel
-}
+// export enum ChannelType {
+// 	direct,
+// 	channel
+// }
 
 @Entity('message')
+// @Unique(["id"])
 export class Message extends BaseEntity {
+
 	@PrimaryGeneratedColumn({type: 'integer'})
-	id!: number;
-	
-	// @PrimaryColumn({type: 'enum', enum: ChannelType})
+	public id!: number;
+
+	// @PrimaryColumn({type: 'integer'})
+	// origin_id!:	number;
+
+	// @PrimaryColumn({type: 'enum', enum: ChannelType, default: ChannelType.direct})
 	// origin_type!: ChannelType;
 
 	@Column({type: 'integer'})
@@ -25,18 +29,10 @@ export class Message extends BaseEntity {
 	@JoinColumn({name: "author_id"})
 	author!: User;
 
-	@Column({type: 'integer', nullable: true})
-	direct_id: number;
-
-	@Column({type: 'integer', nullable: true})
-	channel_id: number;
-
-	@ManyToOne(type => Direct, direct => direct.messages)
-	@JoinColumn({name: "direct_id"})
+	@ManyToOne(type => Direct, direct => direct.messages, {nullable: true})
 	direct: Direct;
 
-	@ManyToOne(() => Channel, channel => channel.messages)
-	@JoinColumn({name: "channel_id"})
+	@ManyToOne(type => Channel, channel => channel.messages, {nullable: true})
 	channel: Channel;
 
 	// @Column({name: 'type'})

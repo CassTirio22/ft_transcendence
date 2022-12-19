@@ -1,6 +1,11 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class SendDto {
+
+	@IsBoolean()
+	@IsNotEmpty()
+	public readonly isDirect: boolean;
+
 	@IsNumber()
 	@IsNotEmpty()
 	public readonly origin: number;

@@ -1,3 +1,4 @@
+import { Channel } from 'diagnostics_channel';
 import { Direct } from './direct/direct.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,7 +11,7 @@ import { MessageService } from './message.service';
 
 @Module({
 	controllers: [MessageController],
-	imports: [TypeOrmModule.forFeature([User, Message, Direct]), DirectModule , ChannelModule], 
+	imports: [TypeOrmModule.forFeature([User, Message, Direct, Channel]), DirectModule , ChannelModule], 
 	providers: [MessageService]
 })
 export class MessageModule{}

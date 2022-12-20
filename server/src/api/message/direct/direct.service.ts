@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { DirectDto } from "./direct.dto";
+import { CreateDirectDto } from "./direct.dto";
 import { Request } from "express";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "@/api/user/user.entity";
@@ -10,7 +10,9 @@ import { Direct } from "./direct.entity";
 export class DirectService {
 	constructor(
 		@InjectRepository(Direct)
-		private directRepository: Repository<Direct>
+		private readonly directRepository: Repository<Direct>,
+		@InjectRepository(User)
+		private readonly userRepository: Repository<User>
 	) {}
 
 	public async direct(directId: number, userId: number): Promise<Direct> {
@@ -38,45 +40,25 @@ export class DirectService {
 			.execute()).raw as Direct;
 	}
 
-	// public async create(body: DirectDto, req: Request): Promise<Direct> {
-	// 	const user1: User = <User>req.user;
-		
-	// 	//vérifier que le userid existe
-	// 		//Not found()
-	// 	const user2: User = await this.userRepository.findOne({where: {id: body.user2}})
-	// 	if (!user2)
-	// 	{
-	// 		throw new HttpException('Not found', HttpStatus.NOT_FOUND);
-	// 	}
+	public async create(body: CreateDirectDto, req: Request): Promise<Direct> {
+		const user: User = <User>req.user;
+		const { id }: CreateDirectDto = body;
 
-	// 	//vérifier que la relation n'existe pas
-	// 		//Conflict
-	// 	let direct: Direct = await this.directRepository.findOne({where: [
-	// 		{ user1: {id: user1.id}, user2: {id: user2.id}},
-	// 		{ user1: {id: user2.id}, user2: {id: user1.id}},
-	// 	]})
-	// 	if (direct)
-	// 	{
-	// 		throw new HttpException('Conflict', HttpStatus.CONFLICT);
-	// 	}
-
-	// 	direct = new Direct();
-	// 	direct.user1 = user1;
-	// 	direct.user2 = user2;
-	// 	return this.directRepository.save(direct); // retourné le direct créé
-		
-	// }
-
-	// public async getAllDirect( user: User): Promise<Direct[]> {
-
-	// 	const listdirect: Direct[] = await this.directRepository.find(
-	// 		{
-	// 			where:[
-	// 				{user1: {id: user.id}},
-	// 				{user2: {id: user.id}}
-	// 			]
-	// 		}
-	// 	)
-	// 	return listdirect;
-	// }
+		let other: User = await this.userRepository.createQueryBuilder('user')
+			.leftJoinAndSelect("user.direct1", "direct1", "direct1.user2 = :user2Id", {user2Id: user.id})
+			.leftJoinAndSelect("user.direct2", "direct2", "direct2.user1 = :user1Id", {user1Id: user.id})
+			.select()
+			.where("user.id = :userId", {userId: id})
+			.getOne()
+		if (!other) {
+			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
+		}
+		else if (other.direct1.length > 0 || other.direct2.length > 0) {
+			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		}
+		return (await this.directRepository.createQueryBuilder()
+			.insert()
+			.values({user1: user, user2: other})
+			.execute()).generatedMaps[0] as Direct;
+	}
 }

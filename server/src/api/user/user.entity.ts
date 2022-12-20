@@ -82,10 +82,10 @@ export class User extends BaseEntity {
 	blockedBy: Block[]
 
 	@OneToMany(type => Direct, direct => direct.user1)
-	directUser1: Direct[];
+	direct1: Direct[];
 
 	@OneToMany(type => Direct, direct => direct.user2)
-	directUser2: Direct[];
+	direct2: Direct[];
 
 	@OneToMany(type => Message, message => message.author)
 	wrote: Message[];

@@ -5,11 +5,10 @@ import { Direct } from './direct/direct.entity';
 import { Inject, Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Request } from "express";
-import { In, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { User } from "../user/user.entity";
 import { SendDto, MessagesDto } from "./message.dto";
 import { Message } from "./message.entity";
-import { disconnect } from 'process';
 
 interface MessageSettings {
 	author:		User;

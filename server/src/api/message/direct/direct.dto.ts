@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsNumber } from "class-validator";
 
-export class DirectDto {
+export class CreateDirectDto {
 	@IsNotEmpty()
 	@IsNumber()
-	public readonly user2!: number;
+	public readonly id!: number;
 }

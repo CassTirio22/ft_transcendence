@@ -26,6 +26,6 @@ export class Channel extends BaseEntity {
 	@Column({type: 'enum', enum: ChannelStatus, default: ChannelStatus.public})
 	status: ChannelStatus;
 
-	@CreateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
-	date!: Date;
+	@CreateDateColumn({type: 'varchar', default: () => "CURRENT_TIMESTAMP"})
+	date!: string;
 }

@@ -47,6 +47,6 @@ export class UserService {
 
 		let discussions: (Channel | Direct)[] = await this.channelService.channels(user.id);
 		discussions = discussions.concat(await this.directService.directs(user.id));
-		return (discussions.sort( (A, B) => A.date.getTime() - B.date.getTime()));
+		return (discussions.sort( (A, B) => (new Date(A.date)).getTime() - (new Date(B.date)).getTime()));
 	}
 }

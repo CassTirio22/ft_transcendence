@@ -37,7 +37,7 @@ export class MessageService {
 		let settings: MessageSettings = {
 			author: user,
 			content: content,
-			origin: (await this.directService.direct(origin, user.id))};
+			origin: (await this.directService.updateDate(origin, user.id))};
 		if (!settings.origin) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 		}
@@ -53,7 +53,7 @@ export class MessageService {
 		let settings: MessageSettings = {
 			author: user,
 			content: content,
-			origin: (await this.channelService.channel(origin, user.id))};
+			origin: (await this.channelService.updateDate(origin, user.id))};
 		if (!settings.origin) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 		}

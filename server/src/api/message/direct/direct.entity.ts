@@ -17,6 +17,6 @@ export class Direct extends BaseEntity{
 	@OneToMany(type => Message, message => message.direct)
 	public messages: Message[];
 
-	@CreateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
-	date!: Date;
+	@CreateDateColumn({type: 'varchar', default: () => "CURRENT_TIMESTAMP"})
+	date!: string;
 }

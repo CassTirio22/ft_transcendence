@@ -28,6 +28,16 @@ export class DirectService {
 		.getMany());
 	}
 
+	public async updateDate(channelId: number, userId: number): Promise<Direct> {
+		return (await this.directRepository.createQueryBuilder('direct')
+			.update()
+			.where("id = :channelId", {channelId: channelId})
+			.andWhere(":userId IN (user1Id, user2Id)", {userId: userId})
+			.set({date: () => 'NOW()'})
+			.returning('*')
+			.execute()).raw as Direct;
+	}
+
 	// public async create(body: DirectDto, req: Request): Promise<Direct> {
 	// 	const user1: User = <User>req.user;
 		

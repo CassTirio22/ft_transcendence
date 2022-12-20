@@ -1,3 +1,5 @@
+import { ChannelService } from './channel/channel.service';
+import { DirectService } from './direct/direct.service';
 import { Channel } from './channel/channel.entity';
 import { Direct } from './direct/direct.entity';
 import { Module } from '@nestjs/common';
@@ -12,6 +14,6 @@ import { MessageService } from './message.service';
 @Module({
 	controllers: [MessageController],
 	imports: [TypeOrmModule.forFeature([User, Message, Direct, Channel]), DirectModule , ChannelModule], 
-	providers: [MessageService]
+	providers: [MessageService, DirectService, ChannelService]
 })
 export class MessageModule{}

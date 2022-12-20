@@ -34,11 +34,4 @@ export class MessageController{
 	channelMessages(@Body() body: MessagesDto, @Req() req: Request):  Promise<Message[]> {
 		return this.service.channelMessages(body, req);
 	}
-
-	@Get('discussions')
-	@UseGuards(JwtAuthGuard)
-	dicussions(@Req() req: Request): Promise<(Direct | Channel)[]> {
-		return this.service.discussions(req);
-	}
-
 }

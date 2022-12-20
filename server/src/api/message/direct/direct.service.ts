@@ -6,15 +6,27 @@ import { User } from "@/api/user/user.entity";
 import { Repository } from "typeorm";
 import { Direct } from "./direct.entity";
 
-@Injectable({})
+@Injectable()
 export class DirectService {
 	constructor(
-		@InjectRepository(User)
-		private userRepository: Repository<User>,
-
 		@InjectRepository(Direct)
 		private directRepository: Repository<Direct>
 	) {}
+
+	public async direct(directId: number, userId: number): Promise<Direct> {
+		return (await this.directRepository.createQueryBuilder('direct')
+			.select()
+			.where("direct.id = :directId", {directId: directId})
+			.andWhere(":userId IN (direct.user1Id, direct.user2Id)", {userId: userId})
+			.getOne());
+	}
+
+	public async directs(userId: number): Promise <Direct[]> {
+		return (await this.directRepository.createQueryBuilder('direct')
+		.select()
+		.where(":userId IN (direct.user1Id, direct.user2Id)", {userId: userId})
+		.getMany());
+	}
 
 	// public async create(body: DirectDto, req: Request): Promise<Direct> {
 	// 	const user1: User = <User>req.user;

@@ -1,9 +1,11 @@
+import { DirectService } from './direct/direct.service';
+import { ChannelService } from './channel/channel.service';
 import { Channel } from './channel/channel.entity'
 import { Direct } from './direct/direct.entity';
-import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
+import { Inject, Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Request } from "express";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { User } from "../user/user.entity";
 import { SendDto, MessagesDto } from "./message.dto";
 import { Message } from "./message.entity";
@@ -18,14 +20,12 @@ interface MessageSettings {
 @Injectable()
 export class MessageService {
 	constructor(
-		@InjectRepository(User)
-		private readonly userRepository : Repository<User>,
 		@InjectRepository(Message)
 		private readonly messageRepository: Repository<Message>,
-		@InjectRepository(Direct)
-		private readonly directRepository: Repository<Direct>,
-		@InjectRepository(Channel)
-		private readonly channelRepository: Repository<Channel>
+		@Inject(ChannelService)
+		private channelService: ChannelService,
+		@Inject(DirectService)
+		private directService: DirectService
 	){}
 	
 	//should update channel date
@@ -37,12 +37,12 @@ export class MessageService {
 		let settings: MessageSettings = {
 			author: user,
 			content: content,
-			origin: (await this._direct(origin, user.id))};
+			origin: (await this.directService.direct(origin, user.id))};
 		if (!settings.origin) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 		}
 		return this._insert(settings);
-		}
+	}
 
 	//should update channel date
 	//will not be able if blocked or muted
@@ -53,7 +53,7 @@ export class MessageService {
 		let settings: MessageSettings = {
 			author: user,
 			content: content,
-			origin: (await this._channel(origin, user.id))};
+			origin: (await this.channelService.channel(origin, user.id))};
 		if (!settings.origin) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 		}
@@ -80,45 +80,6 @@ export class MessageService {
 			.innerJoin("message.channel", "channel", "channel.id = :channelId", {channelId: origin})
 			.innerJoin("channel.members", "members", "members.user_id = :userId", {userId: user.id})
 			.select()
-			.getMany());
-	}
-
-	//should not give direct with blocked users
-	public async discussions(req: Request): Promise<(Direct | Channel)[]> {
-		const user: User = <User>req.user;
-
-		let discussions: (Channel | Direct)[] = await this._channels(user.id);
-		discussions = discussions.concat(await this._directs(user.id));
-		return (discussions.sort( (A, B) => A.date.getTime() - B.date.getTime()));
-	}
-
-	private async _direct(directId: number, userId: number): Promise<Direct> {
-		return (await this.directRepository.createQueryBuilder('direct')
-			.select()
-			.where("direct.id = :directId", {directId: directId})
-			.andWhere(":userId IN (direct.user1Id, direct.user2Id)", {userId: userId})
-			.getOne());
-	}
-
-	private async _directs(userId: number): Promise <Direct[]> {
-		return (await this.directRepository.createQueryBuilder('direct')
-		.select()
-		.where(":userId IN (direct.user1Id, direct.user2Id)", {userId: userId})
-		.getMany());
-	}
-
-	private async _channel(channelId: number, userId: number): Promise<Channel> {
-		return (await this.channelRepository.createQueryBuilder('channel')
-			.select()
-			.innerJoin("channel.members", "members", "members.user_id = :userId", {userId: userId})
-			.where("channel.id = :channelId", {channelId: channelId})
-			.getOne());
-	}
-
-	private async _channels(userId: number): Promise<Channel[]> {
-		return ( await this.channelRepository.createQueryBuilder('channel')
-			.select()
-			.innerJoin("channel.members", "members", "members.user_id = :memberId", {memberId: userId})
 			.getMany());
 	}
 

@@ -38,10 +38,10 @@ export class MessageService {
 			author: user,
 			content: content,
 			origin: (await this._direct(origin, user.id))};
-			if (!settings.origin) {
-				throw new HttpException('Not found', HttpStatus.NOT_FOUND)
-			}
-			return this._insert(settings);
+		if (!settings.origin) {
+			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
+		}
+		return this._insert(settings);
 		}
 
 	//should update channel date
@@ -87,15 +87,9 @@ export class MessageService {
 	public async discussions(req: Request): Promise<(Direct | Channel)[]> {
 		const user: User = <User>req.user;
 
-		let directs: (Channel | Direct)[] = (await this.directRepository.createQueryBuilder('direct')
-			.select()
-			.where(":userId IN (direct.user1Id, direct.user2Id)", {userId: user.id})
-			.getMany());
-		let channels: (Channel | Direct)[] = ( await this.channelRepository.createQueryBuilder('channel')
-			.select()
-			.innerJoin("channel.members", "members", "members.id = :memberId", {memberId: user.id})
-			.getMany());
-		return (directs.concat(channels).sort( (A, B) => A.date.getTime() - B.date.getTime()));
+		let discussions: (Channel | Direct)[] = await this._channels(user.id);
+		discussions = discussions.concat(await this._directs(user.id));
+		return (discussions.sort( (A, B) => A.date.getTime() - B.date.getTime()));
 	}
 
 	private async _direct(directId: number, userId: number): Promise<Direct> {
@@ -106,12 +100,26 @@ export class MessageService {
 			.getOne());
 	}
 
+	private async _directs(userId: number): Promise <Direct[]> {
+		return (await this.directRepository.createQueryBuilder('direct')
+		.select()
+		.where(":userId IN (direct.user1Id, direct.user2Id)", {userId: userId})
+		.getMany());
+	}
+
 	private async _channel(channelId: number, userId: number): Promise<Channel> {
 		return (await this.channelRepository.createQueryBuilder('channel')
 			.select()
 			.innerJoin("channel.members", "members", "members.user_id = :userId", {userId: userId})
 			.where("channel.id = :channelId", {channelId: channelId})
 			.getOne());
+	}
+
+	private async _channels(userId: number): Promise<Channel[]> {
+		return ( await this.channelRepository.createQueryBuilder('channel')
+			.select()
+			.innerJoin("channel.members", "members", "members.user_id = :memberId", {memberId: userId})
+			.getMany());
 	}
 
 	private async _insert(settings: MessageSettings): Promise<Message> {

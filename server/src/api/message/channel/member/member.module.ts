@@ -1,13 +1,14 @@
-import { Channel } from 'diagnostics_channel';
+import { ChannelService } from './../channel.service';
 import { Member } from './member.entity';
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MemberController } from './member.controller';
 import { MemberService } from './member.service';
+import { Channel } from '../channel.entity';
 
 @Module({
 	imports:[TypeOrmModule.forFeature([Member, Channel])],
 	controllers: [MemberController],
-	providers: [MemberService],
+	providers: [MemberService, ChannelService],
 })
 export class MemberModule {}

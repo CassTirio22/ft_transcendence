@@ -11,7 +11,6 @@ export class FriendshipService {
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
-
 		@InjectRepository(Friendship)
 		private readonly friendshipRepository: Repository<Friendship>
 	){}

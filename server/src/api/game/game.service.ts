@@ -23,7 +23,6 @@ export class GameService {
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
-
 		@InjectRepository(Game)
 		private readonly gameRepository: Repository<Game>
 	){}

@@ -12,12 +12,12 @@ export class UserController {
   @Inject(UserService)
   private readonly service: UserService;
 
-  @Put('name')
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(ClassSerializerInterceptor)
-  private updateName(@Body() body: UpdateNameDto, @Req() req: Request): Promise<number> {
-    return this.service.updateName(body, req);
-  }
+	@Put('name')
+	@UseGuards(JwtAuthGuard)
+	@UseInterceptors(ClassSerializerInterceptor)
+	private updateName(@Body() body: UpdateNameDto, @Req() req: Request): Promise<number> {
+		return this.service.updateName(body, req);
+	}
 
 
 	@Get('profile')

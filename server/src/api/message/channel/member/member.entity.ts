@@ -1,6 +1,18 @@
 import { Channel } from '../channel.entity';
-import { BaseEntity, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 import { User } from "@/api/user/user.entity";
+
+export enum MemberStatus {
+	regular,
+	muted,
+	banned
+}
+
+export enum MemberLevel {
+	owner,
+	administrator,
+	regular
+}
 
 @Entity('member')
 export class Member extends BaseEntity {
@@ -18,4 +30,10 @@ export class Member extends BaseEntity {
 	@ManyToOne( type => Channel, channel => channel.members)
 	@JoinColumn({name: 'channel_id'})
 	channel!: Channel;
+
+	@Column({ type: 'enum', enum: MemberStatus, default: MemberStatus.regular})
+	public status!: MemberStatus;
+
+	@Column({type: 'enum', enum: MemberLevel, default: MemberLevel.regular})
+	public level!: MemberLevel;
 }

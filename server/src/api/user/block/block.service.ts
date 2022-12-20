@@ -12,7 +12,6 @@ export class BlockService {
 	constructor(
 		@InjectRepository(Block)
 		private blockRepository: Repository<Block>,
-		
 		@InjectRepository(User)
 		private userRepository: Repository<User>
 	){}

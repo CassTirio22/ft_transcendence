@@ -21,6 +21,9 @@ export class Channel extends BaseEntity {
 	messages: Message[];
 
 	@Column()
+	name: string;
+
+	@Column({nullable: true})
 	password: string;
 
 	@Column({type: 'enum', enum: ChannelStatus, default: ChannelStatus.public})

@@ -4,7 +4,7 @@ import { User } from '@/api/user/user.entity';
 import { forwardRef, Injectable, HttpStatus, HttpException, Inject } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { CreateChannelDto } from './channel.dto';
+import { CreateChannelDto, DeleteChannelDto } from './channel.dto';
 import { Channel, ChannelStatus } from "./channel.entity";
 import { Request } from 'express';
 
@@ -28,7 +28,7 @@ export class ChannelService {
 	public async channelJoinStatus(channelId: number, level: MemberLevel): Promise<Channel> {
 		return (await this.channelRepository.createQueryBuilder('channel')
 			.select()
-			.innerJoinAndSelect("channel.members", "members", "members.level = :memberLevel", {memberLevel: level})
+			.leftJoinAndSelect("channel.members", "members", "members.level = :memberLevel", {memberLevel: level})
 			.where("channel.id = :channelId", {channelId: channelId})
 			.getOne());
 	}
@@ -65,7 +65,20 @@ export class ChannelService {
 				status: (status == "public" ? ChannelStatus.public : (status == "protected" ? ChannelStatus.protected : ChannelStatus.private) )
 			})
 			.execute()).generatedMaps[0] as Channel;
-		this.memberService.becomeMember({level: "owner", channel: channel.id}, req);
+		await this.memberService.addOwner(channel, user);
 		return channel;
+	}
+
+	public async delete(body: DeleteChannelDto, req: Request): Promise<number> {
+		const { channel }: DeleteChannelDto = body;
+
+		let owner: Member = this.memberService.membersLevel({channel: channel, level: "owner"}, req)[0];
+		if (!owner) {
+			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		}
+		return (await this.channelRepository.createQueryBuilder()
+			.delete()
+			.where("id = :channelId", {channelId: channel})
+			.execute()).affected;
 	}
 }

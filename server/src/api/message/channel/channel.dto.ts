@@ -12,3 +12,9 @@ export class CreateChannelDto {
 	@IsNotEmpty()
 	public readonly status: string;
 }
+
+export class DeleteChannelDto {
+	@IsNumber()
+	@IsNotEmpty()
+	public readonly channel: number;
+}

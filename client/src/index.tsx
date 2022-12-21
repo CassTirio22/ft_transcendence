@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import reportWebVitals from './reportWebVitals';
 import { createCtx } from './contexts/AuthContext';
 import { store } from './store';
+import { createTheme, ThemeProvider } from '@mui/material';
 
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
@@ -14,10 +15,18 @@ const root = ReactDOM.createRoot(
 const [ctx, AuthProvider] = createCtx();
 export const AuthContext = ctx;
 
+const theme = createTheme({
+	palette: {
+		mode: "dark"
+	}
+});
+
 root.render(
 	<Provider store={store}>
 		<AuthProvider>
-			<App/>
+			<ThemeProvider theme={theme}>
+				<App/>
+			</ThemeProvider>
 		</AuthProvider>
 	</Provider>
 );

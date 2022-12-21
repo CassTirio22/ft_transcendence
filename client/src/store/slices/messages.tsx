@@ -44,12 +44,12 @@ const channels = [
 			{
 				id: 1,
 				full_name: "Bob Marley",
-				image_path: "owijf",
+				image_path: "aebrvdvqe",
 			},
 			{
 				id: 2,
 				full_name: "Jean Vient",
-				image_path: "wfadc",
+				image_path: "abeqgrsdvf",
 			},
 		]
 	},
@@ -94,13 +94,13 @@ const channels = [
 		members: [
 			{
 				id: 1,
-				full_name: "Bob Marley",
-				image_path: "owijf",
+				full_name: "Albert Marley",
+				image_path: "hegrh",
 			},
 			{
 				id: 2,
-				full_name: "Jean Vient",
-				image_path: "wfadc",
+				full_name: "Jeanne Vient",
+				image_path: "gegvafawe",
 			},
 		]
 	},
@@ -145,13 +145,13 @@ const channels = [
 		members: [
 			{
 				id: 1,
-				full_name: "Bob Marley",
-				image_path: "owijf",
+				full_name: "Bob Test",
+				image_path: "badsfeaww",
 			},
 			{
 				id: 2,
 				full_name: "Jean Vient",
-				image_path: "wfadc",
+				image_path: "hwegj",
 			},
 			{
 				id: 3,

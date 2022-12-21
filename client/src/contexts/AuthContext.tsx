@@ -94,7 +94,7 @@ export function createCtx() {
 			}
 			set_instance_token(token);
 			setUser({...user, token: token});
-			sessionStorage.setItem("token", token);
+			localStorage.setItem("token", token);
 			await profile();
 			return token;
 		}
@@ -102,7 +102,7 @@ export function createCtx() {
 		const signOut = async () => {
 			unset_instance_token();
 			setUser(default_user);
-			sessionStorage.setItem("token", "");
+			localStorage.clear();
 			return "";
 		}
 
@@ -133,7 +133,7 @@ export function createCtx() {
 		}
 
 		useEffect(() => {
-			const token = sessionStorage.getItem("token");
+			const token = localStorage.getItem("token");
 			if (token) {
 				set_instance_token(token);
 				setUser({...user, token: token})

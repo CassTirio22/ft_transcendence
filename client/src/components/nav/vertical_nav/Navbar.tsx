@@ -11,9 +11,7 @@ function Navbar() {
 
 	const location = useLocation();
 	const {user, signOut, isLoggedIn} = useContext(AuthContext);
-
-	console.log(user.token)
-
+	
 	return (
 		<aside className="navigation">
 			<nav id="navbar">

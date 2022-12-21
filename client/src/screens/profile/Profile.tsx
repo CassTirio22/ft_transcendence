@@ -44,7 +44,6 @@ function ProfileCustomization() {
 
 function Profile() {
 	const {user} = useContext(AuthContext)
-	console.log("TEST:" + user.pseudo);
 	return (
 		<section className='profile'>
 			<div className='name'>

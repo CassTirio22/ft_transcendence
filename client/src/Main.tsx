@@ -11,6 +11,7 @@ const Main = () => {
 return (         
 	<Routes>
 		<Route path='/' element={<Home/>} />
+		<Route path='/me/profile' element={<Profile/>} />
 	</Routes>
 );
 }

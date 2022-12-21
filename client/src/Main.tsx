@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import Conversations from './screens/conversations/Conversations';
 import Login from './screens/log/login/Login';
 import Register from './screens/log/register/Register';
 import Profile from './screens/profile/Profile';
@@ -11,6 +12,7 @@ return (
 	<Routes>
 		<Route path='/' element={<Login/>} />
 		<Route path='/login' element={<Login/>} />
+		<Route path='/conversations' element={<Conversations/>} />
 		<Route path='/register' element={<Register/>} />
 		<Route path='/me/profile' element={<Profile/>} />
 	</Routes>

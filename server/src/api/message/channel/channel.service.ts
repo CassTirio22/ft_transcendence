@@ -73,7 +73,7 @@ export class ChannelService {
 		const { channel }: DeleteChannelDto = body;
 
 		let owner: Member = (await this.memberService.membersLevel({channel: channel, level: "owner"}, req))[0];
-		if (!owner || owner.user_id != <number>req.user.id) {
+		if (!owner) {
 			console.log("Can't delete : user was not found as a owner of this channel.");
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}

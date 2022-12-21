@@ -39,15 +39,37 @@ export class MemberService {
 			.execute()).generatedMaps[0] as Member;
 	}
 	
-	// public async addMember(body: AddMemberDto, req: Request): Promise<Member> {
-	// 	const user: User = <User>req.user;
-	// 	const { level, channel, member }: AddMemberDto = body;
+	public async addMember(body: AddMemberDto, req: Request): Promise<Member> {
+		const user: User = <User>req.user;
+		const { channel, member }: AddMemberDto = body;
+
+		//do channel already exists?
+		//do member user already exists?
+		//is user admin/owner if channel is private
+		//is member already existing
+		//select channel inner join channel.members members where (userId) in channel.members.id and where (memberId) not in channel.members.id
+
+		// let members: Member[] = await this.memberRepository.createQueryBuilder('members')
+		// 	.innerJoinAndSelect("members.channel", "channel", "channel.id == :channelId", {channelId: channel})
+		// 	.select()
+		// 	.where("members.id IN (:...membersId)", {membersId: [user.id, member]})
+		// 	.getMany()
+		// if ( members.length > 1 || members[0].user_id != user.id ||
+		// 	(members[0].level != MemberLevel.owner && members[0].level != MemberLevel.administrator) ) {
+		// 	throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		// }
+		// else if (members.length < 1) {
+		// 	throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+		// }
+		return (await this.memberRepository.createQueryBuilder()
+			.insert()
+			.values({
+				user_id: member,
+				channel_id: channel,
+			})
+			.execute()).generatedMaps[0] as Member;
 	
-	// 	//check if user is owner or admin
-	// 	//check if member already in it
-	// 	//check if level is something plausible
-	
-	// }
+	}
 
 	public async addOwner(channel: Channel, owner: User) {
 		return (await this.memberRepository.createQueryBuilder()

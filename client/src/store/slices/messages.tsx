@@ -3,9 +3,9 @@ import axios from "../../service/axios"
 
 export const fetchMessages = createAsyncThunk(
 	"messages/fetchMessages",
-	async (events) => {
-		const response = await axios.get("/");
-		return response;
+	async (direct_id) => {
+		const response = await axios.get(`/message/directMessages/${direct_id}`);
+		return response.data;
 	}
 )
 
@@ -15,7 +15,7 @@ const messagesSlice = createSlice({
 	reducers: {},
 	extraReducers: builder => {
         builder.addCase(fetchMessages.fulfilled, (state, action) => {
-            return [];
+            return action.payload;
         })
       }
 })

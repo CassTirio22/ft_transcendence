@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../user/auth/auth.guard";
 import { SendDto, MessagesDto } from "./message.dto";
 import { MessageService } from "./message.service";
@@ -23,10 +23,10 @@ export class MessageController{
 		return this.service.sendChannel(body, req);
 	}
 
-	@Get('directMessages')
+	@Get('directMessages/:id')
 	@UseGuards(JwtAuthGuard)
-	directMessages(@Body() body: MessagesDto, @Req() req: Request):  Promise<Message[]>{
-		return this.service.directMessages(body, req);
+	directMessages(@Req() req: Request, @Param('id') id):  Promise<Message[]>{
+		return this.service.directMessages(req, id);
 	}
 
 	@Get('channelMessages')

@@ -60,12 +60,10 @@ export class MessageService {
 	}
 
 	//will need to select only non blocked messages
-	public async directMessages(body: MessagesDto, req: Request): Promise<Message[]> {
+	public async directMessages(req: Request, id: number): Promise<Message[]> {
 		const user: User = <User>req.user;
-		const { origin }: MessagesDto = body;
-
 		return (await this.messageRepository.createQueryBuilder('message')
-			.innerJoin("message.direct", "direct", "direct.id = :directId AND :userId IN (direct.user1Id, direct.user2Id)", {directId: origin, userId: user.id})
+			.innerJoin("message.direct", "direct", "direct.id = :directId AND :userId IN (direct.user1Id, direct.user2Id)", {directId: id, userId: user.id})
 			.select()
 			.getMany());
 	}

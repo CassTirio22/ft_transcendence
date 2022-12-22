@@ -33,12 +33,21 @@ export class ChannelService {
 			.getOne());
 	}
 
+	public async channelJoinMembers(channelId: number) {
+		return (await this.channelRepository.createQueryBuilder('channel')
+			.innerJoinAndSelect("channel.members", "members")
+			.select()
+			.where("channel.id = :channelId", {channelId: channelId})
+			.getOne());
+	}
+
 	public async channels(userId: number): Promise<Channel[]> {
 		return ( await this.channelRepository.createQueryBuilder('channel')
 			.select()
 			.innerJoin("channel.members", "members", "members.user_id = :memberId", {memberId: userId})
 			.getMany());
 	}
+
 
 	public async updateDate(channelId: number, userId: number): Promise<Channel> {
 		return (await this.channelRepository.createQueryBuilder('channel')
@@ -70,10 +79,11 @@ export class ChannelService {
 	}
 
 	public async delete(body: DeleteChannelDto, req: Request): Promise<number> {
+		const user: User = <User>req.user;
 		const { channel }: DeleteChannelDto = body;
 
-		let owner: Member = (await this.memberService.membersLevel({channel: channel, level: "owner"}, req))[0];
-		if (!owner || owner.user_id != <number>req.user.id) {
+		let owner: Member = (await this.memberService.members({channel: channel}, user)).find( (obj) => {return obj.level == MemberLevel.owner} );
+		if (owner.user_id != user.id) {
 			console.log("Can't delete : user was not found as a owner of this channel.");
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}

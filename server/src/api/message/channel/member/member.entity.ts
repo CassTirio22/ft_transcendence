@@ -1,5 +1,5 @@
 import { Channel } from '../channel.entity';
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, CreateDateColumn } from "typeorm";
 import { User } from "@/api/user/user.entity";
 
 export enum MemberStatus {
@@ -36,4 +36,7 @@ export class Member extends BaseEntity {
 
 	@Column({type: 'enum', enum: MemberLevel, default: MemberLevel.regular})
 	public level!: MemberLevel;
+
+	@CreateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
+	block_until!: Date;
 }

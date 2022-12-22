@@ -1,7 +1,8 @@
+import { channel } from 'diagnostics_channel';
 import { Channel, ChannelStatus } from './../channel.entity';
 import { ChannelService } from './../channel.service';
-import { BecomeMemberDto, AddMemberDto, GetMembersLevelDto, GetMembersDto } from './member.dto';
-import { Member, MemberLevel } from './member.entity';
+import { BecomeMemberDto, AddMemberDto, GetMembersDto, ChangeMemberDto, QuitChannelDto } from './member.dto';
+import { Member, MemberLevel, MemberStatus } from './member.entity';
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Brackets, Repository } from "typeorm";
@@ -23,7 +24,7 @@ export class MemberService {
 		const user: User = <User>req.user;
 		const { level, channel }: BecomeMemberDto = body;
 
-		let ourLevel: MemberLevel = this.stringToLevel(level);
+		let ourLevel: MemberLevel = this._stringToLevel(level);
 		let ourChannel: Channel = await this.channelService.channelJoinStatus(channel, ourLevel);
 		if (!ourChannel) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
@@ -77,8 +78,7 @@ export class MemberService {
 			.execute())[0] as Member;
 	}
 
-	public async members(body: GetMembersDto, req: Request): Promise<Member[]> {
-		const user: User = <User>req.user;
+	public async members(body: GetMembersDto, user: User): Promise<Member[]> {
 		const { channel }: GetMembersDto = body;
 
 		let members: Member[] = (await this.memberRepository.createQueryBuilder('members')
@@ -92,24 +92,62 @@ export class MemberService {
 		return members;
 	}
 
-	public async membersLevel(body: GetMembersLevelDto, req: Request): Promise<Member[]> {
+	public async alterStatus(body: ChangeMemberDto, req: Request): Promise<number> {
 		const user: User = <User>req.user;
-		const { channel, level }: GetMembersLevelDto = body;
+		const { time, member, toChange }: ChangeMemberDto = body;
 
-		let members: Member[] = (await this.memberRepository.createQueryBuilder('members')
-			.innerJoin("members.channel", "channel", "channel.id = :channelId", {channelId: channel})
-			.select()
-			.where("members.level = :memberLevel", {memberLevel: this.stringToLevel(level)})
-			.getMany());
-			//should get every members then filter them, if not a simple member can't have a list of administrators
-		if (!members.find( (obj) => {return obj.user_id == user.id} )) {
-			console.log("Can't list members: user was not found as a member of this channel.")
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
-		}
-		return members;
+		await this._checkUserPermission(body, user);
+		return (await this.memberRepository.createQueryBuilder('member')
+			.update()
+			.set({
+				block_until: time == 'infinity' ? time : () => ('NOW()' + new Date(time)),
+				status: this._stringToStatus(toChange)
+			})
+			.where("member.id = :memberId", {memberId: member})
+			.execute()).affected;
 	}
 
-	private stringToLevel(level: string): MemberLevel {
+	public async alterLevel(body: ChangeMemberDto, req: Request): Promise<number> {
+		const user: User = <User>req.user;
+		const { time, member, toChange }: ChangeMemberDto = body;
+
+		await this._checkUserPermission(body, user);
+		return (await this.memberRepository.createQueryBuilder('member')
+			.update()
+			.set({
+				block_until: time == 'infinity' ? time : () => ('NOW()' + new Date(time)),
+				level: this._stringToLevel(toChange)
+			})
+			.where("member.id = :memberId", {memberId: member})
+			.execute()).affected;
+	}
+
+	// public async quit(body: QuitChannelDto, req: Request): Promise<number> {
+	// 	const user: User = <User>req.user;
+	// 	const { channel }: QuitChannelDto = body;
+
+	// }
+
+	private async _checkUserPermission(body: ChangeMemberDto, user: User): Promise<Channel> {
+		const { member, channel }: ChangeMemberDto = body;
+	
+		let ourChannel: Channel  = await (this.channelService.channelJoinMembers(channel));
+		let userMember: Member = ourChannel.members.find( (obj) => {obj.user_id == user.id} );
+		let wantedMember: Member = ourChannel.members.find( (obj) => {obj.user_id == member} );
+		if (!ourChannel || !wantedMember || !userMember) {
+			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+		}
+		else if (userMember.level == MemberLevel.regular || (userMember.level == MemberLevel.administrator && wantedMember.level != MemberLevel.regular)) {
+			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		}
+		return ourChannel;
+	}
+
+	private _stringToLevel(level: string): MemberLevel {
 		return ((level == "owner") ? MemberLevel.owner : (level == "administrator" ? MemberLevel.administrator : MemberLevel.regular));
+	}
+
+	private _stringToStatus(status: string): MemberStatus {
+		return ( (status == "banned" ? MemberStatus.banned : (status == "muted" ? MemberStatus.muted : MemberStatus.regular)) );
 	}
 }

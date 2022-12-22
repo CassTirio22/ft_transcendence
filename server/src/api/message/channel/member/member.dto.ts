@@ -1,7 +1,8 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsDate, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class BecomeMemberDto {
 	@IsString()
+	@IsOptional()
 	public readonly level: string;
 
 	@IsNumber()
@@ -21,14 +22,29 @@ export class AddMemberDto {
 
 export class GetMembersDto {
 	@IsNumber()
+	@IsNotEmpty()
 	public readonly channel: number;
 }
 
-export class GetMembersLevelDto {
+export class ChangeMemberDto {
+	@IsNumber()
+	@IsNotEmpty()
+	public readonly member: number;
+
+	@IsNumber()
+	@IsNotEmpty()
+	public readonly channel: number;
+
+	@IsDateString()
+	@IsNotEmpty()
+	public readonly time: string;
+
 	@IsString()
 	@IsNotEmpty()
-	public readonly level: string;
+	public readonly toChange: string;
+}
 
+export class QuitChannelDto {
 	@IsNumber()
 	@IsNotEmpty()
 	public readonly channel: number;

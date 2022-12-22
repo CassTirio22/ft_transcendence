@@ -25,14 +25,6 @@ export class ChannelService {
 			.getOne());
 	}
 
-	public async channelJoinStatus(channelId: number, level: MemberLevel): Promise<Channel> {
-		return (await this.channelRepository.createQueryBuilder('channel')
-			.select()
-			.leftJoinAndSelect("channel.members", "members", "members.level = :memberLevel", {memberLevel: level})
-			.where("channel.id = :channelId", {channelId: channelId})
-			.getOne());
-	}
-
 	public async channelJoinMembers(channelId: number) {
 		return (await this.channelRepository.createQueryBuilder('channel')
 			.innerJoinAndSelect("channel.members", "members")
@@ -43,8 +35,10 @@ export class ChannelService {
 
 	public async channels(userId: number): Promise<Channel[]> {
 		return ( await this.channelRepository.createQueryBuilder('channel')
+			.innerJoin("channel.members", "members")
 			.select()
-			.innerJoin("channel.members", "members", "members.user_id = :memberId", {memberId: userId})
+			.where("members.user_id = :memberId", {memberId: userId})
+			.orWhere("channel.status IN (:...status)", {levels: [ChannelStatus.public, ChannelStatus.protected]})
 			.getMany());
 	}
 
@@ -78,8 +72,8 @@ export class ChannelService {
 		return channel;
 	}
 
-	public async delete(body: DeleteChannelDto, req: Request): Promise<number> {
-		const user: User = <User>req.user;
+	//should I delete all linked members or cascade can do it by itself
+	public async delete(body: DeleteChannelDto, user: User): Promise<number> {
 		const { channel }: DeleteChannelDto = body;
 
 		let owner: Member = (await this.memberService.members({channel: channel}, user)).find( (obj) => {return obj.level == MemberLevel.owner} );

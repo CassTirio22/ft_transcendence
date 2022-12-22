@@ -29,22 +29,20 @@ export class MemberService {
 
 	public async becomeMember(body: BecomeMemberDto, req: Request): Promise<Member> {
 		const user: User = <User>req.user;
-		const { level, channel }: BecomeMemberDto = body;
+		const { channel, password }: BecomeMemberDto = body;
 
-		let ourLevel: MemberLevel = this._stringToLevel(level);
-		let ourChannel: Channel = await this.channelService.channelJoinStatus(channel, ourLevel);
+		let ourChannel: Channel = await this.channelService.channel(channel, user.id);
 		if (!ourChannel) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
-		else if (ourLevel == MemberLevel.owner && ourChannel.members.length > 0) {
+		else if (ourChannel.status == ChannelStatus.private || (ourChannel.status == ChannelStatus.protected && !this._checkPassword(password, ourChannel)) ) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
 		return (await this.memberRepository.createQueryBuilder()
 			.insert()
 			.values({
 				user: user,
-				channel_id: channel,
-				level: ourLevel
+				channel_id: channel
 			})
 			.execute()).generatedMaps[0] as Member;
 	}
@@ -148,6 +146,15 @@ export class MemberService {
 		const user: User = <User>req.user;
 		const { channel, newOwner }: QuitChannelDto = body;
 
+		let members: Member[] = await this.members({channel: channel}, user);
+		if (members.length == 0) {
+			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+		}
+		else if (members.length == 1) {
+			await this.channelService.delete({channel: channel}, user);
+			return (await this.delete({ channel: channel, member: user.id})); //if needed, could be done by cascade : then return 1;
+		}
+
 		let owner: Member = await this.member({channel: channel}, user);
 		if (!owner) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
@@ -178,6 +185,10 @@ export class MemberService {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
 		return ourChannel;
+	}
+
+	private async _checkPassword(password: string, channel: Channel): boolean {
+		return (password == channel.password);
 	}
 
 	private _stringToLevel(level: string): MemberLevel {

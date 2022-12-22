@@ -1,13 +1,13 @@
 import { IsDate, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class BecomeMemberDto {
-	@IsString()
-	@IsOptional()
-	public readonly level: string;
-
 	@IsNumber()
 	@IsNotEmpty()
 	public readonly channel: number;
+
+	@IsString()
+	@IsOptional()
+	public readonly password: string;
 }
 
 export class AddMemberDto {

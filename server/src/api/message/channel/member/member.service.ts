@@ -1,13 +1,20 @@
 import { channel } from 'diagnostics_channel';
 import { Channel, ChannelStatus } from './../channel.entity';
 import { ChannelService } from './../channel.service';
-import { BecomeMemberDto, AddMemberDto, GetMembersDto, ChangeMemberDto, QuitChannelDto } from './member.dto';
+import { BecomeMemberDto, AddMemberDto, GetMembersDto, ChangeMemberStatusDto, ChangeMemberLevelDto, QuitChannelDto, DeleteMemberDto } from './member.dto';
 import { Member, MemberLevel, MemberStatus } from './member.entity';
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Brackets, Repository } from "typeorm";
 import { Request } from 'express';
 import { User } from '@/api/user/user.entity';
+
+interface MemberSettings {
+	user:		number;
+	channel:	number;
+	level?:		MemberLevel;
+	status?:	MemberStatus
+}
 
 @Injectable({})
 export class MemberService {
@@ -55,7 +62,7 @@ export class MemberService {
 				.andWhere("members.level IN (:...neededLevels)", {neededLevels: [MemberLevel.administrator, MemberLevel.owner]})
 			}))
 			.getOne();
-		if (!channel) {
+		if (!memberChannel) {
 			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 		}
 		return (await this.memberRepository.createQueryBuilder()
@@ -78,6 +85,14 @@ export class MemberService {
 			.execute())[0] as Member;
 	}
 
+	public async member(body: GetMembersDto, user: User): Promise<Member | never> {
+		return (await this.memberRepository.createQueryBuilder('member')
+		.innerJoin("member.channel", "channel", "channel.id = :channelId", {channelId: channel})
+		.innerJoin("member.user", "user", "user.id = :userId", {userId: user.id})
+		.select()
+		.getOne());
+	}
+
 	public async members(body: GetMembersDto, user: User): Promise<Member[]> {
 		const { channel }: GetMembersDto = body;
 
@@ -92,48 +107,70 @@ export class MemberService {
 		return members;
 	}
 
-	public async alterStatus(body: ChangeMemberDto, req: Request): Promise<number> {
+	public async changeStatus(body: ChangeMemberStatusDto, req: Request): Promise<number> {
 		const user: User = <User>req.user;
-		const { time, member, toChange }: ChangeMemberDto = body;
+		const { time, member, status, channel }: ChangeMemberStatusDto = body;
 
-		await this._checkUserPermission(body, user);
+		await this._checkUserPermission({user: member, channel: channel}, user);
 		return (await this.memberRepository.createQueryBuilder('member')
 			.update()
 			.set({
 				block_until: time == 'infinity' ? time : () => ('NOW()' + new Date(time)),
-				status: this._stringToStatus(toChange)
+				status: this._stringToStatus(status)
 			})
 			.where("member.id = :memberId", {memberId: member})
 			.execute()).affected;
 	}
 
-	public async alterLevel(body: ChangeMemberDto, req: Request): Promise<number> {
+	public async changeLevel(body: ChangeMemberLevelDto, req: Request): Promise<number> {
 		const user: User = <User>req.user;
-		const { time, member, toChange }: ChangeMemberDto = body;
+		const { member, level, channel }: ChangeMemberLevelDto = body;
 
-		await this._checkUserPermission(body, user);
+		await this._checkUserPermission({user: member, channel: channel}, user);
 		return (await this.memberRepository.createQueryBuilder('member')
 			.update()
-			.set({
-				block_until: time == 'infinity' ? time : () => ('NOW()' + new Date(time)),
-				level: this._stringToLevel(toChange)
-			})
+			.set({ level: this._stringToLevel(level) })
 			.where("member.id = :memberId", {memberId: member})
 			.execute()).affected;
 	}
 
-	// public async quit(body: QuitChannelDto, req: Request): Promise<number> {
-	// 	const user: User = <User>req.user;
-	// 	const { channel }: QuitChannelDto = body;
-
-	// }
-
-	private async _checkUserPermission(body: ChangeMemberDto, user: User): Promise<Channel> {
-		const { member, channel }: ChangeMemberDto = body;
+	public async delete(body: DeleteMemberDto): Promise<number> {
+		const { channel, member }: DeleteMemberDto = body;
 	
-		let ourChannel: Channel  = await (this.channelService.channelJoinMembers(channel));
+		return (await this.memberRepository.createQueryBuilder('member')
+			.delete()
+			.where("member.user_id = :userId", {userId: member})
+			.andWhere("member.channel_id = :channelId", {channelId: channel})
+			.execute()).affected
+	}
+
+	public async quit(body: QuitChannelDto, req: Request): Promise<number> {
+		const user: User = <User>req.user;
+		const { channel, newOwner }: QuitChannelDto = body;
+
+		let owner: Member = await this.member({channel: channel}, user);
+		if (!owner) {
+			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+		}
+		if (owner.level = MemberLevel.owner) {
+			let tmp: number = (await this.memberRepository.createQueryBuilder('member')
+				.update()
+				.set({level: MemberLevel.owner})
+				.where("member.user_id = :memberId", {memberId: newOwner})
+				.andWhere("member.user_id != :userId", {userId: user.id})
+				.andWhere("member.channel_id = :channelId", {channelId: channel})
+				.execute()).affected;
+			if (!tmp) {
+				throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			}
+		}
+		return (await this.delete({ channel: channel, member: user.id}));
+	}
+
+	private async _checkUserPermission(settings: MemberSettings, user: User): Promise<Channel> {	
+		let ourChannel: Channel  = await (this.channelService.channelJoinMembers(settings.channel));
 		let userMember: Member = ourChannel.members.find( (obj) => {obj.user_id == user.id} );
-		let wantedMember: Member = ourChannel.members.find( (obj) => {obj.user_id == member} );
+		let wantedMember: Member = ourChannel.members.find( (obj) => {obj.user_id == settings.user} );
 		if (!ourChannel || !wantedMember || !userMember) {
 			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 		}

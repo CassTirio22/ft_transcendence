@@ -26,7 +26,7 @@ export class GetMembersDto {
 	public readonly channel: number;
 }
 
-export class ChangeMemberDto {
+export class ChangeMemberStatusDto {
 	@IsNumber()
 	@IsNotEmpty()
 	public readonly member: number;
@@ -41,11 +41,39 @@ export class ChangeMemberDto {
 
 	@IsString()
 	@IsNotEmpty()
-	public readonly toChange: string;
+	public readonly status: string;
+}
+
+export class ChangeMemberLevelDto {
+	@IsNumber()
+	@IsNotEmpty()
+	public readonly member: number;
+
+	@IsNumber()
+	@IsNotEmpty()
+	public readonly channel: number;
+
+	@IsString()
+	@IsNotEmpty()
+	public readonly level: string;
+}
+
+export class DeleteMemberDto {
+	@IsNumber()
+	@IsNotEmpty()
+	public readonly channel: number;
+
+	@IsNumber()
+	@IsNotEmpty()
+	public readonly member: number;
 }
 
 export class QuitChannelDto {
 	@IsNumber()
 	@IsNotEmpty()
 	public readonly channel: number;
+
+	@IsOptional()
+	@IsNumber()
+	public readonly newOwner: number;
 }

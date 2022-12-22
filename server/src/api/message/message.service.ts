@@ -1,3 +1,4 @@
+import { Member } from './channel/member/member.entity';
 import { DirectService } from './direct/direct.service';
 import { ChannelService } from './channel/channel.service';
 import { Channel } from './channel/channel.entity'
@@ -27,8 +28,7 @@ export class MessageService {
 		private directService: DirectService
 	){}
 	
-	//should update channel date
-	//will not be able if blocked or not friend
+	//will not be able if blocked or not friend (just id not in direct actually)
 	public async sendDirect(body: SendDto, req: Request): Promise <Message> {
 		const user: User = <User>req.user;
 		const { content, origin }: SendDto = body;
@@ -43,8 +43,7 @@ export class MessageService {
 		return this._insert(settings);
 	}
 
-	//should update channel date
-	//will not be able if blocked or muted
+	//will not be able if blocked or muted or not in channel
 	public async sendChannel(body: SendDto, req: Request): Promise <Message> {
 		const user: User = <User>req.user;
 		const { content, origin }: SendDto = body;

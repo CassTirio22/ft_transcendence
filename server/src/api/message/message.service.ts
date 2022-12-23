@@ -1,4 +1,5 @@
-import { Member } from './channel/member/member.entity';
+import { MemberService } from './channel/member/member.service';
+import { Member, MemberLevel, MemberStatus } from './channel/member/member.entity';
 import { DirectService } from './direct/direct.service';
 import { ChannelService } from './channel/channel.service';
 import { Channel } from './channel/channel.entity'
@@ -25,7 +26,9 @@ export class MessageService {
 		@Inject(ChannelService)
 		private channelService: ChannelService,
 		@Inject(DirectService)
-		private directService: DirectService
+		private directService: DirectService,
+		@Inject(MemberService)
+		private memberService: MemberService
 	){}
 	
 	//will not be able if blocked or not friend (just id not in direct actually)
@@ -43,11 +46,11 @@ export class MessageService {
 		return this._insert(settings);
 	}
 
-	//will not be able if blocked or muted or not in channel
 	public async sendChannel(body: SendDto, req: Request): Promise <Message> {
 		const user: User = <User>req.user;
 		const { content, origin }: SendDto = body;
 
+		await this._checkMemberStatus(origin, user, [MemberStatus.regular]);
 		let settings: MessageSettings = {
 			author: user,
 			content: content,
@@ -58,7 +61,7 @@ export class MessageService {
 		return this._insert(settings);
 	}
 
-	//will need to select only non blocked messages
+	//will need to select only non blocked messages (the Direct should also be blocked)
 	public async directMessages(body: MessagesDto, req: Request): Promise<Message[]> {
 		const user: User = <User>req.user;
 		const { origin }: MessagesDto = body;
@@ -91,5 +94,15 @@ export class MessageService {
 			channel: settings.origin instanceof Channel ? settings.origin : null
 		})
 		.execute()).generatedMaps[0] as Message;
+	}
+
+
+	/* PRIVATE UTILS -- PUT SOMEWHERE ELSE FOR CLEAN ARCHITECTURE*/
+
+	private async _checkMemberStatus(channel: number, user: User, authorized: MemberStatus[]) {
+		let member: Member =  await this.memberService.member({channel: channel}, user);
+		if (!authorized.find(element => member.status == element)) {
+			throw new HttpException('Conflict', HttpStatus.CONFLICT)
+		}
 	}
 }

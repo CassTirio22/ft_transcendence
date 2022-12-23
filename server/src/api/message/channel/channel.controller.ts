@@ -1,6 +1,6 @@
-import { CreateChannelDto, DeleteChannelDto } from './channel.dto';
+import { CreateChannelDto, DeleteChannelDto, ChangeChannelDto } from './channel.dto';
 import { JwtAuthGuard } from './../../user/auth/auth.guard';
-import { Body, Controller, Delete, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { Channel } from "./channel.entity";
 import { ChannelService } from "./channel.service";
 import { Request } from "express";
@@ -20,6 +20,12 @@ export class ChannelController {
 	@UseGuards(JwtAuthGuard)
 	private channels(@Req() req: Request) {
 		return this.channelService.channels( (<User>req.user).id );
+	}
+
+	@Put('change')
+	@UseGuards(JwtAuthGuard)
+	private change(@Body() body: ChangeChannelDto, @Req() req: Request) {
+		return this.channelService.change(body, req);
 	}
 
 	@Delete('delete')

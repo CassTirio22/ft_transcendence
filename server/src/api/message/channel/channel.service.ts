@@ -1,10 +1,10 @@
 import { MemberService } from './member/member.service';
-import { Member, MemberLevel } from './member/member.entity';
+import { Member, MemberLevel, MemberStatus } from './member/member.entity';
 import { User } from '@/api/user/user.entity';
 import { forwardRef, Injectable, HttpStatus, HttpException, Inject } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { CreateChannelDto, DeleteChannelDto } from './channel.dto';
+import { CreateChannelDto, DeleteChannelDto, ChangeChannelDto } from './channel.dto';
 import { Channel, ChannelStatus } from "./channel.entity";
 import { Request } from 'express';
 
@@ -20,7 +20,7 @@ export class ChannelService {
 	public async channel(channelId: number, userId: number): Promise<Channel> {
 		return (await this.channelRepository.createQueryBuilder('channel')
 			.select()
-			.innerJoin("channel.members", "members", "members.user_id = :userId", {userId: userId})
+			.innerJoinAndSelect("channel.members", "members", "members.user_id = :userId", {userId: userId})
 			.where("channel.id = :channelId", {channelId: channelId})
 			.getOne());
 	}
@@ -35,13 +35,39 @@ export class ChannelService {
 
 	public async channels(userId: number): Promise<Channel[]> {
 		return ( await this.channelRepository.createQueryBuilder('channel')
-			.innerJoin("channel.members", "members")
+			.innerJoin("channel.members", "members", "members.status != :bannedStatus", {bannedStatus: MemberStatus.banned})
 			.select()
 			.where("members.user_id = :memberId", {memberId: userId})
 			.orWhere("channel.status IN (:...status)", {levels: [ChannelStatus.public, ChannelStatus.protected]})
 			.getMany());
 	}
 
+	public async change(body: ChangeChannelDto, req: Request): Promise<number> {
+		const user: User = <User>req.user;
+		let { name, password, channel}: ChangeChannelDto = body;
+
+		let ourChannel: Channel = await this.channel(channel, user.id);
+		if (!ourChannel) {
+			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+		}
+		else if (ourChannel.members.length < 1 || ourChannel.members[0].level != MemberLevel.owner) {
+			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		}
+		name = (name != null) ? name : ourChannel.name;
+		password = (password != null) ? password : ourChannel.password;
+		return (await this.update({name: name, password: password, channel: channel}, user));
+	}
+
+	public async update(body: ChangeChannelDto, user: User): Promise<number> {
+		let { name, password, channel}: ChangeChannelDto = body;
+		return (await this.channelRepository.createQueryBuilder()
+			.update()
+			.set({name: name,
+				password: password, 
+				date: () => 'NOW()'})
+			.where("id = :channelId", {channelId: channel})
+			.execute()).affected;
+	}
 
 	public async updateDate(channelId: number, userId: number): Promise<Channel> {
 		return (await this.channelRepository.createQueryBuilder('channel')
@@ -68,7 +94,7 @@ export class ChannelService {
 				status: (status == "public" ? ChannelStatus.public : (status == "protected" ? ChannelStatus.protected : ChannelStatus.private) )
 			})
 			.execute()).generatedMaps[0] as Channel;
-		await this.memberService.addOwner(channel, user);
+		await this.memberService.insert({user: user.id, channel: channel.id, level: MemberLevel.owner});
 		return channel;
 	}
 

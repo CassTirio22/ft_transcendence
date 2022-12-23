@@ -13,6 +13,20 @@ export class CreateChannelDto {
 	public readonly status: string;
 }
 
+export class ChangeChannelDto {
+	@IsString()
+	@IsOptional()
+	public readonly name: string;
+
+	@IsString()
+	@IsOptional()
+	public readonly password: string;
+	
+	@IsNumber()
+	@IsNotEmpty()
+	public readonly channel: number;
+}
+
 export class DeleteChannelDto {
 	@IsNumber()
 	@IsNotEmpty()

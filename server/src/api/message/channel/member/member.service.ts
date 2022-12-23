@@ -38,54 +38,31 @@ export class MemberService {
 		else if (ourChannel.status == ChannelStatus.private || (ourChannel.status == ChannelStatus.protected && !this._checkPassword(password, ourChannel)) ) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
-		return (await this.memberRepository.createQueryBuilder()
-			.insert()
-			.values({
-				user: user,
-				channel_id: channel
-			})
-			.execute()).generatedMaps[0] as Member;
+		return (await this.insert({user: user.id, channel: channel, level: MemberLevel.regular}));
 	}
 	
 	public async addMember(body: AddMemberDto, req: Request): Promise<Member> {
 		const user: User = <User>req.user;
 		const { channel, member }: AddMemberDto = body;
 
-		let memberChannel: Channel = await this.channelRepository.createQueryBuilder()
-			.innerJoinAndSelect("channel.members", "members", ":userId IN members.user_id AND :memberId NOT IN members.user_id")
-			.select()
-			.where("channel.status IN (:...channelStatus)", {channelStatus: [ChannelStatus.public, ChannelStatus.protected]})
-			.orWhere(new Brackets( query => { query
-				.where("channel.status = :privateStatus", {privateStatus: ChannelStatus.private})
-				.andWhere("members.level IN (:...neededLevels)", {neededLevels: [MemberLevel.administrator, MemberLevel.owner]})
-			}))
-			.getOne();
-		if (!memberChannel) {
-			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-		}
-		return (await this.memberRepository.createQueryBuilder()
-			.insert()
-			.values({
-				user_id: member,
-				channel_id: channel,
-			})
-			.execute()).generatedMaps[0] as Member;
+		await this._checkUserAddPermission({user: member, channel: channel}, user);
+		return (await this.insert({user: member, channel: channel, level: MemberLevel.regular}));
 	}
 
-	public async addOwner(channel: Channel, owner: User): Promise<Member> {
+	public async insert(settings: MemberSettings): Promise<Member> {
 		return (await this.memberRepository.createQueryBuilder()
 			.insert()
 			.values({
-				user: owner,
-				channel: channel,
-				level: MemberLevel.owner
+				user_id: settings.user,
+				channel_id: settings.channel,
+				level: settings.level
 			})
 			.execute())[0] as Member;
 	}
 
 	public async member(body: GetMembersDto, user: User): Promise<Member | never> {
 		return (await this.memberRepository.createQueryBuilder('member')
-		.innerJoin("member.channel", "channel", "channel.id = :channelId", {channelId: channel})
+		.innerJoin("member.channel", "channel", "channel.id = :channelId", {channelId: body.channel})
 		.innerJoin("member.user", "user", "user.id = :userId", {userId: user.id})
 		.select()
 		.getOne());
@@ -109,7 +86,7 @@ export class MemberService {
 		const user: User = <User>req.user;
 		const { time, member, status, channel }: ChangeMemberStatusDto = body;
 
-		await this._checkUserPermission({user: member, channel: channel}, user);
+		await this._checkUserChangePermission({user: member, channel: channel}, user);
 		return (await this.memberRepository.createQueryBuilder('member')
 			.update()
 			.set({
@@ -124,7 +101,7 @@ export class MemberService {
 		const user: User = <User>req.user;
 		const { member, level, channel }: ChangeMemberLevelDto = body;
 
-		await this._checkUserPermission({user: member, channel: channel}, user);
+		await this._checkUserChangePermission({user: member, channel: channel}, user);
 		return (await this.memberRepository.createQueryBuilder('member')
 			.update()
 			.set({ level: this._stringToLevel(level) })
@@ -174,20 +151,39 @@ export class MemberService {
 		return (await this.delete({ channel: channel, member: user.id}));
 	}
 
-	private async _checkUserPermission(settings: MemberSettings, user: User): Promise<Channel> {	
+
+	/* PRIVATE UTILS -- PUT SOMEWHERE ELSE FOR CLEAN ARCHITECTURE*/
+
+	private async _checkUserChangePermission(settings: MemberSettings, user: User): Promise<Channel> {	
 		let ourChannel: Channel  = await (this.channelService.channelJoinMembers(settings.channel));
 		let userMember: Member = ourChannel.members.find( (obj) => {obj.user_id == user.id} );
 		let wantedMember: Member = ourChannel.members.find( (obj) => {obj.user_id == settings.user} );
 		if (!ourChannel || !wantedMember || !userMember) {
 			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 		}
-		else if (userMember.level == MemberLevel.regular || (userMember.level == MemberLevel.administrator && wantedMember.level != MemberLevel.regular)) {
+		else if (userMember.level == MemberLevel.regular || 
+				(userMember.level == MemberLevel.administrator && wantedMember.level != MemberLevel.regular)) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
 		return ourChannel;
 	}
 
-	private async _checkPassword(password: string, channel: Channel): boolean {
+	private async _checkUserAddPermission(settings: MemberSettings, user: User): Promise<Channel> {	
+		let ourChannel: Channel  = await (this.channelService.channelJoinMembers(settings.channel));
+		let userMember: Member = ourChannel.members.find( (obj) => {obj.user_id == user.id} );
+		let wantedMember: Member = ourChannel.members.find( (obj) => {obj.user_id == settings.user} );
+		if (!ourChannel || !userMember) {
+			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+		}
+		else if (wantedMember || 
+				(ourChannel.status == ChannelStatus.private && userMember.level == MemberLevel.regular) || 
+				userMember.status != MemberStatus.regular) {
+			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		}
+		return ourChannel;
+	}
+
+	private _checkPassword(password: string, channel: Channel): boolean {
 		return (password == channel.password);
 	}
 

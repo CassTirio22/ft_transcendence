@@ -60,6 +60,17 @@ export class FriendshipService {
 			.getMany());
 	}
 
+	public async friend(user: User, other: number): Promise<Friendship | never> {
+		if (user.id == other) {
+			throw new HttpException("Conflict", HttpStatus.CONFLICT);
+		}
+		return (await this.friendshipRepository.createQueryBuilder('friendship')
+			.innerJoin("friendship.applicant", "applicant", "applicant IN (:...applicantId)", {applicantId: [user.id, other]})
+			.innerJoin("friendship.solicited", "solicited", "solicited IN (:...solicitedId)", {solicitedId: [user.id, other]})
+			.select()
+			.getOne());
+	}
+
 	public async deleteFriend(body: DeleteFriendDto, req: Request): Promise<number> {
 		const { friend } : DeleteFriendDto = body;
 		const user: User = <User>req.user;

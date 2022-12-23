@@ -59,6 +59,13 @@ export class UserService {
 			.getOne());
 	}
 
+	public async ladder(user: User): Promise<User[]> {
+		return (await this.repository.createQueryBuilder('user')
+			.select()
+			.orderBy('user.score', 'ASC')
+			.getMany())
+	}
+
 	public async discussions(req: Request): Promise<(Direct | Channel)[]> {
 		const user: User = <User>req.user;
 

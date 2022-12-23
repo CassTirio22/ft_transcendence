@@ -100,6 +100,7 @@ export class GameService {
 			.select()
 			.where(":player IN (winner.id, loser.id)", {player: user.id})
 			.andWhere("game.status = :gameStatus", {gameStatus: GameStatus.done})
+			.orderBy("game.date", 'ASC')
 			.getMany();
 	}
 

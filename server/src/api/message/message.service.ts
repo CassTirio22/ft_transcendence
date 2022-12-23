@@ -1,3 +1,4 @@
+import { FriendshipService } from './../user/friendship/friendship.service';
 import { Friendship } from './../user/friendship/friendship.entity';
 import { MemberService } from './channel/member/member.service';
 import { Member, MemberLevel, MemberStatus } from './channel/member/member.entity';
@@ -33,7 +34,9 @@ export class MessageService {
 		@Inject(MemberService)
 		private memberService: MemberService,
 		@Inject(BlockService)
-		private blockService: BlockService
+		private blockService: BlockService,
+		@Inject(FriendshipService)
+		private friendshipService: FriendshipService,
 	){}
 	
 	public async sendDirect(body: SendDto, req: Request): Promise <Message> {
@@ -45,10 +48,14 @@ export class MessageService {
 			content: content,
 			origin: (await this.directService.updateDate(origin, user.id)
 		)};
-		if (!settings.origin) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
-		}
 		let other: number = (user ==  (<Direct>settings.origin).user1) ? (<Direct>settings.origin).user2.id : user.id;
+		let friendship: Friendship = await this.friendshipService.friend(user, other);
+		if (!settings.origin) {
+			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+		}
+		else if (!friendship) {
+			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		}
 		await this._checkUserBlocked(user, other);
 		return this._insert(settings);
 	}

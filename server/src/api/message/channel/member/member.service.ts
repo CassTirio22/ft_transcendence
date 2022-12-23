@@ -1,3 +1,5 @@
+import { FriendshipService } from './../../../user/friendship/friendship.service';
+import { Friendship } from './../../../user/friendship/friendship.entity';
 import { channel } from 'diagnostics_channel';
 import { Channel, ChannelStatus } from './../channel.entity';
 import { ChannelService } from './../channel.service';
@@ -25,6 +27,8 @@ export class MemberService {
 		private channelRepository: Repository<Channel>,
 		@Inject(forwardRef( () => ChannelService))
 		private channelService: ChannelService,
+		@Inject(FriendshipService)
+		private friendshipService: FriendshipService,
 	) {}
 
 	public async becomeMember(body: BecomeMemberDto, req: Request): Promise<Member> {
@@ -172,10 +176,12 @@ export class MemberService {
 		let ourChannel: Channel  = await (this.channelService.channelJoinMembers(settings.channel));
 		let userMember: Member = ourChannel.members.find( (obj) => {obj.user_id == user.id} );
 		let wantedMember: Member = ourChannel.members.find( (obj) => {obj.user_id == settings.user} );
+		let friendship: Friendship = await this.friendshipService.friend(user, settings.user);
 		if (!ourChannel || !userMember) {
 			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 		}
 		else if (wantedMember || 
+				!friendship ||
 				(ourChannel.status == ChannelStatus.private && userMember.level == MemberLevel.regular) || 
 				userMember.status != MemberStatus.regular) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);

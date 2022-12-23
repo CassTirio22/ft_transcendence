@@ -1,3 +1,5 @@
+import { FriendshipService } from './../../user/friendship/friendship.service';
+import { Friendship } from './../../user/friendship/friendship.entity';
 import { Block } from './../../user/block/block.entity';
 import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { CreateDirectDto } from "./direct.dto";
@@ -16,7 +18,9 @@ export class DirectService {
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
 		@Inject(BlockService)
-		private blockService: BlockService
+		private blockService: BlockService,
+		@Inject(FriendshipService)
+		private friendshipService: FriendshipService
 	) {}
 
 	public async directs(user: User): Promise <Direct[]> {
@@ -48,11 +52,12 @@ export class DirectService {
 			.leftJoinAndSelect("user.direct2", "direct2", "direct2.user1 = :user1Id", {user1Id: user.id})
 			.select()
 			.where("user.id = :userId", {userId: id})
-			.getOne()
+			.getOne();
+		let friendship: Friendship = await this.friendshipService.friend(user, id);
 		if (!other) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
+			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
-		else if (other.direct1.length > 0 || other.direct2.length > 0) {
+		else if (!friendship || other.direct1.length > 0 || other.direct2.length > 0) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
 		await this._checkEitherBlocked(user.id, other.id);

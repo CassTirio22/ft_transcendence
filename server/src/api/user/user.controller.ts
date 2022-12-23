@@ -31,6 +31,12 @@ export class UserController {
 		return this.service.otherProfile(body, <User>user);
 	}
 
+	@Get('ladder')
+	@UseGuards(JwtAuthGuard)
+	private ladder(@Req() { user }: Request): Promise<User[]> {
+		return 
+	}
+
 	@Get('discussions')
 	@UseGuards(JwtAuthGuard)
 	dicussions(@Req() req: Request): Promise<(Direct | Channel)[]> {

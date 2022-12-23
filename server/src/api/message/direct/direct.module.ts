@@ -1,3 +1,5 @@
+import { Friendship } from './../../user/friendship/friendship.entity';
+import { FriendshipService } from './../../user/friendship/friendship.service';
 import { Block } from './../../user/block/block.entity';
 import { MessageModule } from './../message.module';
 import { Message } from './../message.entity';
@@ -11,7 +13,7 @@ import { BlockService } from '@/api/user/block/block.service';
 
 @Module({
 	controllers: [DirectController],
-	imports: [TypeOrmModule.forFeature([User, Direct, Block])], 
-	providers: [DirectService, BlockService]
+	imports: [TypeOrmModule.forFeature([User, Direct, Block, Friendship])], 
+	providers: [DirectService, BlockService, FriendshipService]
 })
 export class DirectModule {}

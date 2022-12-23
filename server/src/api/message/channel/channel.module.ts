@@ -1,3 +1,5 @@
+import { Friendship } from './../../user/friendship/friendship.entity';
+import { FriendshipService } from './../../user/friendship/friendship.service';
 import { MemberService } from './member/member.service';
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
@@ -9,7 +11,7 @@ import { Member } from './member/member.entity';
 
 @Module({
 	controllers: [ChannelController],
-	imports: [TypeOrmModule.forFeature([User, Channel, Member])],
-	providers: [ChannelService, MemberService]
+	imports: [TypeOrmModule.forFeature([User, Channel, Member, Friendship])],
+	providers: [ChannelService, MemberService, FriendshipService]
 })
 export class ChannelModule {}

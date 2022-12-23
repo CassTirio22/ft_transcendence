@@ -1,7 +1,13 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+
+export class GetProfileDto {
+	@IsNumber()
+	@IsNotEmpty()
+	public readonly id: number;
+}
 
 export class UpdateNameDto {
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   public readonly name?: string;
 }

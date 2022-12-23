@@ -5,7 +5,6 @@ import { User } from "../user.entity";
 import { BlockDto, DeleteBlockDto } from "./block.dto";
 import { Block } from "./block.entity";
 import { Request } from 'express';
-import { NOTFOUND } from "dns";
 
 @Injectable({})
 export class BlockService {
@@ -16,8 +15,7 @@ export class BlockService {
 		private userRepository: Repository<User>
 	){}
 
-	public async block(body: BlockDto, req: Request): Promise<Block>
-	{
+	public async block(body: BlockDto, req: Request): Promise<Block> {
 		const user: User = <User>req.user;
 		const { id }: BlockDto = body;
 
@@ -38,7 +36,23 @@ export class BlockService {
 			.execute()).generatedMaps[0] as Block;
 	}
 
-	public async getBlocked(user: User): Promise<User[]> 
+	public async getBlock(user: User, other: number): Promise<Block | never> {
+		return (await this.blockRepository.createQueryBuilder('block')
+			.select()
+			.where("blocker_id = :userId", {userId: user.id})
+			.andWhere("blocked_id = :otherId", {otherId: other})
+			.getOne());
+	}
+
+	public async getEitherBlock(user1: number, user2: number): Promise<Block | never> {
+		return (await this.blockRepository.createQueryBuilder('block')
+			.innerJoin("block.blocker", "blocker", "blocker.id IN (:...usersId)", {usersId: [user1, user2]})
+			.leftJoin("block.blocked", "blocked", "blocked.id IN (:...othersId)", {usersId: [user1, user2]})
+			.select()
+			.getOne());
+	}
+
+	public async getBlockedList(user: User): Promise<User[]> 
 	{
 		return (await this.userRepository.createQueryBuilder('user')
 			.innerJoin("user.blockTo", "blockTo","blockTo.blocker = :blockerId", {blockerId: user.id} )

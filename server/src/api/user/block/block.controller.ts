@@ -19,7 +19,7 @@ export class BlockController{
     @Get('blocked')
     @UseGuards(JwtAuthGuard)
     private getBlocked(@Req() { user }: Request): Promise<User[]> {
-        return this.blockedService.getBlocked(<User>user);
+        return this.blockedService.getBlockedList(<User>user);
     }
 
     @Delete('delete')

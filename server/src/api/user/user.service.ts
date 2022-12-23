@@ -1,9 +1,11 @@
+import { Block } from './block/block.entity';
+import { BlockService } from './block/block.service';
 import { ChannelService } from './../message/channel/channel.service';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Request } from 'express';
-import { UpdateNameDto } from './user.dto';
+import { UpdateNameDto, GetProfileDto } from './user.dto';
 import { User } from './user.entity';
 import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
@@ -18,6 +20,8 @@ export class UserService {
 		private directService: DirectService,
 		@Inject(ChannelService)
 		private channelService: ChannelService,
+		@Inject(BlockService)
+		private blockService: BlockService,
 	){}	
 
 	public async updateName(body: UpdateNameDto, req: Request): Promise<number> {
@@ -41,12 +45,25 @@ export class UserService {
 		return user;
 	}
 
-  	//should not give direct with blocked users
+	//check friendship and if blocked
+	public async otherProfile(body: GetProfileDto, user: User): Promise<User | never> {
+		const { id }: GetProfileDto = body;
+
+		let block: Block = await this.blockService.getBlock(user, id);
+		if (block) {
+			throw new HttpException("Conflict", HttpStatus.CONFLICT);
+		}
+		return (this.repository.createQueryBuilder()
+			.select()
+			.where("id = :userId", {userId: user.id})
+			.getOne());
+	}
+
 	public async discussions(req: Request): Promise<(Direct | Channel)[]> {
 		const user: User = <User>req.user;
 
 		let discussions: (Channel | Direct)[] = await this.channelService.channels(user.id);
-		discussions = discussions.concat(await this.directService.directs(user.id));
+		discussions = discussions.concat(await this.directService.directs(user));
 		return (discussions.sort( (A, B) => (new Date(A.date)).getTime() - (new Date(B.date)).getTime()));
 	}
 }

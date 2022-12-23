@@ -1,3 +1,4 @@
+import { Block } from './../../user/block/block.entity';
 import { MessageModule } from './../message.module';
 import { Message } from './../message.entity';
 import { User } from "@/api/user/user.entity";
@@ -6,10 +7,11 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { DirectController } from "./direct.controller";
 import { Direct } from "./direct.entity";
 import { DirectService } from "./direct.service";
+import { BlockService } from '@/api/user/block/block.service';
 
 @Module({
 	controllers: [DirectController],
-	imports: [TypeOrmModule.forFeature([User, Direct])], 
-	providers: [DirectService]
+	imports: [TypeOrmModule.forFeature([User, Direct, Block])], 
+	providers: [DirectService, BlockService]
 })
 export class DirectModule {}

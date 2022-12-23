@@ -1,3 +1,5 @@
+import { Block } from './../user/block/block.entity';
+import { BlockService } from '@/api/user/block/block.service';
 import { MemberService } from './channel/member/member.service';
 import { ChannelService } from './channel/channel.service';
 import { DirectService } from './direct/direct.service';
@@ -13,7 +15,7 @@ import { Member } from './channel/member/member.entity';
 
 @Module({
 	controllers: [MessageController],
-	imports: [TypeOrmModule.forFeature([Message, Direct, User, Channel, Member])], 
-	providers: [MessageService, DirectService, ChannelService, MemberService]
+	imports: [TypeOrmModule.forFeature([Message, Direct, User, Channel, Member, Block])], 
+	providers: [MessageService, DirectService, ChannelService, MemberService, BlockService]
 })
 export class MessageModule{}

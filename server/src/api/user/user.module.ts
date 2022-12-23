@@ -1,3 +1,4 @@
+import { Block } from './block/block.entity';
 import { MemberService } from './../message/channel/member/member.service';
 import { Member } from './../message/channel/member/member.entity';
 import { DirectService } from './../message/direct/direct.service';
@@ -10,10 +11,11 @@ import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
 import { UserService } from './user.service';
 import { AuthModule } from './auth/auth.module';
+import { BlockService } from './block/block.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Channel, Direct, Member]), AuthModule],
+  imports: [TypeOrmModule.forFeature([User, Channel, Direct, Member, Block]), AuthModule],
   controllers: [UserController],
-  providers: [UserService, ChannelService, DirectService, MemberService],
+  providers: [UserService, ChannelService, DirectService, MemberService, BlockService],
 })
 export class UserModule {}

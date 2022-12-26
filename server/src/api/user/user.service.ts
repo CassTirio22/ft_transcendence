@@ -49,7 +49,7 @@ export class UserService {
 	public async otherProfile(body: GetProfileDto, user: User): Promise<User | never> {
 		const { id }: GetProfileDto = body;
 
-		let block: Block = await this.blockService.getBlock(user, id);
+		let block: Block = await this.blockService.getBlock(id, user.id);
 		if (block) {
 			throw new HttpException("Conflict", HttpStatus.CONFLICT);
 		}

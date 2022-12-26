@@ -36,10 +36,10 @@ export class BlockService {
 			.execute()).generatedMaps[0] as Block;
 	}
 
-	public async getBlock(user: User, other: number): Promise<Block | never> {
+	public async getBlock(user: number, other: number): Promise<Block | never> {
 		return (await this.blockRepository.createQueryBuilder('block')
 			.select()
-			.where("blocker_id = :userId", {userId: user.id})
+			.where("blocker_id = :userId", {userId: user})
 			.andWhere("blocked_id = :otherId", {otherId: other})
 			.getOne());
 	}

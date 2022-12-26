@@ -1,3 +1,5 @@
+import { Block } from './../block/block.entity';
+import { BlockService } from '@/api/user/block/block.service';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FriendshipController } from './friendship.controller'
@@ -6,8 +8,8 @@ import { FriendshipService } from './friendship.service';
 import { User } from '../user.entity'
 
 @Module({
-	imports: [TypeOrmModule.forFeature([Friendship, User])],
+	imports: [TypeOrmModule.forFeature([Friendship, User, Block])],
 	controllers: [FriendshipController],
-	providers: [FriendshipService],
+	providers: [FriendshipService, BlockService],
 })
 export class FriendshipModule {}

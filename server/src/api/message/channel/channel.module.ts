@@ -1,3 +1,5 @@
+import { Block } from './../../user/block/block.entity';
+import { BlockService } from '@/api/user/block/block.service';
 import { Friendship } from './../../user/friendship/friendship.entity';
 import { FriendshipService } from './../../user/friendship/friendship.service';
 import { MemberService } from './member/member.service';
@@ -11,7 +13,7 @@ import { Member } from './member/member.entity';
 
 @Module({
 	controllers: [ChannelController],
-	imports: [TypeOrmModule.forFeature([User, Channel, Member, Friendship])],
-	providers: [ChannelService, MemberService, FriendshipService]
+	imports: [TypeOrmModule.forFeature([User, Channel, Member, Friendship, Block])],
+	providers: [ChannelService, MemberService, FriendshipService, BlockService]
 })
 export class ChannelModule {}

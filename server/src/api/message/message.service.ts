@@ -48,12 +48,12 @@ export class MessageService {
 			content: content,
 			origin: (await this.directService.updateDate(origin, user.id)
 		)};
-		let other: number = (user ==  (<Direct>settings.origin).user1) ? (<Direct>settings.origin).user2.id : user.id;
-		let friendship: Friendship = await this.friendshipService.friend(user, other);
 		if (!settings.origin) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
-		else if (!friendship) {
+		let other: number = (user.id == (<Direct>settings.origin).user1_id) ? (<Direct>settings.origin).user2_id : (<Direct>settings.origin).user1_id;
+		let friendship: Friendship = await this.friendshipService.friend(user, other);
+		if (!friendship) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
 		await this._checkUserBlocked(user, other);
@@ -81,7 +81,7 @@ export class MessageService {
 
 		let blocked: User[] = await this.blockService.getBlockedList(user);
 		return (await this.messageRepository.createQueryBuilder('message')
-			.innerJoin("message.direct", "direct", "direct.id = :directId AND :userId IN (direct.user1Id, direct.user2Id)", {directId: origin, userId: user.id})
+			.innerJoin("message.direct", "direct", "direct.id = :directId AND :userId IN (direct.user1_id, direct.user2_id)", {directId: origin, userId: user.id})
 			.select()
 			.where("message.author NOT IN (:...blockedList)", {blockedList: blocked})
 			.getMany());
@@ -123,9 +123,9 @@ export class MessageService {
 	}
 
 	private async _checkUserBlocked(user: User, other: number): Promise<void> {
-		let block: Block = await this.blockService.getBlock(user,other);
+		let block: Block = await this.blockService.getBlock(other, user.id);
 		if (block) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		}
 	}
 }

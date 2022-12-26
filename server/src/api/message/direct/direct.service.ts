@@ -27,7 +27,7 @@ export class DirectService {
 		let blocked: number[] = (await this.blockService.getBlockedList(user)).map( (obj) => (obj.id) );
 		let query: any = this.directRepository.createQueryBuilder('direct')
 			.select()
-			.where(":userId IN (direct.user1Id, direct.user2Id)", {userId: user.id});
+			.where(":userId IN (direct.user1_id, direct.user2_id)", {userId: user.id});
 		if (blocked.length > 0) {
 			query = query
 			.andWhere("direct.user1 NOT IN (:...blockList_1)", {blockList_1: blocked})
@@ -36,14 +36,18 @@ export class DirectService {
 		return (await query.getMany());
 	}
 
-	public async updateDate(channelId: number, userId: number): Promise<Direct> {
-		return (await this.directRepository.createQueryBuilder('direct')
+	public async updateDate(channelId: number, userId: number): Promise<Direct | never> {
+		let direct: Direct[] = (await this.directRepository.createQueryBuilder('direct')
 			.update()
 			.where("id = :channelId", {channelId: channelId})
-			.andWhere(":userId IN (user1Id, user2Id)", {userId: userId})
+			// .andWhere(":userId IN (user1_id, user2_id)", {userId: userId})
 			.set({date: () => 'NOW()'})
 			.returning('*')
-			.execute()).raw as Direct;
+			.execute()).raw;
+		if (direct.length == 0) {
+			return null;
+		}
+		return direct[0];
 	}
 
 	//maybe check if blocked

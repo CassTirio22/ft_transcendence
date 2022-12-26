@@ -4,7 +4,7 @@ import { User } from '@/api/user/user.entity';
 import { forwardRef, Injectable, HttpStatus, HttpException, Inject } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { CreateChannelDto, DeleteChannelDto, ChangeChannelDto } from './channel.dto';
+import { CreateChannelDto, DeleteChannelDto, EditChannelDto } from './channel.dto';
 import { Channel, ChannelStatus } from "./channel.entity";
 import { Request } from 'express';
 
@@ -38,13 +38,13 @@ export class ChannelService {
 			.innerJoin("channel.members", "members", "members.status != :bannedStatus", {bannedStatus: MemberStatus.banned})
 			.select()
 			.where("members.user_id = :memberId", {memberId: userId})
-			.orWhere("channel.status IN (:...status)", {levels: [ChannelStatus.public, ChannelStatus.protected]})
+			.orWhere("channel.status IN (:...status)", {status: [ChannelStatus.public, ChannelStatus.protected]})
 			.getMany());
 	}
 
-	public async change(body: ChangeChannelDto, req: Request): Promise<number> {
+	public async edit(body: EditChannelDto, req: Request): Promise<number> {
 		const user: User = <User>req.user;
-		let { name, password, channel}: ChangeChannelDto = body;
+		let { name, password, channel}: EditChannelDto = body;
 
 		let ourChannel: Channel = await this.channel(channel, user.id);
 		if (!ourChannel) {
@@ -58,8 +58,8 @@ export class ChannelService {
 		return (await this.update({name: name, password: password, channel: channel}, user));
 	}
 
-	public async update(body: ChangeChannelDto, user: User): Promise<number> {
-		let { name, password, channel}: ChangeChannelDto = body;
+	public async update(body: EditChannelDto, user: User): Promise<number> {
+		let { name, password, channel}: EditChannelDto = body;
 		return (await this.channelRepository.createQueryBuilder()
 			.update()
 			.set({name: name,
@@ -83,7 +83,7 @@ export class ChannelService {
 		const user: User = <User>req.user;
 		const { name, password, status}: CreateChannelDto = body;
 
-		if (status == "protected" && (!password || password.length < 3)) {
+		if (status == "protected" && !password) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
 		let channel: Channel = (await this.channelRepository.createQueryBuilder()
@@ -102,15 +102,13 @@ export class ChannelService {
 	public async delete(body: DeleteChannelDto, user: User): Promise<number> {
 		const { channel }: DeleteChannelDto = body;
 
-		let owner: Member = (await this.memberService.members({channel: channel}, user)).find( (obj) => {return obj.level == MemberLevel.owner} );
-		if (owner.user_id != user.id) {
-			console.log("Can't delete : user was not found as a owner of this channel.");
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
-		}
-		if (1) {
-			return 1500;
-		}
-		return (await this.channelRepository.createQueryBuilder()
+		// let owner: Member = (await this.memberService.members({channel: channel}, user)).find( (obj) => {return obj.level == MemberLevel.owner} );
+		// if (owner.user_id != user.id) {
+		// 	console.log("Can't delete : user was not found as a owner of this channel.");
+		// 	throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		// }
+		return (await this.channelRepository.createQueryBuilder('channel')
+			.innerJoin("channel.members", "members", "members.user_id = :userId AND members.level = :memberLevel", {userId: user.id, memberLevel: MemberLevel.owner})
 			.delete()
 			.where("id = :channelId", {channelId: channel})
 			.execute()).affected;

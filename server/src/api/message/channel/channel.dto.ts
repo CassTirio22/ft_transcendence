@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, MinLength } from "class-validator";
 
 export class CreateChannelDto {
 	@IsString()
@@ -6,6 +6,7 @@ export class CreateChannelDto {
 
 	@IsString()
 	@IsOptional()
+	@MinLength(6)
 	public readonly password: string;
 
 	@IsString()
@@ -13,12 +14,13 @@ export class CreateChannelDto {
 	public readonly status: string;
 }
 
-export class ChangeChannelDto {
+export class EditChannelDto {
 	@IsString()
 	@IsOptional()
 	public readonly name: string;
 
 	@IsString()
+	@MinLength(6)
 	@IsOptional()
 	public readonly password: string;
 	

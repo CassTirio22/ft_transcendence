@@ -14,10 +14,10 @@ export class Channel extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id!: number;
 
-	@OneToMany(type => Member, member => member.channel, {onDelete: 'CASCADE'})
+	@OneToMany(type => Member, member => member.channel/*, {orphanedRowAction: 'delete', onDelete: 'CASCADE'}*/)
 	members: Member[];
 
-	@OneToMany(type => Message, message => message.channel, {onDelete: 'CASCADE'})
+	@OneToMany(type => Message, message => message.channel/*, {orphanedRowAction: 'delete', onDelete: 'CASCADE'}*/)
 	messages: Message[];
 
 	@Column()

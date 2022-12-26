@@ -102,13 +102,11 @@ export class ChannelService {
 	public async delete(body: DeleteChannelDto, user: User): Promise<number> {
 		const { channel }: DeleteChannelDto = body;
 
-		// let owner: Member = (await this.memberService.members({channel: channel}, user)).find( (obj) => {return obj.level == MemberLevel.owner} );
-		// if (owner.user_id != user.id) {
-		// 	console.log("Can't delete : user was not found as a owner of this channel.");
-		// 	throw new HttpException('Conflict', HttpStatus.CONFLICT);
-		// }
+		let owner: Member = (await this.memberService.members({channel: channel}, user)).find( (obj) => {return obj.level == MemberLevel.owner} );
+		if (owner.user_id != user.id) {
+			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		}
 		return (await this.channelRepository.createQueryBuilder('channel')
-			.innerJoin("channel.members", "members", "members.user_id = :userId AND members.level = :memberLevel", {userId: user.id, memberLevel: MemberLevel.owner})
 			.delete()
 			.where("id = :channelId", {channelId: channel})
 			.execute()).affected;

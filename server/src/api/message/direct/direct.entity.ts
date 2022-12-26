@@ -14,7 +14,7 @@ export class Direct extends BaseEntity{
 	@ManyToOne(type => User, user => user.direct2)
 	public user2!: User;
 
-	@OneToMany(type => Message, message => message.direct, {onDelete: 'CASCADE'})
+	@OneToMany(type => Message, message => message.direct/*, {orphanedRowAction: 'delete', onDelete: 'CASCADE'}*/)
 	public messages: Message[];
 
 	@CreateDateColumn({type: 'varchar', default: () => "CURRENT_TIMESTAMP"})

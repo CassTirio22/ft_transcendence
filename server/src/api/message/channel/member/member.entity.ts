@@ -23,11 +23,11 @@ export class Member extends BaseEntity {
 	@PrimaryColumn({type: 'integer'})
 	channel_id!: number;
 
-	@ManyToOne( type => User, user => user.membership)
+	@ManyToOne( type => User, user => user.membership, {onDelete: 'CASCADE'})
 	@JoinColumn({name: 'user_id'})
 	user!: User;
 
-	@ManyToOne( type => Channel, channel => channel.members)
+	@ManyToOne( type => Channel, channel => channel.members, {onDelete: 'CASCADE'})
 	@JoinColumn({name: 'channel_id'})
 	channel!: Channel;
 

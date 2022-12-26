@@ -17,10 +17,10 @@ export class Message extends BaseEntity {
 	@JoinColumn({name: "author_id"})
 	author!: User;
 
-	@ManyToOne(type => Direct, direct => direct.messages, {nullable: true})
+	@ManyToOne(type => Direct, direct => direct.messages, {nullable: true, onDelete: 'CASCADE'})
 	direct: Direct;
 
-	@ManyToOne(type => Channel, channel => channel.messages, {nullable: true})
+	@ManyToOne(type => Channel, channel => channel.messages, {nullable: true, onDelete: 'CASCADE'})
 	channel: Channel;
 
 	@CreateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})

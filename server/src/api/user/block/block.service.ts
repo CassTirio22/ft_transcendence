@@ -46,9 +46,9 @@ export class BlockService {
 
 	public async getEitherBlock(user1: number, user2: number): Promise<Block | never> {
 		return (await this.blockRepository.createQueryBuilder('block')
-			.innerJoin("block.blocker", "blocker", "blocker.id IN (:...usersId)", {usersId: [user1, user2]})
-			.leftJoin("block.blocked", "blocked", "blocked.id IN (:...othersId)", {usersId: [user1, user2]})
 			.select()
+			.where("block.blocker_id IN (:...usersId)", {usersId: [user1, user2]})
+			.andWhere("block.blocked_id IN (:...othersId)", {othersId: [user1, user2]})
 			.getOne());
 	}
 

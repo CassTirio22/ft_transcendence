@@ -15,4 +15,10 @@ export class DirectController {
 	private create(@Body() body: CreateDirectDto, @Req() req: Request): Promise<Direct> {
 		return this.directService.create(body, req);
 	}
+
+	@Get('directs')
+	@UseGuards(JwtAuthGuard)
+	private directs(@Req() req: Request): Promise<Direct[]> {
+		return this.directService.directs(<User>req.user);
+	}
 }

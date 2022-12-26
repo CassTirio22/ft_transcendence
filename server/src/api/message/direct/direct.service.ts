@@ -6,7 +6,7 @@ import { CreateDirectDto } from "./direct.dto";
 import { Request } from "express";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "@/api/user/user.entity";
-import { Repository } from "typeorm";
+import { EntityManager, QueryBuilder, Repository } from "typeorm";
 import { Direct } from "./direct.entity";
 import { BlockService } from '@/api/user/block/block.service';
 
@@ -24,13 +24,16 @@ export class DirectService {
 	) {}
 
 	public async directs(user: User): Promise <Direct[]> {
-		let blocked: User[] = await this.blockService.getBlockedList(user);
-		return (await this.directRepository.createQueryBuilder('direct')
+		let blocked: number[] = (await this.blockService.getBlockedList(user)).map( (obj) => (obj.id) );
+		let query: any = this.directRepository.createQueryBuilder('direct')
 			.select()
-			.where(":userId IN (direct.user1Id, direct.user2Id)", {userId: user.id})
-			.andWhere("direct.user1Id NOT IN (:...blockList_1)", {blockList_1: blocked})
-			.andWhere("direct.user2Id NOT IN (:...blockList_2)", {blockList_1: blocked})
-			.getMany());
+			.where(":userId IN (direct.user1Id, direct.user2Id)", {userId: user.id});
+		if (blocked.length > 0) {
+			query = query
+			.andWhere("direct.user1 NOT IN (:...blockList_1)", {blockList_1: blocked})
+			.andWhere("direct.user2 NOT IN (:...blockList_2)", {blockList_2: blocked})
+		}
+		return (await query.getMany());
 	}
 
 	public async updateDate(channelId: number, userId: number): Promise<Direct> {
@@ -43,13 +46,14 @@ export class DirectService {
 			.execute()).raw as Direct;
 	}
 
+	//maybe check if blocked
 	public async create(body: CreateDirectDto, req: Request): Promise<Direct> {
 		const user: User = <User>req.user;
 		const { id }: CreateDirectDto = body;
 
 		let other: User = await this.userRepository.createQueryBuilder('user')
-			.leftJoinAndSelect("user.direct1", "direct1", "direct1.user2 = :user2Id", {user2Id: user.id})
-			.leftJoinAndSelect("user.direct2", "direct2", "direct2.user1 = :user1Id", {user1Id: user.id})
+			.leftJoinAndSelect("user.direct1", "direct1", "direct1.user2 = :user_2_id", {user_2_id: user.id})
+			.leftJoinAndSelect("user.direct2", "direct2", "direct2.user1 = :user_1_id", {user_1_id: user.id})
 			.select()
 			.where("user.id = :userId", {userId: id})
 			.getOne();
@@ -73,7 +77,7 @@ export class DirectService {
 	private async _checkEitherBlocked(user1: number, user2: number): Promise<void> {
 		let block: Block = await this.blockService.getEitherBlock(user1, user2);
 		if (block) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		}
 	}
 }

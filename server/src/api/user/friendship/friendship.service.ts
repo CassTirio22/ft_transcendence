@@ -65,9 +65,9 @@ export class FriendshipService {
 			throw new HttpException("Conflict", HttpStatus.CONFLICT);
 		}
 		return (await this.friendshipRepository.createQueryBuilder('friendship')
-			.innerJoin("friendship.applicant", "applicant", "applicant IN (:...applicantId)", {applicantId: [user.id, other]})
-			.innerJoin("friendship.solicited", "solicited", "solicited IN (:...solicitedId)", {solicitedId: [user.id, other]})
 			.select()
+			.where("friendship.applicant IN (:...applicantId)", {applicantId: [user.id, other]})
+			.andWhere("friendship.solicited IN (:...solicitedId)", {solicitedId: [user.id, other]})
 			.getOne());
 	}
 

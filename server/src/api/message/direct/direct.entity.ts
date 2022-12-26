@@ -8,10 +8,10 @@ export class Direct extends BaseEntity{
 	@PrimaryGeneratedColumn( {type: 'integer'} )
 	public id!: number;
 	
-	@ManyToOne(type => User, user => user.direct1)
+	@ManyToOne(type => User, user => user.direct1, {onDelete: 'CASCADE'})
 	public user1!: User;
 
-	@ManyToOne(type => User, user => user.direct2)
+	@ManyToOne(type => User, user => user.direct2, {onDelete: 'CASCADE'})
 	public user2!: User;
 
 	@OneToMany(type => Message, message => message.direct/*, {orphanedRowAction: 'delete', onDelete: 'CASCADE'}*/)

@@ -20,7 +20,7 @@ export class ChannelService {
 	public async channel(channelId: number, userId: number): Promise<Channel> {
 		return (await this.channelRepository.createQueryBuilder('channel')
 			.select()
-			.innerJoinAndSelect("channel.members", "members", "members.user_id = :userId", {userId: userId})
+			.leftJoinAndSelect("channel.members", "members", "members.user_id = :userId", {userId: userId})
 			.where("channel.id = :channelId", {channelId: channelId})
 			.getOne());
 	}
@@ -51,7 +51,7 @@ export class ChannelService {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
 		else if (ourChannel.members.length < 1 || ourChannel.members[0].level != MemberLevel.owner) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		}
 		name = (name != null) ? name : ourChannel.name;
 		password = (password != null) ? password : ourChannel.password;

@@ -1,3 +1,5 @@
+import { Block } from './../../../user/block/block.entity';
+import { BlockService } from '@/api/user/block/block.service';
 import { FriendshipService } from './../../../user/friendship/friendship.service';
 import { Friendship } from './../../../user/friendship/friendship.entity';
 import { channel } from 'diagnostics_channel';
@@ -10,6 +12,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Brackets, Repository } from "typeorm";
 import { Request } from 'express';
 import { User } from '@/api/user/user.entity';
+import { IsObject } from 'class-validator';
 
 interface MemberSettings {
 	user:		number;
@@ -18,7 +21,7 @@ interface MemberSettings {
 	status?:	MemberStatus
 }
 
-@Injectable({})
+@Injectable()
 export class MemberService {
 	constructor(
 		@InjectRepository(Member)
@@ -29,6 +32,8 @@ export class MemberService {
 		private channelService: ChannelService,
 		@Inject(FriendshipService)
 		private friendshipService: FriendshipService,
+		@Inject(BlockService)
+		private blockService: BlockService
 	) {}
 
 	public async becomeMember(body: BecomeMemberDto, req: Request): Promise<Member> {
@@ -39,8 +44,11 @@ export class MemberService {
 		if (!ourChannel) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
-		else if (ourChannel.status == ChannelStatus.private || (ourChannel.status == ChannelStatus.protected && !this._checkPassword(password, ourChannel)) ) {
+		else if (ourChannel.members.length > 0) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		}
+		else if (ourChannel.status == ChannelStatus.private || (ourChannel.status == ChannelStatus.protected && !this._checkPassword(password, ourChannel))) {
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		}
 		return (await this.insert({user: user.id, channel: channel, level: MemberLevel.regular}));
 	}
@@ -80,8 +88,7 @@ export class MemberService {
 			.select()
 			.getMany());
 		if (!members.find( (obj) => {return obj.user_id == user.id} )) {
-			console.log("Can't list members: user was not found as a member of this channel.")
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		}
 		return members;
 	}
@@ -94,10 +101,11 @@ export class MemberService {
 		return (await this.memberRepository.createQueryBuilder('member')
 			.update()
 			.set({
-				block_until: time == 'infinity' ? time : () => ('NOW()' + new Date(time)),
+				block_until: /*time == 'infinity' ? time : () => ('NOW()' + */ new Date(time),
 				status: this._stringToStatus(status)
 			})
-			.where("member.id = :memberId", {memberId: member})
+			.where("member.user_id = :memberId", {memberId: member})
+			.andWhere("member.channel_id = :channelId", {channelId: channel})
 			.execute()).affected;
 	}
 
@@ -109,7 +117,8 @@ export class MemberService {
 		return (await this.memberRepository.createQueryBuilder('member')
 			.update()
 			.set({ level: this._stringToLevel(level) })
-			.where("member.id = :memberId", {memberId: member})
+			.where("member.user_id = :memberId", {memberId: member})
+			.andWhere("member.channel_id = :channelId", {channelId: channel})
 			.execute()).affected;
 	}
 
@@ -133,14 +142,14 @@ export class MemberService {
 		}
 		else if (members.length == 1) {
 			await this.channelService.delete({channel: channel}, user);
-			return (await this.delete({ channel: channel, member: user.id})); //if needed, could be done by cascade : then return 1;
+			return (await this.delete({ channel: channel, member: user.id}));
 		}
-
-		let owner: Member = await this.member({channel: channel}, user);
-		if (!owner) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+		let owner: Member = members.find( (obj) => {return obj.user_id == newOwner} );
+		if (!owner || user.id == newOwner) {
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		}
-		if (owner.level = MemberLevel.owner) {
+		let member: Member = members.find( (obj) => {return obj.user_id == user.id} );
+		if (member.level == MemberLevel.owner) {
 			let tmp: number = (await this.memberRepository.createQueryBuilder('member')
 				.update()
 				.set({level: MemberLevel.owner})
@@ -148,9 +157,6 @@ export class MemberService {
 				.andWhere("member.user_id != :userId", {userId: user.id})
 				.andWhere("member.channel_id = :channelId", {channelId: channel})
 				.execute()).affected;
-			if (!tmp) {
-				throw new HttpException('Conflict', HttpStatus.CONFLICT);
-			}
 		}
 		return (await this.delete({ channel: channel, member: user.id}));
 	}
@@ -159,31 +165,39 @@ export class MemberService {
 	/* PRIVATE UTILS -- PUT SOMEWHERE ELSE FOR CLEAN ARCHITECTURE*/
 
 	private async _checkUserChangePermission(settings: MemberSettings, user: User): Promise<Channel> {	
-		let ourChannel: Channel  = await (this.channelService.channelJoinMembers(settings.channel));
-		let userMember: Member = ourChannel.members.find( (obj) => {obj.user_id == user.id} );
-		let wantedMember: Member = ourChannel.members.find( (obj) => {obj.user_id == settings.user} );
-		if (!ourChannel || !wantedMember || !userMember) {
+		let ourChannel: Channel  = (await this.channelService.channelJoinMembers(settings.channel));
+		if (!ourChannel) {
+			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+		}
+		let userMember: Member = ourChannel.members.find( (obj) => {return obj.user_id == user.id} );
+		let wantedMember: Member = ourChannel.members.find( (obj) => {return obj.user_id == settings.user} );
+		if (!wantedMember || !userMember) {
 			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 		}
 		else if (userMember.level == MemberLevel.regular || 
 				(userMember.level == MemberLevel.administrator && wantedMember.level != MemberLevel.regular)) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		}
 		return ourChannel;
 	}
 
 	private async _checkUserAddPermission(settings: MemberSettings, user: User): Promise<Channel> {	
 		let ourChannel: Channel  = await (this.channelService.channelJoinMembers(settings.channel));
-		let userMember: Member = ourChannel.members.find( (obj) => {obj.user_id == user.id} );
-		let wantedMember: Member = ourChannel.members.find( (obj) => {obj.user_id == settings.user} );
-		let friendship: Friendship = await this.friendshipService.friend(user, settings.user);
-		if (!ourChannel || !userMember) {
+		if (!ourChannel) {
 			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
 		}
-		else if (wantedMember || 
-				!friendship ||
-				(ourChannel.status == ChannelStatus.private && userMember.level == MemberLevel.regular) || 
-				userMember.status != MemberStatus.regular) {
+		let userMember: Member = ourChannel.members.find( (obj) => {return obj.user_id == user.id} );
+		let wantedMember: Member = ourChannel.members.find( (obj) => {return obj.user_id == settings.user} );
+		let friendship: Friendship = await this.friendshipService.friend(user, settings.user);
+		let block: Block = await this.blockService.getEitherBlock(user.id, settings.user);
+		if (userMember == undefined ||
+			!friendship ||
+			block ||
+			(ourChannel.status == ChannelStatus.private && userMember.level == MemberLevel.regular) || 
+			userMember.status != MemberStatus.regular) {
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+		}
+		if (wantedMember) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
 		return ourChannel;

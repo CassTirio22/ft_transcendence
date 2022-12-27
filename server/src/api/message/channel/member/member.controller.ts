@@ -32,19 +32,19 @@ export class MemberController {
 
 	@Put('level')
 	@UseGuards(JwtAuthGuard)
-	private changeLevel(body: ChangeMemberLevelDto, req: Request): Promise<number> {
+	private changeLevel(@Body() body: ChangeMemberLevelDto, @Req() req: Request): Promise<number> {
 		return this.memberService.changeLevel(body, req);
 	}
 
 	@Put('status')
 	@UseGuards(JwtAuthGuard)
-	private changeStatus(body: ChangeMemberStatusDto, req: Request): Promise<number> {
+	private changeStatus(@Body() body: ChangeMemberStatusDto, @Req() req: Request): Promise<number> {
 		return this.memberService.changeStatus(body, req);
 	}
 
 	@Delete('quit')
 	@UseGuards(JwtAuthGuard)
-	private quit(body: QuitChannelDto, req: Request): Promise<number> {
+	private quit(@Body() body: QuitChannelDto, @Req() req: Request): Promise<number> {
 		return this.memberService.quit(body, req);
 	}
 }

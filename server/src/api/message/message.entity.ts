@@ -1,6 +1,5 @@
 import { Channel } from "./channel/channel.entity";
-import { type } from "os";
-import { Unique, BaseEntity, BeforeInsert, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../user/user.entity";
 import { Direct } from "./direct/direct.entity";
 

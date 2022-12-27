@@ -1,3 +1,4 @@
+import { Message } from './../message.entity';
 import { FriendshipService } from './../../user/friendship/friendship.service';
 import { Friendship } from './../../user/friendship/friendship.entity';
 import { Block } from './../../user/block/block.entity';
@@ -20,14 +21,19 @@ export class DirectService {
 		@Inject(BlockService)
 		private blockService: BlockService,
 		@Inject(FriendshipService)
-		private friendshipService: FriendshipService
+		private friendshipService: FriendshipService,
+		@InjectRepository(Message)
+		private messageRepository: Repository<Message>
 	) {}
 
 	public async directs(user: User): Promise <Direct[]> {
 		let blocked: number[] = (await this.blockService.getEitherBlockedList(user)).map( (obj) => (obj.id) );
 		let query: any = this.directRepository.createQueryBuilder('direct')
+			.leftJoinAndSelect("direct.messages", "messages")
+			.leftJoin("direct.messages", "next_messages", "messages.date < next_messages.date")
 			.select()
-			.where(":userId IN (direct.user1_id, direct.user2_id)", {userId: user.id});
+			.where("next_messages.id IS NULL")
+			.andWhere(":userId IN (direct.user1_id, direct.user2_id)", {userId: user.id});
 		if (blocked.length > 0) {
 			query = query
 			.andWhere("direct.user1 NOT IN (:...blockList_1)", {blockList_1: blocked})
@@ -36,10 +42,10 @@ export class DirectService {
 		return (await query.getMany());
 	}
 
-	public async updateDate(channelId: number, userId: number): Promise<Direct | never> {
+	public async updateDate(directId: number, userId: number): Promise<Direct | never> {
 		let direct: Direct[] = (await this.directRepository.createQueryBuilder('direct')
 			.update()
-			.where("id = :channelId", {channelId: channelId})
+			.where("id = :directId", {directId: directId})
 			.andWhere(":userId IN (user1_id, user2_id)", {userId: userId})
 			.set({date: () => 'NOW()'})
 			.returning('*')

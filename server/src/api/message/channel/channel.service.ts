@@ -1,12 +1,13 @@
+import { Message } from './../message.entity';
 import { MemberService } from './member/member.service';
 import { Member, MemberLevel, MemberStatus } from './member/member.entity';
 import { User } from '@/api/user/user.entity';
 import { forwardRef, Injectable, HttpStatus, HttpException, Inject } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Brackets, Repository } from "typeorm";
 import { CreateChannelDto, DeleteChannelDto, EditChannelDto } from './channel.dto';
 import { Channel, ChannelStatus } from "./channel.entity";
-import { Request } from 'express';
+import { Request, query } from 'express';
 
 @Injectable()
 export class ChannelService {
@@ -15,6 +16,8 @@ export class ChannelService {
 		private channelRepository: Repository<Channel>,
 		@Inject(forwardRef( () => MemberService))
 		private memberService: MemberService,
+		@InjectRepository(Message)
+		private messageRepository: Repository<Message>
 	) {}
 
 	public async channel(channelId: number, userId: number): Promise<Channel> {
@@ -36,9 +39,14 @@ export class ChannelService {
 	public async channels(userId: number): Promise<Channel[]> {
 		return ( await this.channelRepository.createQueryBuilder('channel')
 			.innerJoin("channel.members", "members", "members.status != :bannedStatus", {bannedStatus: MemberStatus.banned})
+			.leftJoinAndSelect("channel.messages", "messages")
+			.leftJoin("channel.messages", "next_messages", "messages.date < next_messages.date")
 			.select()
-			.where("members.user_id = :memberId", {memberId: userId})
-			.orWhere("channel.status IN (:...status)", {status: [ChannelStatus.public, ChannelStatus.protected]})
+			.where("next_messages.id IS NULL")
+			.andWhere( new Brackets  (query => { query
+				.where("members.user_id = :memberId", {memberId: userId})
+				.orWhere("channel.status IN (:...status)", {status: [ChannelStatus.public, ChannelStatus.protected]})
+			}))
 			.getMany());
 	}
 
@@ -75,7 +83,6 @@ export class ChannelService {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
 		let channel: Channel[] = (await this.channelRepository.createQueryBuilder('channel')
-			// .innerJoin("channel.members", "members", "members.user_id = :userId", {userId: userId})
 			.update()
 			.where("id = :channelId", {channelId: channelId})
 			.set({date: () => 'NOW()'})

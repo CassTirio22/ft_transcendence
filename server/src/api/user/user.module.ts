@@ -1,3 +1,4 @@
+import { Message } from './../message/message.entity';
 import { Friendship } from './friendship/friendship.entity';
 import { FriendshipService } from './friendship/friendship.service';
 import { Block } from './block/block.entity';
@@ -16,7 +17,7 @@ import { AuthModule } from './auth/auth.module';
 import { BlockService } from './block/block.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Channel, Direct, Member, Block, Friendship]), AuthModule],
+  imports: [TypeOrmModule.forFeature([User, Channel, Direct, Member, Block, Friendship, Message]), AuthModule],
   controllers: [UserController],
   providers: [UserService, ChannelService, DirectService, MemberService, BlockService, FriendshipService],
 })

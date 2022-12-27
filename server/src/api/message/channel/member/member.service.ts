@@ -82,6 +82,7 @@ export class MemberService {
 
 	public async members(channel: number, user: User): Promise<Member[]> {
 		let members: Member[] = (await this.memberRepository.createQueryBuilder('members')
+			.innerJoinAndSelect("members.user", "user")
 			.innerJoin("members.channel", "channel", "channel.id = :channelId", {channelId: channel})
 			.select()
 			.getMany());

@@ -46,8 +46,8 @@ export class MessageService {
 		let settings: MessageSettings = {
 			author: user,
 			content: content,
-			origin: (await this.directService.updateDate(origin, user.id)
-		)};
+			origin: (await this.directService.updateDate(origin, user.id))
+		};
 		if (!settings.origin) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
@@ -56,7 +56,7 @@ export class MessageService {
 		if (!friendship) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
-		await this._checkUserBlocked(user, other);
+		await this._checkEitherBlocked(user.id, other);
 		return this._insert(settings);
 	}
 
@@ -64,14 +64,15 @@ export class MessageService {
 		const user: User = <User>req.user;
 		const { content, origin }: SendDto = body;
 
-		await this._checkMemberStatus(origin, user, [MemberStatus.regular]);
 		let settings: MessageSettings = {
 			author: user,
 			content: content,
-			origin: (await this.channelService.updateDate(origin, user.id))};
+			origin: (await this.channelService.updateDate(origin, user))
+		};
 		if (!settings.origin) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 		}
+		await this._checkMemberStatus(origin, user, [MemberStatus.regular]);
 		return this._insert(settings);
 	}
 
@@ -80,11 +81,13 @@ export class MessageService {
 		const { origin }: MessagesDto = body;
 
 		let blocked: User[] = await this.blockService.getBlockedList(user);
-		return (await this.messageRepository.createQueryBuilder('message')
+		let query: any = this.messageRepository.createQueryBuilder('message')
 			.innerJoin("message.direct", "direct", "direct.id = :directId AND :userId IN (direct.user1_id, direct.user2_id)", {directId: origin, userId: user.id})
-			.select()
-			.where("message.author NOT IN (:...blockedList)", {blockedList: blocked})
-			.getMany());
+			.select();
+		if (blocked.length > 0) {
+			query = query.where("message.author NOT IN (:...blockedList)", {blockedList: blocked.map( (obj) => (obj.id) )});
+		}
+		return await query.getMany();
 	}
 
 	public async channelMessages(body: MessagesDto, req: Request): Promise<Message[]> {
@@ -92,24 +95,26 @@ export class MessageService {
 		const { origin }: MessagesDto = body;
 
 		let blocked: User[] = await this.blockService.getBlockedList(user);
-		return (await this.messageRepository.createQueryBuilder('message')
+		let query: any = this.messageRepository.createQueryBuilder('message')
 			.innerJoin("message.channel", "channel", "channel.id = :channelId", {channelId: origin})
-			.innerJoin("channel.members", "members", "members.user_id = :userId", {userId: user.id})
-			.select()
-			.where("members.user_id NOT IN (:...blockedList)", {blockedList: blocked})
-			.getMany());
+			.select();
+		if (blocked.length > 0) {
+			query = query.where("message.author NOT IN (:...blockedList)", {blockedList: blocked.map( (obj) => (obj.id) )});
+		}
+		await this._checkMemberStatus(origin, user, [MemberStatus.regular, MemberStatus.muted]);
+		return await query.getMany();
 	}
 
 	private async _insert(settings: MessageSettings): Promise<Message> {
 		return (await this.messageRepository.createQueryBuilder()
-		.insert()
-		.values({
-			content: settings.content,
-			author: settings.author ,
-			direct: settings.origin instanceof Direct ? settings.origin : null,
-			channel: settings.origin instanceof Channel ? settings.origin : null
-		})
-		.execute()).generatedMaps[0] as Message;
+			.insert()
+			.values({
+				content: settings.content,
+				author: settings.author,
+				direct: ('user1_id' in settings.origin) ? settings.origin : null,
+				channel: ('name' in settings.origin) ?  settings.origin : null
+			})
+			.execute()).generatedMaps[0] as Message;
 	}
 
 
@@ -117,13 +122,13 @@ export class MessageService {
 
 	private async _checkMemberStatus(channel: number, user: User, authorized: MemberStatus[]): Promise<void> {
 		let member: Member =  await this.memberService.member({channel: channel}, user);
-		if (!authorized.find(element => member.status == element)) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT)
+		if (!member || authorized.find((obj) => {return member.status == obj}) == undefined) {
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED)
 		}
 	}
 
-	private async _checkUserBlocked(user: User, other: number): Promise<void> {
-		let block: Block = await this.blockService.getBlock(other, user.id);
+	private async _checkEitherBlocked(user1: number, user2: number): Promise<void> {
+		let block: Block = await this.blockService.getEitherBlock(user1, user2);
 		if (block) {
 			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		}

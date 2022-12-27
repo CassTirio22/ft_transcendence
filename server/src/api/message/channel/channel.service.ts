@@ -69,14 +69,19 @@ export class ChannelService {
 			.execute()).affected;
 	}
 
-	public async updateDate(channelId: number, userId: number): Promise<Channel> {
-		return (await this.channelRepository.createQueryBuilder('channel')
-			.innerJoin("channel.members", "members", "members.user_id = :userId", {userId: userId})
+	public async updateDate(channelId: number, user: User): Promise<Channel> {
+		let member: Member = await this.memberService.member({channel: channelId} , user);
+		if (!member) {
+			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+		}
+		let channel: Channel[] = (await this.channelRepository.createQueryBuilder('channel')
+			// .innerJoin("channel.members", "members", "members.user_id = :userId", {userId: userId})
 			.update()
 			.where("id = :channelId", {channelId: channelId})
 			.set({date: () => 'NOW()'})
 			.returning('*')
-			.execute()).raw as Channel;
+			.execute()).raw;
+		return (channel.length == 0 ? null : channel[0]);
 	}
 
 	public async create(body: CreateChannelDto, req: Request): Promise<Channel> {

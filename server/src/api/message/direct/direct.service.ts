@@ -24,7 +24,7 @@ export class DirectService {
 	) {}
 
 	public async directs(user: User): Promise <Direct[]> {
-		let blocked: number[] = (await this.blockService.getBlockedList(user)).map( (obj) => (obj.id) );
+		let blocked: number[] = (await this.blockService.getEitherBlockedList(user)).map( (obj) => (obj.id) );
 		let query: any = this.directRepository.createQueryBuilder('direct')
 			.select()
 			.where(":userId IN (direct.user1_id, direct.user2_id)", {userId: user.id});
@@ -40,17 +40,13 @@ export class DirectService {
 		let direct: Direct[] = (await this.directRepository.createQueryBuilder('direct')
 			.update()
 			.where("id = :channelId", {channelId: channelId})
-			// .andWhere(":userId IN (user1_id, user2_id)", {userId: userId})
+			.andWhere(":userId IN (user1_id, user2_id)", {userId: userId})
 			.set({date: () => 'NOW()'})
 			.returning('*')
 			.execute()).raw;
-		if (direct.length == 0) {
-			return null;
-		}
-		return direct[0];
+		return (direct.length == 0 ? null : direct[0]);
 	}
 
-	//maybe check if blocked
 	public async create(body: CreateDirectDto, req: Request): Promise<Direct> {
 		const user: User = <User>req.user;
 		const { id }: CreateDirectDto = body;

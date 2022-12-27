@@ -9,9 +9,3 @@ export class SendDto {
 	@IsNotEmpty()
 	public readonly content: string;
 }
-
-export class MessagesDto {
-	@IsNotEmpty()
-	@IsNumber()
-	public readonly origin: number;
-}

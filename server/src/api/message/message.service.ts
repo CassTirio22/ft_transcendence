@@ -11,7 +11,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Request } from "express";
 import { Repository } from "typeorm";
 import { User } from "../user/user.entity";
-import { SendDto, MessagesDto } from "./message.dto";
+import { SendDto } from "./message.dto";
 import { Message } from "./message.entity";
 import { BlockService } from '../user/block/block.service';
 import { Block } from '../user/block/block.entity';
@@ -76,9 +76,8 @@ export class MessageService {
 		return this._insert(settings);
 	}
 
-	public async directMessages(body: MessagesDto, req: Request): Promise<Message[]> {
+	public async directMessages(origin: number, req: Request): Promise<Message[]> {
 		const user: User = <User>req.user;
-		const { origin }: MessagesDto = body;
 
 		let blocked: User[] = await this.blockService.getBlockedList(user);
 		let query: any = this.messageRepository.createQueryBuilder('message')
@@ -90,9 +89,8 @@ export class MessageService {
 		return await query.getMany();
 	}
 
-	public async channelMessages(body: MessagesDto, req: Request): Promise<Message[]> {
+	public async channelMessages(origin: number, req: Request): Promise<Message[]> {
 		const user: User = <User>req.user;
-		const { origin }: MessagesDto = body;
 
 		let blocked: User[] = await this.blockService.getBlockedList(user);
 		let query: any = this.messageRepository.createQueryBuilder('message')
@@ -121,7 +119,7 @@ export class MessageService {
 	/* PRIVATE UTILS -- PUT SOMEWHERE ELSE FOR CLEAN ARCHITECTURE*/
 
 	private async _checkMemberStatus(channel: number, user: User, authorized: MemberStatus[]): Promise<void> {
-		let member: Member =  await this.memberService.member({channel: channel}, user);
+		let member: Member =  await this.memberService.member(channel, user);
 		if (!member || authorized.find((obj) => {return member.status == obj}) == undefined) {
 			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED)
 		}

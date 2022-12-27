@@ -1,7 +1,7 @@
-import { BecomeMemberDto, AddMemberDto, GetMembersDto, ChangeMemberLevelDto, ChangeMemberStatusDto, QuitChannelDto } from './member.dto';
+import { BecomeMemberDto, AddMemberDto, ChangeMemberLevelDto, ChangeMemberStatusDto, QuitChannelDto } from './member.dto';
 import { JwtAuthGuard } from './../../../user/auth/auth.guard';
 import { Member } from './member.entity';
-import { Body, Controller, Delete, Get, Post, Put, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { MemberService } from './member.service';
 import { Request } from "express";
 import { read } from 'fs';
@@ -24,10 +24,10 @@ export class MemberController {
 		return this.memberService.addMember(body, req);
 	}
 
-	@Get('members')
+	@Get('members/:channel')
 	@UseGuards(JwtAuthGuard)
-	private members(@Body() body: GetMembersDto, @Req() req: Request): Promise<Member[]> {
-		return this.memberService.members(body, <User>req.user);
+	private members(@Param('channel') channel, @Req() req: Request): Promise<Member[]> {
+		return this.memberService.members(channel, <User>req.user);
 	}
 
 	@Put('level')

@@ -5,7 +5,7 @@ import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Request } from 'express';
-import { UpdateNameDto, GetProfileDto } from './user.dto';
+import { UpdateNameDto } from './user.dto';
 import { User } from './user.entity';
 import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
@@ -45,17 +45,15 @@ export class UserService {
 		return user;
 	}
 
-	//check friendship and if blocked
-	public async otherProfile(body: GetProfileDto, user: User): Promise<User | never> {
-		const { id }: GetProfileDto = body;
+	public async otherProfile(id: number, user: User): Promise<User | never> {
 
 		let block: Block = await this.blockService.getBlock(id, user.id);
 		if (block) {
-			throw new HttpException("Conflict", HttpStatus.CONFLICT);
+			throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED);
 		}
 		return (this.repository.createQueryBuilder()
 			.select()
-			.where("id = :userId", {userId: user.id})
+			.where("id = :userId", {userId: id})
 			.getOne());
 	}
 

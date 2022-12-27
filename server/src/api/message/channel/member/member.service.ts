@@ -5,7 +5,7 @@ import { Friendship } from './../../../user/friendship/friendship.entity';
 import { channel } from 'diagnostics_channel';
 import { Channel, ChannelStatus } from './../channel.entity';
 import { ChannelService } from './../channel.service';
-import { BecomeMemberDto, AddMemberDto, GetMembersDto, ChangeMemberStatusDto, ChangeMemberLevelDto, QuitChannelDto, DeleteMemberDto } from './member.dto';
+import { BecomeMemberDto, AddMemberDto, ChangeMemberStatusDto, ChangeMemberLevelDto, QuitChannelDto, DeleteMemberDto } from './member.dto';
 import { Member, MemberLevel, MemberStatus } from './member.entity';
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -72,17 +72,15 @@ export class MemberService {
 			.execute())[0] as Member;
 	}
 
-	public async member(body: GetMembersDto, user: User): Promise<Member | never> {
+	public async member(channel: number, user: User): Promise<Member | never> {
 		return (await this.memberRepository.createQueryBuilder('member')
-		.innerJoin("member.channel", "channel", "channel.id = :channelId", {channelId: body.channel})
+		.innerJoin("member.channel", "channel", "channel.id = :channelId", {channelId: channel})
 		.innerJoin("member.user", "user", "user.id = :userId", {userId: user.id})
 		.select()
 		.getOne());
 	}
 
-	public async members(body: GetMembersDto, user: User): Promise<Member[]> {
-		const { channel }: GetMembersDto = body;
-
+	public async members(channel: number, user: User): Promise<Member[]> {
 		let members: Member[] = (await this.memberRepository.createQueryBuilder('members')
 			.innerJoin("members.channel", "channel", "channel.id = :channelId", {channelId: channel})
 			.select()
@@ -136,7 +134,7 @@ export class MemberService {
 		const user: User = <User>req.user;
 		const { channel, newOwner }: QuitChannelDto = body;
 
-		let members: Member[] = await this.members({channel: channel}, user);
+		let members: Member[] = await this.members(channel, user);
 		if (members.length == 0) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}

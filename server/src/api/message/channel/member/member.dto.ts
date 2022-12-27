@@ -20,12 +20,6 @@ export class AddMemberDto {
 	public readonly member: number;
 }
 
-export class GetMembersDto {
-	@IsNumber()
-	@IsNotEmpty()
-	public readonly channel: number;
-}
-
 export class ChangeMemberStatusDto {
 	@IsNumber()
 	@IsNotEmpty()

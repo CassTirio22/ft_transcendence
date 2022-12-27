@@ -70,7 +70,7 @@ export class ChannelService {
 	}
 
 	public async updateDate(channelId: number, user: User): Promise<Channel> {
-		let member: Member = await this.memberService.member({channel: channelId} , user);
+		let member: Member = await this.memberService.member(channelId , user);
 		if (!member) {
 			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 		}
@@ -107,7 +107,7 @@ export class ChannelService {
 	public async delete(body: DeleteChannelDto, user: User): Promise<number> {
 		const { channel }: DeleteChannelDto = body;
 
-		let owner: Member = (await this.memberService.members({channel: channel}, user)).find( (obj) => {return obj.level == MemberLevel.owner} );
+		let owner: Member = (await this.memberService.members(channel, user)).find( (obj) => {return obj.level == MemberLevel.owner} );
 		if (owner.user_id != user.id) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}

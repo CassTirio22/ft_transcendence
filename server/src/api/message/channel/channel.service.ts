@@ -8,6 +8,7 @@ import { Brackets, Repository } from "typeorm";
 import { CreateChannelDto, DeleteChannelDto, EditChannelDto } from './channel.dto';
 import { Channel, ChannelStatus } from "./channel.entity";
 import { Request, query } from 'express';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class ChannelService {
@@ -17,12 +18,13 @@ export class ChannelService {
 		@Inject(forwardRef( () => MemberService))
 		private memberService: MemberService,
 		@InjectRepository(Message)
-		private messageRepository: Repository<Message>
+		private messageRepository: Repository<Message>,
 	) {}
 
 	public async channel(channelId: number, userId: number): Promise<Channel> {
 		return (await this.channelRepository.createQueryBuilder('channel')
 			.select()
+			.addSelect('channel.password')
 			.leftJoinAndSelect("channel.members", "members", "members.user_id = :userId", {userId: userId})
 			.where("channel.id = :channelId", {channelId: channelId})
 			.getOne());
@@ -68,10 +70,12 @@ export class ChannelService {
 
 	public async update(body: EditChannelDto, user: User): Promise<number> {
 		let { name, password, channel}: EditChannelDto = body;
+		let salt: string = bcrypt.genSaltSync(user.id);
 		return (await this.channelRepository.createQueryBuilder()
 			.update()
 			.set({name: name,
-				password: password, 
+				salt: salt,
+				password:  (password ?  bcrypt.hashSync(password, salt) : null), 
 				date: () => 'NOW()'})
 			.where("id = :channelId", {channelId: channel})
 			.execute()).affected;
@@ -98,11 +102,13 @@ export class ChannelService {
 		if (status == "protected" && !password) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
+		let salt: string = bcrypt.genSaltSync(user.id);
 		let channel: Channel = (await this.channelRepository.createQueryBuilder()
 			.insert()
 			.values({
 				name: name,
-				password: status == "protected" ? password : null,
+				salt: status == "protected" ? salt : null,
+				password: status == "protected" ? bcrypt.hashSync(password, salt) : null,
 				status: (status == "public" ? ChannelStatus.public : (status == "protected" ? ChannelStatus.protected : ChannelStatus.private) )
 			})
 			.execute()).generatedMaps[0] as Channel;
@@ -110,7 +116,6 @@ export class ChannelService {
 		return channel;
 	}
 
-	//should I delete all linked members or cascade can do it by itself
 	public async delete(body: DeleteChannelDto, user: User): Promise<number> {
 		const { channel }: DeleteChannelDto = body;
 

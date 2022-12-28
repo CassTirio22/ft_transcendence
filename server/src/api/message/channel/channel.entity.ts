@@ -2,6 +2,7 @@ import { Message } from './../message.entity';
 import { Member } from './member/member.entity';
 import { User } from '@/api/user/user.entity';
 import { BaseEntity, Column, Entity, OneToMany, CreateDateColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Exclude } from 'class-transformer';
 
 export enum ChannelStatus {
 	public, 
@@ -23,8 +24,13 @@ export class Channel extends BaseEntity {
 	@Column()
 	name: string;
 
-	@Column({nullable: true})
+	@Exclude()
+	@Column({type: 'varchar', nullable: true, select: false})
 	password: string;
+
+	@Exclude()
+	@Column({type: 'varchar', nullable: true, select: false})
+	salt: string;
 
 	@Column({type: 'enum', enum: ChannelStatus, default: ChannelStatus.public})
 	status: ChannelStatus;

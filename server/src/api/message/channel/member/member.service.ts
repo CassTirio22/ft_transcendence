@@ -1,18 +1,17 @@
+import * as bcrypt from 'bcryptjs';
 import { Block } from './../../../user/block/block.entity';
 import { BlockService } from '@/api/user/block/block.service';
 import { FriendshipService } from './../../../user/friendship/friendship.service';
 import { Friendship } from './../../../user/friendship/friendship.entity';
-import { channel } from 'diagnostics_channel';
 import { Channel, ChannelStatus } from './../channel.entity';
 import { ChannelService } from './../channel.service';
 import { BecomeMemberDto, AddMemberDto, ChangeMemberStatusDto, ChangeMemberLevelDto, QuitChannelDto, DeleteMemberDto } from './member.dto';
 import { Member, MemberLevel, MemberStatus } from './member.entity';
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Brackets, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { Request } from 'express';
 import { User } from '@/api/user/user.entity';
-import { IsObject } from 'class-validator';
 
 interface MemberSettings {
 	user:		number;
@@ -47,7 +46,8 @@ export class MemberService {
 		else if (ourChannel.members.length > 0) {
 			throw new HttpException('Conflict', HttpStatus.CONFLICT);
 		}
-		else if (ourChannel.status == ChannelStatus.private || (ourChannel.status == ChannelStatus.protected && !this._checkPassword(password, ourChannel))) {
+		else if (ourChannel.status == ChannelStatus.private ||
+				(ourChannel.status == ChannelStatus.protected && !this._checkPassword(password, ourChannel))) {
 			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		}
 		return (await this.insert({user: user.id, channel: channel, level: MemberLevel.regular}));
@@ -203,7 +203,7 @@ export class MemberService {
 	}
 
 	private _checkPassword(password: string, channel: Channel): boolean {
-		return (password == channel.password);
+		return bcrypt.compareSync(password, channel.password);
 	}
 
 	private _stringToLevel(level: string): MemberLevel {

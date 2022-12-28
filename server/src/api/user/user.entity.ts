@@ -35,7 +35,7 @@ export class User extends BaseEntity {
 	 * The User's password. Note that it will be removed from the response data.
 	 */
 	@Exclude()
-	@Column({ type: 'varchar' })
+	@Column({ type: 'varchar'/*, select: false*/})
 	public password!: string;
 	/**
 	 * The User's name

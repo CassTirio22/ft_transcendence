@@ -1,41 +1,85 @@
 
-
-section.profile {
+#profile-main {
 	display: flex;
 	flex-direction: column;
-	align-items: start;
-	width: 100%;
-	min-height: 100vh;
-	padding-left: 100px;
-	padding-top: 100px;
+	align-items: flex-start;
+	justify-content: flex-start;
+	padding: 50px 0 0 calc(60px + 10%);
 
-	.button {
-		padding-top: 2%;
+	h1 {
+		font-size: 2rem;
+		margin-bottom: 20px;
 	}
 
-	.changeProfile {
-		padding-top: 10%;
-		display: flex;
-		flex-direction: column;
+	>p {
+		margin-bottom: 80px;
+	}
 
-		.fillChanges {
+	h2 {
+		font-size: 1.6rem;
+		margin-bottom: 20px;
+	}
+
+	.update-picture-container {
+
+		.img-edit {
 			display: flex;
-			float: left;
-
-			input {
+			flex-direction: row;
+			margin-bottom: 80px;
+			img {
+				border-radius: 64px;
 				background-color: var(--surface);
-				border: none;
-				outline: none;
-				margin: 5px 0;
-				padding: 5px 10px;
-				border-radius: var(--border_radius);
-				font-size: 1rem;
+				height: 128px;
+				width: 128px;
+				margin-right: 30px;
+			}
+
+			.profile-picture-edit {
+				display: flex;
+				flex-direction: column;
+
+				button:first-child {
+					margin-bottom: 10px;
+				}
 			}
 		}
-
-		// .button {
-		// 	padding-top : 10px;
-		// }
 	}
-	
+
+	.update-container {
+		min-width: 300px;
+
+		&>* {
+			margin-bottom: 20px;
+		}
+	}
+
+	.change-password {
+		.password-row {
+			display: flex;
+			flex-direction: row;
+
+			div:nth-child(1),
+			div:nth-child(2) {
+				margin-right: 10px;
+			}
+
+			button {
+				min-width: 180px;
+			}
+		}
+	}
+
+	.update-footer {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+		padding: 20px;
+		width: 100%;
+		margin-top: 40px;
+
+		button:first-child {
+			margin-right: 10px;
+		}
+	}
 }

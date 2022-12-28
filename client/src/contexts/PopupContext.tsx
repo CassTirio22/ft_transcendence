@@ -40,7 +40,6 @@ export function createPopupCtx() {
         };
 
         const set_toast = (level: string, title: string, description: string) => {
-            console.log("coucou")
             setToast.current(level, title, description);
         }
 
@@ -66,7 +65,9 @@ export function createPopupCtx() {
             });
             const [reload, setReload] = useState(false);
 
-            const set_config_fn = (confirm_value: any) => setConfirm(confirm_value)
+            const set_config_fn = (confirm_value: any) => {
+                setConfirm(confirm_value)
+            }
             
             useEffect(() => {
                 set_confirm_ref.current = set_config_fn;
@@ -196,6 +197,7 @@ export function createPopupCtx() {
 			}}
 			{...props} >
                 <Toast/>
+                <Confirm/>
                 <ProfileView reference={profile_ref} />
                 {props.children}
             </ctx.Provider>

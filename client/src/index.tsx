@@ -21,18 +21,18 @@ export const PopupContext = ctxe;
 
 const theme = createTheme({
 	palette: {
-		mode: "dark"
+		mode: "dark",
 	}
 });
 
 root.render(
 	<Provider store={store}>
 		<AuthProvider>
-			<PopupProvider>
-				<ThemeProvider theme={theme}>
-					<App/>
-				</ThemeProvider>
-			</PopupProvider>
+			<ThemeProvider theme={theme}>
+				<PopupProvider>
+						<App/>
+				</PopupProvider>
+			</ThemeProvider>
 		</AuthProvider>
 	</Provider>
 );

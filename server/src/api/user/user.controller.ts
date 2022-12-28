@@ -1,7 +1,7 @@
 import { ClassSerializerInterceptor, Controller, Req, UseGuards, UseInterceptors, Get, Put, Body, Inject, Param } from '@nestjs/common';
 import { Request } from 'express';
 import { JwtAuthGuard } from '@/api/user/auth/auth.guard';
-import { UpdateNameDto } from './user.dto';
+import { EditUserDto } from './user.dto';
 import { User } from './user.entity';
 import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
@@ -12,11 +12,11 @@ export class UserController {
   @Inject(UserService)
   private readonly service: UserService;
 
-	@Put('name')
+	@Put('edit')
 	@UseGuards(JwtAuthGuard)
 	@UseInterceptors(ClassSerializerInterceptor)
-	private updateName(@Body() body: UpdateNameDto, @Req() req: Request): Promise<number> {
-		return this.service.updateName(body, req);
+	private edit(@Body() body: EditUserDto, @Req() req: Request): Promise<string | never> {
+		return this.service.edit(body, req);
 	}
 
 	@Get('profile')
@@ -27,7 +27,7 @@ export class UserController {
 
 	@Get('other/:id')
 	@UseGuards(JwtAuthGuard)
-	private otherProfile(@Param('id') id, @Req() { user }: Request): Promise<User | never> {
+	private otherProfile(@Param('id') id: number, @Req() { user }: Request): Promise<User | never> {
 		return this.service.otherProfile(id, <User>user);
 	}
 

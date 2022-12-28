@@ -26,7 +26,7 @@ export class MemberController {
 
 	@Get('members/:channel')
 	@UseGuards(JwtAuthGuard)
-	private members(@Param('channel') channel, @Req() req: Request): Promise<Member[]> {
+	private members(@Param('channel') channel: number, @Req() req: Request): Promise<Member[]> {
 		return this.memberService.members(channel, <User>req.user);
 	}
 

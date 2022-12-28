@@ -23,13 +23,13 @@ export class MessageController{
 
 	@Get('directMessages/:direct')
 	@UseGuards(JwtAuthGuard)
-	directMessages(@Param('direct') direct, @Req() req: Request):  Promise<Message[]>{
+	directMessages(@Param('direct') direct: number, @Req() req: Request):  Promise<Message[]>{
 		return this.service.directMessages(direct, req);
 	}
 
 	@Get('channelMessages/:channel')
 	@UseGuards(JwtAuthGuard)
-	channelMessages(@Param('channel') channel, @Req() req: Request):  Promise<Message[]> {
+	channelMessages(@Param('channel') channel: number, @Req() req: Request):  Promise<Message[]> {
 		return this.service.channelMessages(channel, req);
 	}
 }

@@ -7,6 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import { createCtx } from './contexts/AuthContext';
 import { store } from './store';
 import { createPopupCtx } from './contexts/PopupContext';
+import { createTheme, ThemeProvider } from '@mui/material';
 
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
@@ -18,11 +19,19 @@ export const AuthContext = ctx;
 const [ctxe, PopupProvider] = createPopupCtx();
 export const PopupContext = ctxe;
 
+const theme = createTheme({
+	palette: {
+		mode: "dark"
+	}
+});
+
 root.render(
 	<Provider store={store}>
 		<AuthProvider>
 			<PopupProvider>
-				<App/>
+				<ThemeProvider theme={theme}>
+					<App/>
+				</ThemeProvider>
 			</PopupProvider>
 		</AuthProvider>
 	</Provider>

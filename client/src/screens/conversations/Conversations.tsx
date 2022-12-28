@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef } from 'react'
 import { connect } from 'react-redux';
-import { AuthContext } from '../..';
+import { AuthContext, PopupContext } from '../..';
 import ConversationList from '../../components/conversations/conversation_list/ConversationList'
 import ConversationOpen from '../../components/conversations/conversation_open/ConversationOpen'
 import { mapDispatchToProps, mapStateToProps } from '../../store/dispatcher';

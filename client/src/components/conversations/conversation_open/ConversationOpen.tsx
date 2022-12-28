@@ -1,6 +1,7 @@
 import { Menu, MenuItem } from '@mui/material';
-import React, { createRef, useEffect, useRef } from 'react'
+import React, { createRef, useContext, useEffect, useRef } from 'react'
 import { connect } from 'react-redux';
+import { PopupContext } from '../../..';
 import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
 import "./style.scss"
 
@@ -32,8 +33,9 @@ type User = {
 }
 
 const ConversationOpen: React.FC<Props> = (props: Props) => {
-	const [anchorEl, setAnchorEl] = React.useState(null);
+	const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement|null>(null);
 	const open = Boolean(anchorEl);
+	const {show_profile} = useContext(PopupContext);
 	const scroll_view = createRef<HTMLDivElement>();
 
 	const handleClick = (event: any) => {
@@ -97,7 +99,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 						const created_at = new Date(message.date);
 						return (
 							<div className='message-div' key={id}>
-								<div onClick={handleClick} className='message-sender-image-container'>
+								<div profile-id={sender.id} onClick={handleClick} className='message-sender-image-container'>
 									<img src={`https://avatars.dicebear.com/api/adventurer/${sender.image_path}.svg`} />
 								</div>
 								<div className='message-content'>
@@ -126,7 +128,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 					'aria-labelledby': 'basic-button',
 					}}
 				>
-					<MenuItem onClick={() => {console.log("first");handleClose()}}>Voir le profil</MenuItem>
+					<MenuItem onClick={() => {if (anchorEl != null){show_profile(anchorEl.getAttribute("profile-id")!)};handleClose()}}>Voir le profil</MenuItem>
 					<MenuItem onClick={() => {console.log("first");handleClose()}}>Parler en priver</MenuItem>
 					<MenuItem onClick={() => {console.log("first");handleClose()}}>Bloquer l'utilisateur</MenuItem>
 				</Menu>

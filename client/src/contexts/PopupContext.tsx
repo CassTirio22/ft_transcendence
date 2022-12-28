@@ -9,6 +9,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import { TOAST_LVL } from '../constants/constants';
 import CloseIcon from '@mui/icons-material/Close';
 import "./popup-context.scss"
+import ProfileView from '../components/profile_view/ProfileView';
 
 let type_value = "";
 
@@ -17,18 +18,26 @@ export function createPopupCtx() {
 	const open_confirm = (title: string, body="", confirm_value="", callback: any) => {};
     const close_confirm = () => {};
 	const set_toast = (level: string, title: string, description: string) => {};
+    const show_profile = (id: string) => {};
 
 	const ctx = createContext({
 		open_confirm: open_confirm,
 		close_confirm: close_confirm,
-		set_toast: set_toast
+		set_toast: set_toast,
+        show_profile: show_profile,
 	});
 
 	function PopupProvider(props: PropsWithChildren<{}>) {
         
         const set_confirm_ref = useRef((confirm_value: any) => {});
 
+        const profile_ref = useRef((id: string) => {});
+
         const setToast = useRef((level: string, title: string, description: string) => {});
+
+        const show_profile = (id: string) => {
+            profile_ref.current(id);
+        };
 
         const set_toast = (level: string, title: string, description: string) => {
             console.log("coucou")
@@ -182,10 +191,12 @@ export function createPopupCtx() {
 			<ctx.Provider value={{ 
                 open_confirm,
                 close_confirm,
-                set_toast
+                set_toast,
+                show_profile
 			}}
 			{...props} >
                 <Toast/>
+                <ProfileView reference={profile_ref} />
                 {props.children}
             </ctx.Provider>
 		);

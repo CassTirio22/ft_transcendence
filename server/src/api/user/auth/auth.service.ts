@@ -30,10 +30,10 @@ export class AuthService {
 	 */
 	public async register(body: RegisterDto): Promise<User | never> {
 		const { name, email, password }: RegisterDto = body;
-		let user: User = await this.repository.findOne({ where: { email } });
+		let user: User = await this.repository.findOne({ where: [{ email }, { name }] });
 
 		if (user) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. Another user already use this email/name.', HttpStatus.CONFLICT);
 		}
 
 		user = new User();

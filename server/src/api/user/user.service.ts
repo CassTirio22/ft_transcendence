@@ -36,7 +36,7 @@ export class UserService {
 			.orWhere('email = :userMail', {userMail: body.email})
 			.getOne())
 		if (duplicate && duplicate.id != user.id) {
-			throw new HttpException("Conflict", HttpStatus.CONFLICT);
+			throw new HttpException("Conflict. Another user uses this name/mail.", HttpStatus.CONFLICT);
 		}
 		let edited: User = (await this.repository.createQueryBuilder()
 			.update()
@@ -61,7 +61,7 @@ export class UserService {
 	public async otherProfile(id: number, user: User): Promise<User | never> {
 		let block: Block = await this.blockService.getBlock(id, user.id);
 		if (block) {
-			throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED);
+			throw new HttpException("Unauthorized. The other user blocked you.", HttpStatus.UNAUTHORIZED);
 		}
 		return (this.repository.createQueryBuilder()
 			.select()

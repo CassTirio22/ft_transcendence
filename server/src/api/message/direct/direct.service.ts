@@ -65,10 +65,13 @@ export class DirectService {
 			.getOne();
 		let friendship: Friendship = await this.friendshipService.friend(user, id);
 		if (!other) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not found. There is no user found with those criterias.', HttpStatus.NOT_FOUND);
 		}
-		else if (!friendship || other.direct1.length > 0 || other.direct2.length > 0) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+		else if (!friendship) {
+			throw new HttpException('Unauthorized. You are not friend with this user.', HttpStatus.UNAUTHORIZED);
+		}
+		else if (other.direct1.length > 0 || other.direct2.length > 0) {
+			throw new HttpException('Conflict. This direct already exists.', HttpStatus.CONFLICT);
 		}
 		await this._checkEitherBlocked(user.id, other.id);
 		return (await this.directRepository.createQueryBuilder()
@@ -83,7 +86,7 @@ export class DirectService {
 	private async _checkEitherBlocked(user1: number, user2: number): Promise<void> {
 		let block: Block = await this.blockService.getEitherBlock(user1, user2);
 		if (block) {
-			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			throw new HttpException('Unauthorized. You have blocked this user OR this user blocked you.', HttpStatus.UNAUTHORIZED);
 		}
 	}
 }

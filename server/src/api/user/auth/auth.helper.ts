@@ -89,7 +89,7 @@ export class AuthHelper {
 		const decoded: unknown = this.jwt.verify(token);
 
 		if (!decoded) {
-			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+			throw new HttpException('Forbidden. You token is not correct.', HttpStatus.FORBIDDEN);
 		}
 
 		const user: User = await this.validateUser(decoded);

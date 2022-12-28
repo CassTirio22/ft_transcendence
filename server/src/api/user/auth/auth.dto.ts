@@ -15,8 +15,7 @@ export class RegisterDto {
 	public readonly password: string;
 
 	@IsString()
-	@IsOptional()
-	public readonly name?: string;
+	public readonly name: string;
 }
 
 /**

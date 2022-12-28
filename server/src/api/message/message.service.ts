@@ -49,12 +49,12 @@ export class MessageService {
 			origin: (await this.directService.updateDate(origin, user.id))
 		};
 		if (!settings.origin) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not found. Did not found a direct with those criterias.', HttpStatus.NOT_FOUND);
 		}
 		let other: number = (user.id == (<Direct>settings.origin).user1_id) ? (<Direct>settings.origin).user2_id : (<Direct>settings.origin).user1_id;
 		let friendship: Friendship = await this.friendshipService.friend(user, other);
 		if (!friendship) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. You cannot send direct messages to a non-friend user.', HttpStatus.CONFLICT);
 		}
 		await this._checkEitherBlocked(user.id, other);
 		return this._insert(settings);
@@ -70,7 +70,7 @@ export class MessageService {
 			origin: (await this.channelService.updateDate(origin, user))
 		};
 		if (!settings.origin) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
+			throw new HttpException('Not found. Did not found a channel with those criterias.', HttpStatus.NOT_FOUND)
 		}
 		await this._checkMemberStatus(origin, user, [MemberStatus.regular]);
 		return this._insert(settings);
@@ -121,14 +121,14 @@ export class MessageService {
 	private async _checkMemberStatus(channel: number, user: User, authorized: MemberStatus[]): Promise<void> {
 		let member: Member =  await this.memberService.member(channel, user);
 		if (!member || authorized.find((obj) => {return member.status == obj}) == undefined) {
-			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED)
+			throw new HttpException('Unauthorized. You are no member of this channel OR you do not have correct status.', HttpStatus.UNAUTHORIZED)
 		}
 	}
 
 	private async _checkEitherBlocked(user1: number, user2: number): Promise<void> {
 		let block: Block = await this.blockService.getEitherBlock(user1, user2);
 		if (block) {
-			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			throw new HttpException('Unauthorized. You cannot do this action while being blocked OR blocking the other user.', HttpStatus.UNAUTHORIZED);
 		}
 	}
 }

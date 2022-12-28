@@ -69,10 +69,10 @@ export class ChannelService {
 
 		let ourChannel: Channel = await this.channel(channel, user.id);
 		if (!ourChannel) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not found. Did not found a channel with those criterias.', HttpStatus.NOT_FOUND);
 		}
 		else if (ourChannel.members.length < 1 || ourChannel.members[0].level != MemberLevel.owner) {
-			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			throw new HttpException('Unauthorized. You must be the owner of this channel for this action.', HttpStatus.UNAUTHORIZED);
 		}
 		name = (name != null) ? name : ourChannel.name;
 		password = (password != null) ? password : ourChannel.password;
@@ -95,7 +95,7 @@ export class ChannelService {
 	public async updateDate(channelId: number, user: User): Promise<Channel> {
 		let member: Member = await this.memberService.member(channelId , user);
 		if (!member) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not found. Did not found a member with those criterias.', HttpStatus.NOT_FOUND);
 		}
 		let channel: Channel[] = (await this.channelRepository.createQueryBuilder('channel')
 			.update()
@@ -111,7 +111,7 @@ export class ChannelService {
 		const { name, password, status}: CreateChannelDto = body;
 
 		if (status == "protected" && !password) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. A password must be set to create a protected channel.', HttpStatus.CONFLICT);
 		}
 		let salt: string = bcrypt.genSaltSync(user.id);
 		let channel: Channel = (await this.channelRepository.createQueryBuilder()
@@ -132,7 +132,7 @@ export class ChannelService {
 
 		let owner: Member = (await this.memberService.members(channel, user)).find( (obj) => {return obj.level == MemberLevel.owner} );
 		if (owner.user_id != user.id) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. You cannot delete a channel without being its owner.', HttpStatus.CONFLICT);
 		}
 		return (await this.channelRepository.createQueryBuilder('channel')
 			.delete()

@@ -41,14 +41,14 @@ export class MemberService {
 
 		let ourChannel: Channel = await this.channelService.channel(channel, user.id);
 		if (!ourChannel) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not found. Did not found a channel with those criterias.', HttpStatus.NOT_FOUND);
 		}
 		else if (ourChannel.members.length > 0) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. You seem to be already a member of this channel.', HttpStatus.CONFLICT);
 		}
 		else if (ourChannel.status == ChannelStatus.private ||
 				(ourChannel.status == ChannelStatus.protected && !this._checkPassword(password, ourChannel))) {
-			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			throw new HttpException('Unauthorized. This channel is private OR you have put a wrong password on a protected channel.', HttpStatus.UNAUTHORIZED);
 		}
 		return (await this.insert({user: user.id, channel: channel, level: MemberLevel.regular}));
 	}
@@ -87,7 +87,7 @@ export class MemberService {
 			.select()
 			.getMany());
 		if (!members.find( (obj) => {return obj.user_id == user.id} )) {
-			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			throw new HttpException('Unauthorized. You are no member of this channel.', HttpStatus.UNAUTHORIZED);
 		}
 		return members;
 	}
@@ -137,7 +137,7 @@ export class MemberService {
 
 		let members: Member[] = await this.members(channel, user);
 		if (members.length == 0) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not found. This case should not happen.', HttpStatus.NOT_FOUND);
 		}
 		else if (members.length == 1) {
 			await this.channelService.delete({channel: channel}, user);
@@ -145,7 +145,7 @@ export class MemberService {
 		}
 		let owner: Member = members.find( (obj) => {return obj.user_id == newOwner} );
 		if (!owner || user.id == newOwner) {
-			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			throw new HttpException('Unauthorized. You are no owner of this channel OR you have put yourself as next owner.', HttpStatus.UNAUTHORIZED);
 		}
 		let member: Member = members.find( (obj) => {return obj.user_id == user.id} );
 		if (member.level == MemberLevel.owner) {
@@ -166,16 +166,16 @@ export class MemberService {
 	private async _checkUserChangePermission(settings: MemberSettings, user: User): Promise<Channel> {	
 		let ourChannel: Channel  = (await this.channelService.channelJoinMembers(settings.channel));
 		if (!ourChannel) {
-			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not Found. No channel was found with those criterias.', HttpStatus.NOT_FOUND);
 		}
 		let userMember: Member = ourChannel.members.find( (obj) => {return obj.user_id == user.id} );
 		let wantedMember: Member = ourChannel.members.find( (obj) => {return obj.user_id == settings.user} );
 		if (!wantedMember || !userMember) {
-			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not Found. You and/or the other user are no members of this channel.', HttpStatus.NOT_FOUND);
 		}
 		else if (userMember.level == MemberLevel.regular || 
 				(userMember.level == MemberLevel.administrator && wantedMember.level != MemberLevel.regular)) {
-			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			throw new HttpException('Unauthorized. The other user have at least the same member level as you.', HttpStatus.UNAUTHORIZED);
 		}
 		return ourChannel;
 	}
@@ -183,7 +183,7 @@ export class MemberService {
 	private async _checkUserAddPermission(settings: MemberSettings, user: User): Promise<Channel> {	
 		let ourChannel: Channel  = await (this.channelService.channelJoinMembers(settings.channel));
 		if (!ourChannel) {
-			throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not Found. No channel found with those criterias.', HttpStatus.NOT_FOUND);
 		}
 		let userMember: Member = ourChannel.members.find( (obj) => {return obj.user_id == user.id} );
 		let wantedMember: Member = ourChannel.members.find( (obj) => {return obj.user_id == settings.user} );
@@ -194,10 +194,12 @@ export class MemberService {
 			block ||
 			(ourChannel.status == ChannelStatus.private && userMember.level == MemberLevel.regular) || 
 			userMember.status != MemberStatus.regular) {
-			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			throw new HttpException('Unauthorized. You are not member if this channel OR you are not friend with this user\
+				 OR this user blocked you OR you blocked this user OR you are muted/banned in this channel OR your member level is not high enough (private channel)'
+			 , HttpStatus.UNAUTHORIZED);
 		}
 		if (wantedMember) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. This user seems to already be in this channel.', HttpStatus.CONFLICT);
 		}
 		return ourChannel;
 	}

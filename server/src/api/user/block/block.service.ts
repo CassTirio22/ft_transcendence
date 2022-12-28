@@ -25,10 +25,10 @@ export class BlockService {
 			.where("id = :blockedId", {blockedId: id})
 			.getOne());
 		if (!blockedUser) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not found. No user found with those criterias.', HttpStatus.NOT_FOUND);
 		}
 		else if (user.id == id || blockedUser.blockTo.length > 0) {
-			throw new HttpException("Conflict", HttpStatus.CONFLICT);
+			throw new HttpException("Conflict. You are already blocking this user OR you tried to block yourself.", HttpStatus.CONFLICT);
 		}
 		return (await this.blockRepository.createQueryBuilder()
 			.insert()
@@ -82,7 +82,7 @@ export class BlockService {
 		const { id }: DeleteBlockDto = body;
 
 		if (user.id == id) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. You tried to unblock yourself.', HttpStatus.CONFLICT);
 		}
 		return (await this.blockRepository.createQueryBuilder()
 			.delete()

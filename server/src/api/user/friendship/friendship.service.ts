@@ -32,10 +32,10 @@ export class FriendshipService {
 			.where("id = :friendId", {friendId: id})
 			.getOne();
 		if (!friend) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND)
+			throw new HttpException('Not found. No user was found with those criterias.', HttpStatus.NOT_FOUND)
 		}
 		else if (user.id == id || friend.sent.length > 0 || friend.received.length > 0) {
-			throw new HttpException("Conflict", HttpStatus.CONFLICT);
+			throw new HttpException("Conflict. You already sent a request to this user OR this user already sent you a request OR you sent it to yourself.", HttpStatus.CONFLICT);
 		}
 		return (await this.friendshipRepository.createQueryBuilder()
 			.insert()
@@ -68,7 +68,7 @@ export class FriendshipService {
 
 	public async friend(user: User, other: number): Promise<Friendship | never> {
 		if (user.id == other) {
-			throw new HttpException("Conflict", HttpStatus.CONFLICT);
+			throw new HttpException("Conflict. You cannot be your friend.", HttpStatus.CONFLICT);
 		}
 		return (await this.friendshipRepository.createQueryBuilder('friendship')
 			.select()
@@ -82,7 +82,7 @@ export class FriendshipService {
 		const user: User = <User>req.user;
 
 		if (user.id == friend) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. You cannot a friendship with yourself. This path should never happen.', HttpStatus.CONFLICT);
 		}
 		return (await this.friendshipRepository.createQueryBuilder()
 			.delete()
@@ -97,7 +97,7 @@ export class FriendshipService {
 	private async _checkEitherBlocked(user1: number, user2: number): Promise<void> {
 		let block: Block = await this.blockService.getEitherBlock(user1, user2);
 		if (block) {
-			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			throw new HttpException('Unauthorized. One of those users blocked the other.', HttpStatus.UNAUTHORIZED);
 		}
 	}
 }

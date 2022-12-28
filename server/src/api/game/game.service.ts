@@ -40,10 +40,10 @@ export class GameService {
 			.where("user.id IN (:...playerIds)", {playerIds: [player1Id, player2Id]})
 			.getMany();
 		if (players.length < 2) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not found. Did not found users with those criterias.', HttpStatus.NOT_FOUND);
 		}
 		else if (players.length > 2 || players.map(p => p.won.length).concat(players.map(p => p.lost.length)).filter(n => n != 0).length > 0) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. A player seems to already be playing.', HttpStatus.CONFLICT);
 		}
 		return (await this.gameRepository.createQueryBuilder()
 			.insert()
@@ -61,10 +61,10 @@ export class GameService {
 
 		let channel: Channel  = await this.channelService.channel(id, user.id);
 		if (!channel) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not found. Did not found channel with those criterias.', HttpStatus.NOT_FOUND);
 		}
 		else if (!channel.members[0] || channel.members[0].status != MemberStatus.regular) {
-			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			throw new HttpException('Unauthorized. You are no member of this channel OR you have been banned/muted.', HttpStatus.UNAUTHORIZED);
 		}
 		let game: Game = await this.gameRepository.createQueryBuilder()
 			.select()
@@ -75,7 +75,7 @@ export class GameService {
 			}))
 			.getOne();
 		if (game) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. You seem to be already playing a game.', HttpStatus.CONFLICT);
 		}
 		return (await this.gameRepository.createQueryBuilder()
 			.insert()
@@ -94,7 +94,7 @@ export class GameService {
 			.andWhere(":winnerId IN (winner.id, loser.id)", {winnerId: winnerId})
 			.getOne();
 		if (!game) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not found. Did not found a game with those criterias.', HttpStatus.NOT_FOUND);
 		}
 		let settings: UpdateGameSettings = this._recalculateELO({
 			id: gameId,
@@ -121,10 +121,10 @@ export class GameService {
 			}))
 			.getMany();
 		if (games.length == 0) {
-			throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+			throw new HttpException('Not found. Did not found a game with those criterias.', HttpStatus.NOT_FOUND);
 		}
 		if (games.length > 1 || games[0].id != game || user.id == games[0].winner_id) {
-			throw new HttpException('Conflict', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. You seem to already be playing a game.', HttpStatus.CONFLICT);
 		}
 		return (await this.gameRepository.createQueryBuilder()
 			.update()

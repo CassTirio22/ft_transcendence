@@ -12,8 +12,6 @@ function Navbar() {
 	const location = useLocation();
 	const {user, signOut, isLoggedIn} = useContext(AuthContext);
 
-	console.log(user.token)
-
 	return (
 		<aside className="navigation">
 			<nav id="navbar">
@@ -58,6 +56,19 @@ function Navbar() {
 							<div className="navigation_elem">
 								<i className="fas fa-eye"></i>
 								<p>Watch match</p>
+							</div>
+						</Link>
+					</li>
+					<li>
+						<div className="separator">
+							<h2 className="separator_title">Conversations</h2>
+						</div>
+					</li>
+					<li className={location.pathname === "/conversations" ? "active hov" : "hov" }>
+						<Link to='/conversations'>
+							<div className="navigation_elem">
+								<i className="fas fa-comments"></i>
+								<p>Conversations</p>
 							</div>
 						</Link>
 					</li>

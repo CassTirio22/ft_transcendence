@@ -5,7 +5,8 @@ import axios, { set_instance_token, unset_instance_token } from "../service/axio
 
 export function createCtx() {
 	const default_user = {
-		pseudo: "Pseudo",
+		id: 0,
+		name: "Pseudo",
 		first_name: "Anonymous",
 		last_name: "User",
 		email: "email",
@@ -45,11 +46,9 @@ export function createCtx() {
 				name: name
 			})
 			.then(response => {
-				console.log(response.data)
 				return response.data;
 			})
 			.catch(e => {
-				console.log(e);
 				return null;
 			})
 			if (!token) {
@@ -64,14 +63,12 @@ export function createCtx() {
 		{
 			const user = await axios.put("user/name", { name: name })
 			.then(response => {
-				console.log(response.data);
 				return response.data;
 			})
 			.catch(e => {
-				console.log(e);
 				return null;
 			})
-			setUser({...user, pseudo: user.name});
+			setUser({...user});
 			return "";
 		}
 
@@ -82,11 +79,9 @@ export function createCtx() {
 				password: password,
 			})
 			.then(response => {
-				console.log(response.data)
 				return response.data;
 			})
 			.catch(e => {
-				console.log(e)
 				return null;
 			})
 			if (!token) {
@@ -95,8 +90,8 @@ export function createCtx() {
 			set_instance_token(token);
 			setUser({...user, token: token});
 			sessionStorage.setItem("token", token);
-			await profile();
-			return token;
+			const name = await profile();
+			return name;
 		}
 
 		const signOut = async () => {
@@ -109,15 +104,13 @@ export function createCtx() {
 		const profile = async () => {
 			const user = await axios.get("user/profile"/*, {user}, { withCredentials: true }*/)
 			.then(response => {
-				console.log(response.data)
 				return response.data;
 			})
 			.catch(e => {
-				console.log(e)
 				return null;
 			})
-			setUser({...user, pseudo: user.name, email: user.email});
-			return "";
+			setUser({...user, email: user.email});
+			return user.name;
 		}
 
 		const isLoggedIn = () => {
@@ -136,7 +129,7 @@ export function createCtx() {
 			const token = sessionStorage.getItem("token");
 			if (token) {
 				set_instance_token(token);
-				setUser({...user, token: token})
+				profile();
 			}
 		}, [])
 		

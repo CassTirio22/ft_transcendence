@@ -101,6 +101,17 @@ const messagesSlice = createSlice({
 			}
 			state.channels = cha;
 			state.direct = direct;
+			if (cha.length) {
+				state.current = {
+					is_channel: true,
+					id: cha[0].id,
+				}
+			} else if (direct.length) {
+				state.current = {
+					is_channel: false,
+					id: direct[0].id,
+				}
+			}
         })
 		builder.addCase(fetchSpecificChannel.fulfilled, (state, {payload}) => {
 			const chan = [...state.channels];

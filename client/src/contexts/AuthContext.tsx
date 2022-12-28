@@ -90,8 +90,8 @@ export function createCtx() {
 			set_instance_token(token);
 			setUser({...user, token: token});
 			sessionStorage.setItem("token", token);
-			await profile();
-			return token;
+			const name = await profile();
+			return name;
 		}
 
 		const signOut = async () => {
@@ -110,7 +110,7 @@ export function createCtx() {
 				return null;
 			})
 			setUser({...user, email: user.email});
-			return "";
+			return user.name;
 		}
 
 		const isLoggedIn = () => {

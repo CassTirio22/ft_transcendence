@@ -1,7 +1,7 @@
 import { Menu, MenuItem } from '@mui/material';
 import React, { createRef, useContext, useEffect, useRef } from 'react'
 import { connect } from 'react-redux';
-import { PopupContext } from '../../..';
+import { AuthContext, PopupContext } from '../../..';
 import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
 import "./style.scss"
 
@@ -35,6 +35,7 @@ type User = {
 const ConversationOpen: React.FC<Props> = (props: Props) => {
 	const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement|null>(null);
 	const open = Boolean(anchorEl);
+	const {user} = useContext(AuthContext);
 	const {show_profile} = useContext(PopupContext);
 	const scroll_view = createRef<HTMLDivElement>();
 
@@ -104,7 +105,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 								</div>
 								<div className='message-content'>
 									<div className='message-header'>
-										<span className='message-sender-name'>{sender.full_name}</span>
+										<span className='message-sender-name'>{sender.full_name}{sender.id == user.id ? " ( you )" : ""}</span>
 										<span>{created_at.toDateString()}</span>
 									</div>
 									<div className='message-body'>

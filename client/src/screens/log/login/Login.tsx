@@ -1,9 +1,10 @@
 
 import React, { useContext, useState } from 'react'
-import { AuthContext } from '../../..';
+import { AuthContext, PopupContext } from '../../..';
 import "./login.scss"
 import logo from "../../../assets/images/test.png"
 import Button from '../../../components/button/Button';
+import { TOAST_LVL } from '../../../constants/constants';
 
 function AlreadyLogged() {
 	return (
@@ -18,14 +19,17 @@ function AlreadyLogged() {
 
 function LogInForm()
 {
-	const [userName, setUserName] = useState("");
-	const [password, setPassword] = useState("");
+	const [userName, setUserName] = useState("trash.todev@gmail.com");
+	const [password, setPassword] = useState("Django07");
 	const {user, signIn, profile} = useContext(AuthContext)
+	const {set_toast} = useContext(PopupContext);
 
 	const handleSubmit = async () => {
 		const response = await signIn(userName, password);
 		if (response == "error") {
-			alert("error");
+			console.log(response)
+		} else {
+			set_toast(TOAST_LVL.SUCCESS, "Successfully login", `Welcome ${response}`)
 		}
 	}
 

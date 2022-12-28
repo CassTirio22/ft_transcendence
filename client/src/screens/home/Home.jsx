@@ -3,14 +3,7 @@ import { PopupContext } from '../..'
 import { TOAST_LVL } from '../../constants/constants';
 import "./style.scss"
 
-const Home = () => {
-
-	const {set_toast} = useContext(PopupContext);
-
-	useEffect(() => {
-		set_toast(TOAST_LVL.SUCCESS, "wesh c'est ok", "i hope so")
-	}, [])
-	
+const Home = () => {	
 
 	return (
 		<div>Home</div>

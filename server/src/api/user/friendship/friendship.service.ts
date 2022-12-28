@@ -1,4 +1,7 @@
-import { Injectable, HttpException, HttpStatus, Catch } from '@nestjs/common';
+import { BlockService } from '@/api/user/block/block.service';
+import { read } from 'fs';
+import { Block } from './../block/block.entity';
+import { Injectable, HttpException, HttpStatus, Catch, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, Not, QueryResult, QueryBuilder, InsertResult, Brackets } from 'typeorm';
 import { Friendship, FriendshipStatus } from './friendship.entity';
@@ -11,15 +14,17 @@ export class FriendshipService {
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
-
 		@InjectRepository(Friendship)
-		private readonly friendshipRepository: Repository<Friendship>
+		private readonly friendshipRepository: Repository<Friendship>,
+		@Inject(BlockService)
+		private blockService: BlockService
 	){}
 
 	public async requestFriend(body: RequestFriendDto, req: Request): Promise<Friendship | never> {
 		const user: User = <User>req.user;
 		const { id }: RequestFriendDto = body;
 
+		await this._checkEitherBlocked(user.id, id);
 		let friend: User = await this.userRepository.createQueryBuilder('user')
 			.select()
 			.leftJoinAndSelect("user.sent", "sent", "sent.solicited = :solicitedId", {solicitedId: user.id})
@@ -61,6 +66,17 @@ export class FriendshipService {
 			.getMany());
 	}
 
+	public async friend(user: User, other: number): Promise<Friendship | never> {
+		if (user.id == other) {
+			throw new HttpException("Conflict", HttpStatus.CONFLICT);
+		}
+		return (await this.friendshipRepository.createQueryBuilder('friendship')
+			.select()
+			.where("friendship.applicant IN (:...applicantId)", {applicantId: [user.id, other]})
+			.andWhere("friendship.solicited IN (:...solicitedId)", {solicitedId: [user.id, other]})
+			.getOne());
+	}
+
 	public async deleteFriend(body: DeleteFriendDto, req: Request): Promise<number> {
 		const { friend } : DeleteFriendDto = body;
 		const user: User = <User>req.user;
@@ -73,5 +89,15 @@ export class FriendshipService {
 			.where("applicant_id IN (:...friendsId_1)", {friendsId_1: [user.id, friend]})
 			.andWhere("solicited_id IN (:...friendsId_2)", {friendsId_2: [user.id, friend]})
 			.execute()).affected;
+	}
+
+
+	/* PRIVATE UTILS -- PUT SOMEWHERE ELSE FOR CLEAN ARCHITECTURE*/
+
+	private async _checkEitherBlocked(user1: number, user2: number): Promise<void> {
+		let block: Block = await this.blockService.getEitherBlock(user1, user2);
+		if (block) {
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+		}
 	}
 }

@@ -1,7 +1,7 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateNameDto {
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   public readonly name?: string;
 }

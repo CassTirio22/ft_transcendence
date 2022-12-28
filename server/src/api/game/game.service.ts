@@ -1,5 +1,3 @@
-import { Interface } from 'readline';
-import { IsNumber } from 'class-validator';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, DeleteResult, Repository, InsertResult } from 'typeorm';
@@ -23,7 +21,6 @@ export class GameService {
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
-
 		@InjectRepository(Game)
 		private readonly gameRepository: Repository<Game>
 	){}
@@ -103,6 +100,7 @@ export class GameService {
 			.select()
 			.where(":player IN (winner.id, loser.id)", {player: user.id})
 			.andWhere("game.status = :gameStatus", {gameStatus: GameStatus.done})
+			.orderBy("game.date", 'ASC')
 			.getMany();
 	}
 

@@ -37,5 +37,4 @@ export class FriendshipController {
 	private deleteFriend(@Body() body: DeleteFriendDto, @Req() req: Request): Promise<number>{
 		return this.service.deleteFriend(body, req);
 	}
-
 }

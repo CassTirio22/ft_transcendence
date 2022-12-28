@@ -5,20 +5,17 @@ import { User } from "../user.entity";
 import { BlockDto, DeleteBlockDto } from "./block.dto";
 import { Block } from "./block.entity";
 import { Request } from 'express';
-import { NOTFOUND } from "dns";
 
 @Injectable({})
 export class BlockService {
 	constructor(
 		@InjectRepository(Block)
 		private blockRepository: Repository<Block>,
-		
 		@InjectRepository(User)
 		private userRepository: Repository<User>
 	){}
 
-	public async block(body: BlockDto, req: Request): Promise<Block>
-	{
+	public async block(body: BlockDto, req: Request): Promise<Block> {
 		const user: User = <User>req.user;
 		const { id }: BlockDto = body;
 
@@ -39,11 +36,43 @@ export class BlockService {
 			.execute()).generatedMaps[0] as Block;
 	}
 
-	public async getBlocked(user: User): Promise<User[]> 
-	{
+	public async getBlock(user: number, other: number): Promise<Block | never> {
+		return (await this.blockRepository.createQueryBuilder('block')
+			.select()
+			.where("blocker_id = :userId", {userId: user})
+			.andWhere("blocked_id = :otherId", {otherId: other})
+			.getOne());
+	}
+
+	public async getEitherBlock(user1: number, user2: number): Promise<Block | never> {
+		return (await this.blockRepository.createQueryBuilder('block')
+			.select()
+			.where("block.blocker_id IN (:...usersId)", {usersId: [user1, user2]})
+			.andWhere("block.blocked_id IN (:...othersId)", {othersId: [user1, user2]})
+			.getOne());
+	}
+
+	public async getBlockedList(user: User): Promise<User[]> {
 		return (await this.userRepository.createQueryBuilder('user')
 			.innerJoin("user.blockTo", "blockTo","blockTo.blocker = :blockerId", {blockerId: user.id} )
 			.select()
+			.getMany());
+	}
+
+	public async getBlockerList(user: User): Promise<User[]> {
+		return (await this.userRepository.createQueryBuilder('user')
+			.innerJoin("user.blockedBy", "blockedBy","blockedBy.blocked = :blockedId", {blockedId: user.id} )
+			.select()
+			.getMany());
+	}
+
+	public async getEitherBlockedList(user: User): Promise<User[]> {
+		return (await this.userRepository.createQueryBuilder('user')
+			.leftJoinAndSelect("user.blockTo", "blockTo")
+			.leftJoinAndSelect("user.blockedBy", "blockedBy")
+			.select()
+			.where("blockTo.blocker = :blockerId", {blockerId: user.id})
+			.orWhere("blockedBy.blocked = :blockedId", {blockedId: user.id})
 			.getMany());
 	}
 

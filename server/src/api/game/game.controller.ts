@@ -1,4 +1,4 @@
-import { StartCompetitiveGameDto, StartFriendlyGameDto, UpdateGameDto, DeleteGameDto } from './game.dto';
+import { StartCompetitiveGameDto, StartFriendlyGameDto, UpdateGameDto, DeleteGameDto, JoinGameDto } from './game.dto';
 import { JwtAuthGuard } from './../user/auth/auth.guard';
 import { GameService } from './game.service';
 import { Game } from './game.entity'
@@ -14,20 +14,34 @@ export class GameController {
 	@Post('startCompetitive')
 	@UseInterceptors(ClassSerializerInterceptor)
 	private startCompetitiveGame(@Body() body: StartCompetitiveGameDto): Promise<Game | never> {
-		return this.service.startCompetitiveGame(body);
+		return this.service.startUserGame(body, true);
 	}
 
 	@Post('startFriendly')
 	@UseGuards(JwtAuthGuard)
 	@UseInterceptors(ClassSerializerInterceptor)
 	private startFriendlyGame(@Body() body: StartFriendlyGameDto, @Req() req: Request): Promise<Game | never> {
-		return this.service.startFriendlyGame(body, req);
+		return this.service.startUserGame({player1Id: (<User>req.user).id, player2Id: body.id}, false);
+	}
+
+	@Post('startChannel')
+	@UseGuards(JwtAuthGuard)
+	@UseInterceptors(ClassSerializerInterceptor)
+	private startChannelGame(@Body() body: StartFriendlyGameDto, @Req() req: Request): Promise<Game | never> {
+		return this.service.startChannelGame(body, req);
 	}
 
 	@Put('update')
 	@UseInterceptors(ClassSerializerInterceptor)
 	private updateGame(@Body() body: UpdateGameDto): Promise<number> {
 		return this.service.updateGame(body);
+	}
+
+	@Put('join')
+	@UseGuards(JwtAuthGuard)
+	@UseInterceptors(ClassSerializerInterceptor)
+	private joinGame(@Body() body: JoinGameDto, @Req() req: Request): Promise<number> {
+		return this.service.joinGame(body, req);
 	}
 
 	@Get('games')

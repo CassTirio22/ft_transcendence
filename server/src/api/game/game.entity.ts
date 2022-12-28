@@ -21,13 +21,19 @@ export class Game extends BaseEntity {
 	@CreateDateColumn({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", name: "gameDate" })
 	public date!: Date;
 
+	@Column({type: 'integer'})
+	public winner_id: number;
+
+	@Column({type: 'integer', nullable: true})
+	public loser_id: number;
+
 	@ManyToOne(type => User, user => user.won)
 	@JoinColumn({name: "winner_id"})
-	winner: User;
+	public winner: User;
 
-	@ManyToOne(type => User, user => user.lost)
+	@ManyToOne(type => User, user => user.lost, {nullable: true})
 	@JoinColumn({name: "loser_id"})
-	loser: User;
+	public loser: User;
 
 	@Column({ type: 'integer', default: 0 })
 	public winnerScore!: number;

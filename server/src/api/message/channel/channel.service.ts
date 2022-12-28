@@ -7,7 +7,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Brackets, Repository } from "typeorm";
 import { CreateChannelDto, DeleteChannelDto, EditChannelDto } from './channel.dto';
 import { Channel, ChannelStatus } from "./channel.entity";
-import { Request, query } from 'express';
+import { Request } from 'express';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -49,6 +49,17 @@ export class ChannelService {
 				.where("members.user_id = :memberId", {memberId: userId})
 				.orWhere("channel.status IN (:...status)", {status: [ChannelStatus.public, ChannelStatus.protected]})
 			}))
+			.getMany());
+	}
+
+	public async myChannels(userId: number): Promise<Channel[]> {
+		return ( await this.channelRepository.createQueryBuilder('channel')
+			.innerJoin("channel.members", "members", "members.status != :bannedStatus", {bannedStatus: MemberStatus.banned})
+			.leftJoinAndSelect("channel.messages", "messages")
+			.leftJoin("channel.messages", "next_messages", "messages.date < next_messages.date")
+			.select()
+			.where("next_messages.id IS NULL")
+			.andWhere("members.user_id = :memberId", {memberId: userId})
 			.getMany());
 	}
 

@@ -11,7 +11,7 @@ export class StartCompetitiveGameDto {
 
 export class StartFriendlyGameDto {
 	@IsNumber()
-	public readonly channelId: number;
+	public readonly id: number;
 }
 
 export class UpdateGameDto {
@@ -29,6 +29,11 @@ export class UpdateGameDto {
 
 	@IsBoolean()
 	public readonly didInterrupt: boolean;
+}
+
+export class JoinGameDto {
+	@IsNumber()
+	public readonly game: number;
 }
 
 export class DeleteGameDto {

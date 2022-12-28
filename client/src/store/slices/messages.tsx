@@ -1,286 +1,54 @@
-import { createAsyncThunk, createSlice, Dispatch } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, current, Dispatch } from "@reduxjs/toolkit";
 import axios from "../../service/axios"
 
-const channels = [
-	{
-		id: 1,
-		title: "First channel",
-		last_message: {
-			content: "Hey how are you all?",
-			created_at: new Date().toJSON(),
-		},
-		messages: [
-			{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			}
-		],
-		members: [
-			{
-				id: 1,
-				full_name: "Bob Marley",
-				image_path: "aebrvdvqe",
-			},
-			{
-				id: 2,
-				full_name: "Jean Vient",
-				image_path: "abeqgrsdvf",
-			},
-		]
-	},
-	{
-		id: 2,
-		title: "Hehe brooo",
-		last_message: {
-			content: "Tromadaire?",
-			created_at: new Date().toJSON(),
-		},
-		messages: [
-			{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			}
-		],
-		members: [
-			{
-				id: 1,
-				full_name: "Albert Marley",
-				image_path: "hegrh",
-			},
-			{
-				id: 2,
-				full_name: "Jeanne Vient",
-				image_path: "gegvafawe",
-			},
-		]
-	},
-	{
-		id: 3,
-		title: "Trololol une autre wesh",
-		last_message: {
-			content: "Just another one!",
-			created_at: new Date().toJSON(),
-		},
-		messages: [
-			{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 3,
-				created_at: new Date().toJSON()
-			}
-		],
-		members: [
-			{
-				id: 1,
-				full_name: "Bob Test",
-				image_path: "badsfeaww",
-			},
-			{
-				id: 2,
-				full_name: "Jean Vient",
-				image_path: "hwegj",
-			},
-			{
-				id: 3,
-				full_name: "tpetit",
-				image_path: "sdfjoqwifjos",
-			},
-		]
-	}
-]
 
-const direct = [
-	{
-		id: 1,
-		title: "Jason d'Ublet",
-		last_message: {
-			content: "Tu viens quand?",
-			created_at: new Date().toJSON(),
-		},
-		messages: [
-			{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			}
-		],
-		members: [
-			{
-				id: 1,
-				full_name: "Jason d'Ublet",
-				image_path: "qwfaosjdf",
-			},{
-				id: 2,
-				full_name: "tpetit",
-				image_path: "sdfjoqwifjos",
-			},
-		]
-	},{
-		id: 2,
-		title: "Laura Murelle",
-		last_message: {
-			content: "Comment vas tu?",
-			created_at: new Date().toJSON(),
-		},
-		messages: [
-			{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 2,
-				created_at: new Date().toJSON()
-			},{
-				content: "Hey how are you all?",
-				sender: 1,
-				created_at: new Date().toJSON()
-			}
-		],
-		members: [
-			{
-				id: 1,
-				full_name: "Laura Murelle",
-				image_path: "wfojs",
-			},
-			{
-				id: 2,
-				full_name: "tpetit",
-				image_path: "sdfjoqwifjos",
-			},
-		]
-	},
-]
+type Channel = {
+	id: number,
+	messages: any,
+	title: string,
+	members: any
+}
+
+const test: Channel[] = []
+
+type fetch_params = {
+	user: any,
+	friends: any
+}
 
 export const fetchMessages = createAsyncThunk(
 	"messages/fetchMessages",
-	async (events) => {
-		const response = await axios.get("/");
-		return response;
+	async (params: fetch_params) => {
+		const response = await axios.get("/user/discussions");
+		return {data: response.data, user: params.user, friends: params.friends};
+	}
+)
+
+export const fetchSpecificChannel = createAsyncThunk(
+	"messages/fetchSpecificChannel",
+	async (id: string) => {
+		const response = await axios.get("/message/channelMessages/" + id);
+		const members = await axios.get("/member/members/" + id);
+		return {id: id, messages: response.data, members: members.data};
+	}
+)
+
+export const fetchSpecificDirect = createAsyncThunk(
+	"messages/fetchSpecificDirect",
+	async (id: string) => {
+		const response = await axios.get("/message/directMessages/" + id);
+		return {id: id, messages: response.data};
 	}
 )
 
 const messagesSlice = createSlice({
 	name: "messages",
 	initialState: {
-		channels: [...channels],
-		direct: [...direct],
+		channels: test,
+		direct: test,
 		current: {
 			is_channel: false,
-			id: 1,
+			id: -1,
 		}
 	},
 	reducers: {
@@ -289,9 +57,75 @@ const messagesSlice = createSlice({
         },
 	},
 	extraReducers: builder => {
-        builder.addCase(fetchMessages.fulfilled, (state, action) => {
-            return state;
+        builder.addCase(fetchMessages.fulfilled, (state, {payload}) => {
+			const {data, user, friends} = payload;
+			const user_id = payload.user?.id;
+			let cha: Channel[] = [];
+			let direct: Channel[] = [];
+			for (let index = 0; index < data.length; index++) {
+				const conv = data[index];
+				if (conv.user1_id) {
+					const id_other = conv.user1_id == user_id ? conv.user2_id : conv.user1_id;
+					const fr = friends.filter((elem: Channel) => elem.id == id_other)[0];
+					const direct_elem = {
+						id: conv.id,
+						messages: conv.messages,
+						title: fr.name,
+						members: [
+							{
+								id: user_id,
+								full_name: user.name,
+								image_path: user.name
+							},
+							{
+								id: user_id,
+								full_name: fr.name,
+								image_path: fr.name
+							},
+						]
+					}
+					direct.push(direct_elem);
+				} else {
+					const direct_elem = {
+						id: conv.id,
+						messages: conv.messages,
+						title: conv.name,
+						members: []
+					}
+					cha.push(direct_elem)
+				}
+			}
+            state.current = {
+				is_channel: false,
+				id: -1,
+			}
+			state.channels = cha;
+			state.direct = direct;
         })
+		builder.addCase(fetchSpecificChannel.fulfilled, (state, {payload}) => {
+			const chan = [...state.channels];
+			const old = state.channels.filter(e => e.id.toString() == payload.id);
+			if (!old.length) {
+				return state;
+			}
+			const members = payload.members.map((user: any) => {
+				return {
+					id: user.user_id,
+					full_name: user.user.name,
+					image_path: user.user.name
+				}
+			})
+			state.channels.splice(state.channels.indexOf(old[0]), 1, {...state.channels[state.channels.indexOf(old[0])], messages: payload.messages, members: members})
+		})
+
+		builder.addCase(fetchSpecificDirect.fulfilled, (state, {payload}) => {
+			const chan = [...state.direct];
+			const old = state.direct.filter(e => e.id.toString() == payload.id);
+			if (!old.length) {
+				return state;
+			}
+			state.direct.splice(state.direct.indexOf(old[0]), 1, {...state.direct[state.direct.indexOf(old[0])], messages: payload.messages})
+		})
       }
 })
 
@@ -301,7 +135,9 @@ export const selectConversation = (type: any) => (dispatch: any) => {
 
 export const messagesMethods = {
 	fetchMessages,
-	selectConversation
+	selectConversation,
+	fetchSpecificChannel,
+	fetchSpecificDirect
 }
 
 export default messagesSlice

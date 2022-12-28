@@ -18,6 +18,7 @@ import LandingMain from "./LandingMain";
 export type Props = {
 	messages?: any,
 	fetchMessages?: any,
+	fetchFriends?: any
 };
 
 /**
@@ -25,9 +26,15 @@ export type Props = {
  * Use the HashRouter to keep the UI in sync with the URL.
  * Call of the NavBar with Main as child.
  */
-const App: React.FC<Props> = ({messages, fetchMessages}) => {
+const App: React.FC<Props> = (props) => {
 
-	const {isLoggedIn} = useContext(AuthContext);
+	const {isLoggedIn, user} = useContext(AuthContext);
+
+	useEffect(() => {
+		if (isLoggedIn())
+	  		props.fetchFriends();
+	}, [user])
+	
 
 	if (!isLoggedIn()) {
 		return (

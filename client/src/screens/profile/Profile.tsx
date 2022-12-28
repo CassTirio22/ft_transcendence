@@ -9,7 +9,7 @@ import { debug } from 'console';
 function ProfileCustomization() {
 	const {user, rename} = useContext(AuthContext)
 	const [changing, setChanging] = useState(false);
-	const [pseudo, setPseudo] = useState(user.pseudo);
+	const [pseudo, setPseudo] = useState(user.name);
 
 	const handleSubmit = async () => {
 		await rename(pseudo);
@@ -44,11 +44,10 @@ function ProfileCustomization() {
 
 function Profile() {
 	const {user} = useContext(AuthContext)
-	console.log("TEST:" + user.pseudo);
 	return (
 		<section className='profile'>
 			<div className='name'>
-				<h1>{user.pseudo}</h1>
+				<h1>{user.name}</h1>
 			</div>
 			<div className='mail'>
 				<h3>{user.email}</h3>

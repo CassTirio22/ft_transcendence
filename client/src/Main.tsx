@@ -1,4 +1,6 @@
+
 import { Routes, Route } from 'react-router-dom';
+import Home from './screens/home/Home';
 import Login from './screens/log/login/Login';
 import Register from './screens/log/register/Register';
 import Profile from './screens/profile/Profile';
@@ -9,9 +11,7 @@ import Profile from './screens/profile/Profile';
 const Main = () => {
 return (         
 	<Routes>
-		<Route path='/' element={<Login/>} />
-		<Route path='/login' element={<Login/>} />
-		<Route path='/register' element={<Register/>} />
+		<Route path='/' element={<Home/>} />
 		<Route path='/me/profile' element={<Profile/>} />
 	</Routes>
 );

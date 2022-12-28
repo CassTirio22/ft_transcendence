@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import reportWebVitals from './reportWebVitals';
 import { createCtx } from './contexts/AuthContext';
 import { store } from './store';
+import { createPopupCtx } from './contexts/PopupContext';
 
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
@@ -14,10 +15,15 @@ const root = ReactDOM.createRoot(
 const [ctx, AuthProvider] = createCtx();
 export const AuthContext = ctx;
 
+const [ctxe, PopupProvider] = createPopupCtx();
+export const PopupContext = ctxe;
+
 root.render(
 	<Provider store={store}>
 		<AuthProvider>
-			<App/>
+			<PopupProvider>
+				<App/>
+			</PopupProvider>
 		</AuthProvider>
 	</Provider>
 );

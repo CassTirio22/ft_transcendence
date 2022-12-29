@@ -1,3 +1,4 @@
+import { UserGateway } from './user.gateway';
 import { JwtStrategy } from './auth/auth.strategy';
 import { ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
@@ -34,6 +35,16 @@ import { BlockService } from './block/block.service';
   		}),TypeOrmModule.forFeature([User, Channel, Direct, Member, Block, Friendship, Message]), 
 		AuthModule],
 	controllers: [UserController],
-  	providers: [UserService, ChannelService, DirectService, MemberService, BlockService, FriendshipService, AuthHelper, JwtStrategy],
+  	providers: [
+		UserService, 
+		ChannelService, 
+		DirectService, 
+		MemberService, 
+		BlockService, 
+		FriendshipService, 
+		AuthHelper, 
+		JwtStrategy,
+		UserGateway
+	],
 })
 export class UserModule {}

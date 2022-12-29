@@ -2,7 +2,7 @@ import { UserGateway } from './user.gateway';
 import { JwtStrategy } from './auth/auth.strategy';
 import { ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
-import { JwtService, JwtModule } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { AuthHelper } from './auth/auth.helper';
 import { Message } from './../message/message.entity';
 import { Friendship } from './friendship/friendship.entity';

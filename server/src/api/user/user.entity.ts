@@ -64,6 +64,9 @@ export class User extends BaseEntity {
 	public status!: UserStatus;
 
 	@Column({type: 'varchar', nullable: true})
+	public socket: string;
+
+	@Column({type: 'varchar', nullable: true})
 	public picture: string;
 
 	@OneToMany(type => Game, game => game.winner)

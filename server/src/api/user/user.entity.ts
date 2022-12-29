@@ -63,6 +63,9 @@ export class User extends BaseEntity {
 	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.online})
 	public status!: UserStatus;
 
+	@Column({type: 'varchar', nullable: true})
+	public picture: string;
+
 	@OneToMany(type => Game, game => game.winner)
 	won: Game[];
 

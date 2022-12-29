@@ -11,6 +11,7 @@ import { User } from './user.entity';
 import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
 import { DirectService } from '../message/direct/direct.service';
+import { unlinkSync, writeFileSync } from 'fs';
 
 @Injectable()
 export class UserService {
@@ -82,5 +83,37 @@ export class UserService {
 		let discussions: (Channel | Direct)[] = await this.channelService.myChannels(user.id);
 		discussions = discussions.concat(await this.directService.directs(user));
 		return (discussions.sort( (A, B) => (new Date(A.date)).getTime() - (new Date(B.date)).getTime()));
+	}
+
+	public async uploadPicture(picture: any, req: Request): Promise<number> {
+		const user: User = <User>req.user;
+		const filePath = this.fileName(user);
+		if (user.picture) {
+			unlinkSync(filePath);
+		}
+		writeFileSync(filePath, picture.buffer);
+		return (await this.repository.createQueryBuilder()
+			.update()
+			.where("id = :userId", {userId: user.id})
+			.set({picture: filePath})
+			.execute()).affected;
+	}
+
+	public async deletePicture(req: Request) {
+		const user: User = <User>req.user;
+		if (user.picture) {
+			unlinkSync(this.fileName(user));
+		}
+		return (await this.repository.createQueryBuilder()
+			.update()
+			.where("id = :userId", {userId: user.id})
+			.set({picture: null})
+			.execute()).affected;
+	}
+
+	/* UTILS, PUT SOMEWHERE ELSE WHEN REFACTORING */
+
+	public fileName(user: User) {
+		return `${process.cwd()}/uploads/pictures/profile_${user.id}`;
 	}
 }

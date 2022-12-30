@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Request } from 'express';
 import { EditUserDto } from './user.dto';
-import { User } from './user.entity';
+import { User, UserStatus } from './user.entity';
 import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
 import { DirectService } from '../message/direct/direct.service';
@@ -75,6 +75,22 @@ export class UserService {
 			.select()
 			.orderBy('user.score', 'ASC')
 			.getMany())
+	}
+
+	public async saveSocket(user: User, id: string): Promise<number | never> {
+		return (await this.repository.createQueryBuilder()
+			.update()
+			.set({socket: id, status: UserStatus.online})
+			.where("id = :userId", {userId: user.id})
+			.execute()).affected;
+	}
+
+	public async deleteSocket(id: string): Promise<number | never> {
+		return (await this.repository.createQueryBuilder()
+			.update()
+			.set({socket: null, status: UserStatus.offline})
+			.where("socket = :socketId", {socketId: id})
+			.execute()).affected;
 	}
 
 	public async discussions(req: Request): Promise<(Direct | Channel)[]> {

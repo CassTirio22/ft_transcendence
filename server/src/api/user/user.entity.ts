@@ -60,7 +60,7 @@ export class User extends BaseEntity {
 	/**
 	 * Is the User online, offline or playing a game 
 	 */
-	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.online})
+	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.offline})
 	public status!: UserStatus;
 
 	@Column({type: 'varchar', nullable: true})

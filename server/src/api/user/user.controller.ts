@@ -36,7 +36,7 @@ export class UserController {
 	@Get('ladder')
 	@UseGuards(JwtAuthGuard)
 	private ladder(@Req() { user }: Request): Promise<User[]> {
-		return this.service.ladder(<User>user);
+		return this.service.ladder();
 	}
 	
 	@Get('discussions')

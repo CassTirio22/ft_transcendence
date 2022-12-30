@@ -66,6 +66,18 @@ export class FriendshipService {
 			.getMany());
 	}
 
+	public async friendsBySocket(socket: string): Promise<User[] | never> {
+		return (await this.userRepository.createQueryBuilder('user')
+			.leftJoin("user.received", "rec", "rec.status = :recStatus", {recStatus: FriendshipStatus.accepted})
+			.leftJoin("user.sent", "sent", "sent.status = :sentStatus", {sentStatus: FriendshipStatus.accepted})
+			.leftJoin("rec.applicant", "app")
+			.leftJoin("sent.solicited", "sol")
+			.select()
+			.where("app.socket = :appSocket", {appSocket: socket})
+			.orWhere("sent.socket = :solSocket", {solSocket: socket})
+			.getMany());
+	}
+
 	public async friend(user: User, other: number): Promise<Friendship | never> {
 		if (user.id == other) {
 			throw new HttpException("Conflict. You cannot be your friend.", HttpStatus.CONFLICT);

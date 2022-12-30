@@ -70,7 +70,7 @@ export class UserService {
 			.getOne());
 	}
 
-	public async ladder(user: User): Promise<User[]> {
+	public async ladder(): Promise<User[]> {
 		return (await this.repository.createQueryBuilder('user')
 			.select()
 			.orderBy('user.score', 'ASC')
@@ -90,6 +90,13 @@ export class UserService {
 			.update()
 			.set({socket: null, status: UserStatus.offline})
 			.where("socket = :socketId", {socketId: id})
+			.execute()).affected;
+	}
+
+	public async usersDefault(): Promise<number | never>{
+		return (await this.repository.createQueryBuilder()
+			.update()
+			.set({socket: null, status: UserStatus.offline})
 			.execute()).affected;
 	}
 

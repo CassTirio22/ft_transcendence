@@ -12,7 +12,7 @@ import { MemberService } from './../message/channel/member/member.service';
 import { Member } from './../message/channel/member/member.entity';
 import { DirectService } from './../message/direct/direct.service';
 import { ChannelService } from './../message/channel/channel.service';
-import { Module } from '@nestjs/common';
+import { Inject, Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './user.controller';
 import { User } from './user.entity';
@@ -47,4 +47,13 @@ import { BlockService } from './block/block.service';
 		UserGateway
 	],
 })
-export class UserModule {}
+export class UserModule implements OnModuleInit {
+	constructor (
+		@Inject(UserService)
+		private userService: UserService,
+	) {}
+
+	async onModuleInit() {
+		this.userService.usersDefault();
+	}
+}

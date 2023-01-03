@@ -28,11 +28,12 @@ interface DiscussionMessage {
 type MessageFormats = ConnectionMessage | DiscussionMessage;
 type MessageMethod = (client: Socket, message: MessageFormats) => void;
 
-// @Injectable()
 class UserGatewayUtil {
 	constructor(
 		@Inject(FriendshipService)
 		private friendshipService: FriendshipService,
+		@Inject(UserService)
+		private userService: UserService,
 	) {}
 
 
@@ -61,9 +62,13 @@ class UserGatewayUtil {
 		this.emitToSet(clients, set, message, method);
 	}
 
-	async getFriendsSocket(clients: Socket[] , client: string): Promise<string[]> {
-		let friends: string[] = (await this.friendshipService.friendsBySocket(client)).map( (obj) => {return obj.socket} );
-		return clients.map( (socket) => {return socket.id} ).filter( (id) => {return friends.includes(id)} );
+	async userDisconnection(clients: Socket[], user: User, client: Socket) {
+		if (user) {
+			const message: ConnectionMessage = {user_id: user.id , status: false};
+			this.emitToFriends(clients, client.id, message, this.emitConnection);
+		}
+		await this.userService.deleteSocket(client.id);
+		clients.splice(clients.indexOf(client), 1);
 	}
 }
 
@@ -83,7 +88,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private friendshipService: FriendshipService,
 	) {
 		this.clients = [];
-		this.util = new UserGatewayUtil(friendshipService);
+		this.util = new UserGatewayUtil(friendshipService, userService);
 	}
 
 	async afterInit(): Promise<any | never> {
@@ -91,8 +96,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		setInterval(() => {
 			this.clients.forEach((async (element) => {
 				if (element.disconnected) {
-					await this.userService.deleteSocket(element.id);
-					this.clients.splice(this.clients.indexOf(element), 1);
+					this.util.userDisconnection(this.clients, users.find( (obj) => (obj.socket == element.id) ), element);
 				}
 			}));
 		}, 5000);
@@ -105,7 +109,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			await this.userService.saveSocket(user, client.id);
 			this.clients.push(client);
 
-			let message: ConnectionMessage = {user_id: user.id, status: true};
+			const message: ConnectionMessage = {user_id: user.id, status: true};
 			this.util.emitToFriends(this.clients, client.id, message, this.util.emitConnection);
 			this.util.emitConnection(client, message);
 		}
@@ -116,13 +120,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 	
     async handleDisconnect(client: Socket): Promise<any> {
-		
-		let user: User = await this.userService.userBySocket(client.id);
-		if (user) {
-			let message: ConnectionMessage = {user_id: user.id , status: false};
-			this.util.emitToFriends(this.clients, client.id, message, this.util.emitConnection);
-		}
-		await this.userService.deleteSocket(client.id);
-		this.clients.splice(this.clients.indexOf(client), 1);
+		const user: User = await this.userService.userBySocket(client.id);
+		await this.util.userDisconnection(this.clients, user, client);
 	}
 }

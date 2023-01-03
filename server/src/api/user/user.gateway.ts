@@ -73,10 +73,11 @@ class UserGatewayUtil {
 }
 
 
-
 @WebSocketGateway()
 export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
 	private clients:	Socket[];
+	private channels:	string[];
+	private directs:	string[];
 	private util:		UserGatewayUtil
 
 	constructor(
@@ -88,6 +89,8 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private friendshipService: FriendshipService,
 	) {
 		this.clients = [];
+		this.channels = [];
+		this.directs = [];
 		this.util = new UserGatewayUtil(friendshipService, userService);
 	}
 
@@ -118,7 +121,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			client.disconnect();
 		}
 	}
-	
+
     async handleDisconnect(client: Socket): Promise<any> {
 		const user: User = await this.userService.userBySocket(client.id);
 		await this.util.userDisconnection(this.clients, user, client);

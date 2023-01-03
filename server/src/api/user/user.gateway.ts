@@ -12,7 +12,6 @@ import {
 import { Socket, Server } from "socket.io";
 import { AuthHelper } from "./auth/auth.helper";
 import { User } from "./user.entity";
-import { emit } from 'process';
 
 interface ConnectionMessage {
 	user_id: number;
@@ -27,19 +26,58 @@ interface DiscussionMessage {
 	content: string;
 }
 
+type MessageFormats = ConnectionMessage | DiscussionMessage;
+type MessageMethod = (client: Socket, message: MessageFormats) => void;
+
+class UserGatewayUtil {
+	constructor(
+		@Inject(FriendshipService)
+		private friendshipService: FriendshipService,
+	) {}
+
+	/* MESSAGES EMITION */
+
+	public emitConnection(client: Socket, message: ConnectionMessage): void {
+		client.emit('connection', message);
+	}
+
+	public emitMessage(client: Socket, message: DiscussionMessage): void {
+		client.emit('message', message);
+	}
+
+
+	
+	/* UTILS */
+
+	emitToSet(clients: Socket[], set: string[], message: MessageFormats, method: MessageMethod) {
+		clients.forEach( (client) => {
+			if (set.includes(client.id))
+				method(client, message);
+		});
+	}
+
+	async emitToFriends(clients: Socket[], client: string, message: MessageFormats, method: MessageMethod) {
+		let set: string[] = (await this.friendshipService.friendsBySocket(client)).map( (obj) => {return obj.socket} );
+		this.emitToSet(clients, set, message, method);
+	}
+
+	async getFriendsSocket(clients: Socket[] , client: string): Promise<string[]> {
+		let friends: string[] = (await this.friendshipService.friendsBySocket(client)).map( (obj) => {return obj.socket} );
+		return clients.map( (socket) => {return socket.id} ).filter( (id) => {return friends.includes(id)} );
+	}
+}
+
+
 @WebSocketGateway()
 export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
-	private clients: Socket[];
-	@WebSocketServer()
-	server;
+	private clients:	Socket[];
+	private util:		UserGatewayUtil;
 
 	constructor(
 		@Inject(AuthHelper)
 		private authHelper: AuthHelper,
 		@Inject(UserService)
 		private userService: UserService,
-		@Inject(FriendshipService)
-		private friendshipService: FriendshipService,
 	) {
 		this.clients = [];
 	}
@@ -62,7 +100,10 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const user: User = await this.authHelper.getUser(token); //not ok if wrong token
 			await this.userService.saveSocket(user, client.id);
 			this.clients.push(client);
-			client.emit('connection', {message: 'Connected to MegaMegaPong server.'});
+
+			let message: ConnectionMessage = {user_id: user.id, status: true};
+			this.util.emitToFriends(this.clients, client.id, message, this.util.emitConnection);
+			this.util.emitConnection(client, message);
 		}
 		catch (error) {
 			client.emit('error', {message: 'Connection unauthorized.'});
@@ -73,18 +114,9 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     async handleDisconnect(client: Socket): Promise<any> {
 		await this.userService.deleteSocket(client.id);
 		this.clients.splice(this.clients.indexOf(client), 1);
-	}
 
-	async getFriendsSocket(clients: string): Promise<string[]> {
-		let friends: string[] = (await this.friendshipService.friendsBySocket(clients)).map( (obj) => {return obj.socket} );
-		return this.clients.map( (socket) => {return socket.id} ).filter( (id) => {return friends.includes(id)} );
-	}
-
-	sendMessagesToSet(clients: string[], event: string, data: any) {
-		this.server.emit(event, data);
-		this.server.clients.forEach( (client) => {
-			if (clients.includes(client))
-				client.emit(event, data);
-		});
+		let user: User = await this.userService.userBySocket(client.id);
+		let message: ConnectionMessage = {user_id: user.id , status: false};
+		this.util.emitToFriends(this.clients, client.id, message, this.util.emitConnection);
 	}
 }

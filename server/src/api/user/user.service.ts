@@ -70,6 +70,13 @@ export class UserService {
 			.getOne());
 	}
 
+	public async userBySocket(socket: string): Promise<User | never> {
+		return (await this.repository.createQueryBuilder()
+			.select()
+			.where('socker = :socketId', {socketId: socket})
+			.getOne());
+	}
+
 	public async ladder(): Promise<User[]> {
 		return (await this.repository.createQueryBuilder('user')
 			.select()

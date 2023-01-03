@@ -74,7 +74,7 @@ export class FriendshipService {
 			.leftJoin("sent.solicited", "sol")
 			.select()
 			.where("app.socket = :appSocket", {appSocket: socket})
-			.orWhere("sent.socket = :solSocket", {solSocket: socket})
+			.orWhere("sol.socket = :solSocket", {solSocket: socket})
 			.getMany());
 	}
 

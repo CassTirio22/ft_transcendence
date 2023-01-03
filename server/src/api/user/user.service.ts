@@ -73,7 +73,7 @@ export class UserService {
 	public async userBySocket(socket: string): Promise<User | never> {
 		return (await this.repository.createQueryBuilder()
 			.select()
-			.where('socker = :socketId', {socketId: socket})
+			.where('socket = :socketId', {socketId: socket})
 			.getOne());
 	}
 

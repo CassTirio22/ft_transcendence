@@ -1,7 +1,6 @@
 import { FriendshipService } from './friendship/friendship.service';
-import { Message } from './../message/message.entity';
 import { UserService } from './user.service';
-import { Inject, HttpException, HttpStatus } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { 
 	OnGatewayConnection, 
 	OnGatewayDisconnect, 
@@ -29,11 +28,13 @@ interface DiscussionMessage {
 type MessageFormats = ConnectionMessage | DiscussionMessage;
 type MessageMethod = (client: Socket, message: MessageFormats) => void;
 
+// @Injectable()
 class UserGatewayUtil {
 	constructor(
 		@Inject(FriendshipService)
 		private friendshipService: FriendshipService,
 	) {}
+
 
 	/* MESSAGES EMITION */
 
@@ -46,7 +47,6 @@ class UserGatewayUtil {
 	}
 
 
-	
 	/* UTILS */
 
 	emitToSet(clients: Socket[], set: string[], message: MessageFormats, method: MessageMethod) {
@@ -68,18 +68,22 @@ class UserGatewayUtil {
 }
 
 
+
 @WebSocketGateway()
 export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
 	private clients:	Socket[];
-	private util:		UserGatewayUtil;
+	private util:		UserGatewayUtil
 
 	constructor(
 		@Inject(AuthHelper)
 		private authHelper: AuthHelper,
 		@Inject(UserService)
 		private userService: UserService,
+		@Inject(FriendshipService)
+		private friendshipService: FriendshipService,
 	) {
 		this.clients = [];
+		this.util = new UserGatewayUtil(friendshipService);
 	}
 
 	async afterInit(): Promise<any | never> {
@@ -93,7 +97,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			}));
 		}, 5000);
 	}
-	
+
     async handleConnection(client: Socket, ...args: any[]): Promise<any | never> {
 		try {
 			const token: string = <string>client.handshake.headers.authorization;
@@ -112,11 +116,13 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 	
     async handleDisconnect(client: Socket): Promise<any> {
+		
+		let user: User = await this.userService.userBySocket(client.id);
+		if (user) {
+			let message: ConnectionMessage = {user_id: user.id , status: false};
+			this.util.emitToFriends(this.clients, client.id, message, this.util.emitConnection);
+		}
 		await this.userService.deleteSocket(client.id);
 		this.clients.splice(this.clients.indexOf(client), 1);
-
-		let user: User = await this.userService.userBySocket(client.id);
-		let message: ConnectionMessage = {user_id: user.id , status: false};
-		this.util.emitToFriends(this.clients, client.id, message, this.util.emitConnection);
 	}
 }

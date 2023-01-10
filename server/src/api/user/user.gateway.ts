@@ -59,8 +59,9 @@ class UserGatewayUtil {
 			-The whole instructions above are there to avoid to check all members+users in each channel
 			
 			-Will still need to check who is blocked in the DB, not very compatible with the channel system
-				 -indeed always check who blocked the sender to not see the message
-				 -from there creating a temporary room with all persons that should not receive the message and use except key word before the emit keyword
+				-indeed always check who blocked the sender to not see the message
+				-from there creating a temporary room with all persons that should not receive the message and use except key word before the emit keyword
+				-https://github.com/socketio/socket.io/issues/3629
 
 		HOW TO STOCK THE CHANNELS? => map(channelId: string, channel: Channel | Direct)
 	*/

@@ -63,6 +63,8 @@ class UserGatewayUtil {
 				-from there creating a temporary room with all persons that should not receive the message and use except key word before the emit keyword
 				-https://github.com/socketio/socket.io/issues/3629
 
+			-When someone block someone else also send through a socket -> just notif, can be hidden in the front until the page is reloaded
+
 		HOW TO STOCK THE CHANNELS? => map(channelId: string, channel: Channel | Direct)
 	*/
 
@@ -169,6 +171,10 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}, 10000); //every 10 secs
 		//SOMETHING TO DO
 		//CHECK ABOUT MUTED / BANNED HAS ENDED
+		//GETTER OF ALL MEMBERS => CHECK FOR ALL IF TIMED MUTE/BAN HAS CHANGE AND UPDATE IT (do all that in service)
+		//from there check if some of the users returned are connected
+			//if they were banned join them to channel and send message to client
+			//if they were muted just notify them
 	}
 
 	//client connect

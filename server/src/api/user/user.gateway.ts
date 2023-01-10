@@ -23,14 +23,13 @@ interface ConnectionMessage {
 
 interface DiscussionMessage {
 	author_id: number;
-	date: number;
 	direct_id: number;
 	channel_id: number;
 	content: string;
 }
 
 type MessageFormats = ConnectionMessage | DiscussionMessage;
-type MessageMethod = (client: Socket, message: MessageFormats) => void;
+type MessageMethod = (client: Socket, message: MessageFormats) => boolean;
 
 class UserGatewayUtil {
 	constructor(
@@ -43,13 +42,19 @@ class UserGatewayUtil {
 
 	/* MESSAGES EMITION */
 
-	public emitConnection(client: Socket, message: ConnectionMessage): void {
+	public emitConnection(client: Socket, message: ConnectionMessage): boolean {
 		client.emit('connection', message);
+		return true;
 	}
 
-	public emitMessage(client: Socket, message: DiscussionMessage): void {
+	public emitMessage(client: Socket, message: DiscussionMessage): boolean {
 		let channelId: string = this.defineChannelId(message);
+		//just check if client in channel, will have to check about mute/ban, blocked
+		if (!client.rooms.has(channelId)) {
+			return false;
+		}
 		client.to(channelId).emit('message', message);
+		return true;
 	}
 
 	/* UTILS */
@@ -128,6 +133,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.util = new UserGatewayUtil(friendshipService, userService);
 	}
 
+	//regular loop
 	async afterInit(): Promise<any | never> {
 		const users: User[] = await this.userService.ladder();
 		setInterval(() => {
@@ -141,6 +147,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}, 10000); //every 10 secs
 	}
 
+	//client connect
     async handleConnection(client: Socket, ...args: any[]): Promise<any | never> {
 		try {
 			//manage auth
@@ -164,12 +171,25 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 	}
 
+	//client disconnect
     async handleDisconnect(client: Socket): Promise<any> {
 		const user: User = await this.userService.userBySocket(client.id);
 		await this.util.userDisconnection(this.clients, user, client);
 		//leave every channels joined (should remove each empty room at some point)
 		client.rooms.forEach( room => { client.leave(room);} )
 	}
+
+	//client send message to channel
+	@SubscribeMessage("message")
+	handleMessage(client: Socket, data: DiscussionMessage)
+	{
+		//check if client has the right to send to channel
+		if (!this.util.emitMessage(client, data))
+			client.emit('error', {message: 'Sending messages in this channel unauthorized.'});
+	}
+
+	// @SubscribeMessage("join")
+	// handleJoin(client: Socket, data)
 
 	joinChannel(client: Socket, channelId: string): void {
 		if (!this.channels.includes(channelId))

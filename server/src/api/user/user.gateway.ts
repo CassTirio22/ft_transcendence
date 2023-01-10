@@ -1,3 +1,4 @@
+import { channel } from 'diagnostics_channel';
 import { FriendshipService } from './friendship/friendship.service';
 import { UserService } from './user.service';
 import { Inject, Injectable } from "@nestjs/common";
@@ -5,12 +6,15 @@ import {
 	OnGatewayConnection, 
 	OnGatewayDisconnect, 
 	OnGatewayInit, 
+	SubscribeMessage, 
 	WebSocketGateway,
 	WebSocketServer, 
 } from "@nestjs/websockets";
-import { Socket, Server } from "socket.io";
+import { Socket, Server, ServerOptions } from "socket.io";
 import { AuthHelper } from "./auth/auth.helper";
 import { User } from "./user.entity";
+import { Channel } from '../message/channel/channel.entity';
+import { Direct } from '../message/direct/direct.entity';
 
 interface ConnectionMessage {
 	user_id: number;
@@ -44,13 +48,13 @@ class UserGatewayUtil {
 	}
 
 	public emitMessage(client: Socket, message: DiscussionMessage): void {
-		client.emit('message', message);
+		let channelId: string = this.defineChannelId(message);
+		client.to(channelId).emit('message', message);
 	}
-
 
 	/* UTILS */
 
-	emitToSet(clients: Socket[], set: string[], message: MessageFormats, method: MessageMethod) {
+	emitToSet(clients: Socket[], set: string[], message: MessageFormats, method: MessageMethod): void {
 		clients.forEach( (client) => {
 			if (set.includes(client.id))
 				method(client, message);
@@ -62,19 +66,49 @@ class UserGatewayUtil {
 		this.emitToSet(clients, set, message, method);
 	}
 
-	async userDisconnection(clients: Socket[], user: User, client: Socket) {
+	async userDisconnection(clients: Socket[], user: User, client: Socket): Promise<void> {
+		//send to friends about disconnection
 		if (user) {
 			const message: ConnectionMessage = {user_id: user.id , status: false};
 			this.emitToFriends(clients, client.id, message, this.emitConnection);
 		}
+
+		//delete socket and remove it from socket list
 		await this.userService.deleteSocket(client.id);
 		clients.splice(clients.indexOf(client), 1);
+	}
+
+	async getUserChannels(user: User): Promise<string[] | never>
+	{
+		let channelIds: string[] = [];
+		let discussions: (Channel | Direct)[] = await this.userService.discussions(user);
+		discussions.forEach(discussion => {
+			let id: {direct_id: number, channel_id: number};
+			id.direct_id = ('user1_id' in discussion) ? discussion.id : null;
+			id.channel_id = ('name' in discussion) ? discussion.id : null;
+			channelIds.push(this.defineChannelId(id));
+		});
+		return channelIds;
+	}
+
+	defineChannelId(settings : {direct_id: number, channel_id: number}): string | null {
+		if ((settings.direct_id == null && settings.channel_id == null)
+		|| (settings.direct_id != null && settings.channel_id != null)) {
+			return null;
+		}
+		else if (settings.direct_id != null) {
+			return ("direct" + settings.direct_id);
+		}
+		return ("channel" + settings.channel_id);
 	}
 }
 
 
 @WebSocketGateway()
 export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
+	@WebSocketServer()
+	server: Server;
+
 	private clients:	Socket[];
 	private channels:	string[];
 	private directs:	string[];
@@ -97,24 +131,32 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	async afterInit(): Promise<any | never> {
 		const users: User[] = await this.userService.ladder();
 		setInterval(() => {
-			this.clients.forEach((async (element) => {
-				if (element.disconnected) {
-					this.util.userDisconnection(this.clients, users.find( (obj) => (obj.socket == element.id) ), element);
+			this.clients.forEach((async (client) => {
+				if (client.disconnected) {
+					this.util.userDisconnection(this.clients, users.find( (obj) => (obj.socket == client.id) ), client);
+					//leave every channels joined (should remove each empty room at some point)
+					client.rooms.forEach( room => { client.leave(room);} )
 				}
 			}));
-		}, 5000);
+		}, 10000); //every 10 secs
 	}
 
     async handleConnection(client: Socket, ...args: any[]): Promise<any | never> {
 		try {
+			//manage auth
 			const token: string = <string>client.handshake.headers.authorization;
 			const user: User = await this.authHelper.getUser(token); //not ok if wrong token
 			await this.userService.saveSocket(user, client.id);
 			this.clients.push(client);
 
+			//emit connection to friends
 			const message: ConnectionMessage = {user_id: user.id, status: true};
 			this.util.emitToFriends(this.clients, client.id, message, this.util.emitConnection);
 			this.util.emitConnection(client, message);
+
+			//create and join all channels/directs
+			let discussions: string[] = await this.util.getUserChannels(user);
+			discussions.forEach( discussion => this.joinChannel(client, discussion));
 		}
 		catch (error) {
 			client.emit('error', {message: 'Connection unauthorized.'});
@@ -125,5 +167,13 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     async handleDisconnect(client: Socket): Promise<any> {
 		const user: User = await this.userService.userBySocket(client.id);
 		await this.util.userDisconnection(this.clients, user, client);
+		//leave every channels joined (should remove each empty room at some point)
+		client.rooms.forEach( room => { client.leave(room);} )
+	}
+
+	joinChannel(client: Socket, channelId: string): void {
+		if (!this.channels.includes(channelId))
+			this.channels.push(channelId);
+		client.join(channelId);
 	}
 }

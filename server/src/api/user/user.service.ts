@@ -107,9 +107,7 @@ export class UserService {
 			.execute()).affected;
 	}
 
-	public async discussions(req: Request): Promise<(Direct | Channel)[]> {
-		const user: User = <User>req.user;
-
+	public async discussions(user: User): Promise<(Direct | Channel)[]> {
 		let discussions: (Channel | Direct)[] = await this.channelService.myChannels(user.id);
 		discussions = discussions.concat(await this.directService.directs(user));
 		return (discussions.sort( (A, B) => (new Date(A.date)).getTime() - (new Date(B.date)).getTime()));

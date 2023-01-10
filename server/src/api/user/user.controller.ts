@@ -42,7 +42,7 @@ export class UserController {
 	@Get('discussions')
 	@UseGuards(JwtAuthGuard)
 	dicussions(@Req() req: Request): Promise<(Direct | Channel)[]> {
-		return this.service.discussions(req);
+		return this.service.discussions( <User>req.user);
 	}
 
 	@Post('uploadPicture')

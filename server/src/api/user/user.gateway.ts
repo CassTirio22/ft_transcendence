@@ -47,10 +47,30 @@ class UserGatewayUtil {
 		return true;
 	}
 
+	/*
+		BIG DEFINITION OF WHAT WILL HAPPEN NEXT: 
+			-No need to check if muted/kick/ban because we can check if inside the channel
+			-To be ok with the DB we check at connection which channel client is muted or banned
+				-(we will need more than  an array of strings for that)
+			-We will neeed to update channels and clients while status of members/users change
+				-first scenario : someone join/leave/is added to a channel
+				-second scenario : someone is muted/kicked/banned
+				-third scenario : timed mute/kick is over for someone
+			-The whole instructions above are there to avoid to check all members+users in each channel
+			
+			-Will still need to check who is blocked in the DB, not very compatible with the channel system
+				 -indeed always check who blocked the sender to not see the message
+				 -from there creating a temporary room with all persons that should not receive the message and use except key word before the emit keyword
+
+		HOW TO STOCK THE CHANNELS? => map(channelId: string, channel: Channel | Direct)
+	*/
+
 	public emitMessage(client: Socket, message: DiscussionMessage): boolean {
 		let channelId: string = this.defineChannelId(message);
+		//SOMETHING TO DO
 		//just check if client in channel, will have to check about mute/ban, blocked
-		if (!client.rooms.has(channelId)) {
+		//how to check that? => get all channel members users block/direct users, block see their status
+		if (!client.rooms.has(channelId)) { //won't be enough since have to check if muted/kicked/blocked
 			return false;
 		}
 		client.to(channelId).emit('message', message);
@@ -87,6 +107,7 @@ class UserGatewayUtil {
 	{
 		let channelIds: string[] = [];
 		let discussions: (Channel | Direct)[] = await this.userService.discussions(user);
+		//SOMETHING TO DO : CHECK IF BANNED/KICKED FROM CHANNEL (WILL BE ACCESSIBLE LATER)
 		discussions.forEach(discussion => {
 			let id: {direct_id: number, channel_id: number};
 			id.direct_id = ('user1_id' in discussion) ? discussion.id : null;
@@ -145,6 +166,8 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				}
 			}));
 		}, 10000); //every 10 secs
+		//SOMETHING TO DO
+		//CHECK ABOUT MUTED / BANNED HAS ENDED
 	}
 
 	//client connect
@@ -187,6 +210,13 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		if (!this.util.emitMessage(client, data))
 			client.emit('error', {message: 'Sending messages in this channel unauthorized.'});
 	}
+
+	//ACTIONS TO DO ;
+	// JOIN/LEAVE CHANNEL
+	// ADD USER TO CHANNEL
+	// BLOCK USER
+	// MUTE/KICK FROM CHANNEL (ALSO CHANGE TIMING)
+	// 
 
 	// @SubscribeMessage("join")
 	// handleJoin(client: Socket, data)

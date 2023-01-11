@@ -39,8 +39,7 @@ export class MessageService {
 		private friendshipService: FriendshipService,
 	){}
 	
-	public async sendDirect(body: SendDto, req: Request): Promise <Message> {
-		const user: User = <User>req.user;
+	public async sendDirect(body: SendDto, user: User): Promise <Message> {
 		const { content, origin }: SendDto = body;
 		
 		let settings: MessageSettings = {
@@ -60,8 +59,7 @@ export class MessageService {
 		return this._insert(settings);
 	}
 
-	public async sendChannel(body: SendDto, req: Request): Promise <Message> {
-		const user: User = <User>req.user;
+	public async sendChannel(body: SendDto, user: User): Promise <Message> {
 		const { content, origin }: SendDto = body;
 
 		let settings: MessageSettings = {

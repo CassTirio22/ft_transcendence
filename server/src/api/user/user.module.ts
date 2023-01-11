@@ -1,3 +1,4 @@
+import { MessageService } from './../message/message.service';
 import { UserGateway } from './user.gateway';
 import { JwtStrategy } from './auth/auth.strategy';
 import { ConfigService } from '@nestjs/config';
@@ -42,6 +43,7 @@ import { BlockService } from './block/block.service';
 		MemberService, 
 		BlockService, 
 		FriendshipService, 
+		MessageService,
 		AuthHelper, 
 		JwtStrategy,
 		UserGateway

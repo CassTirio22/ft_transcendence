@@ -66,6 +66,15 @@ export class BlockService {
 			.getMany());
 	}
 
+	public async getBlockerListBySocket(socket: number): Promise<User[]> {
+		return (await this.userRepository.createQueryBuilder('user')
+			.innerJoin("user.blockedBy", "blockedBy")
+			.innerJoin("blockedBy.blocked", "blocked")
+			.select()
+			.where("blocked.socket = :socketId", {socketId: socket})
+			.getMany())
+	}
+
 	public async getEitherBlockedList(user: User): Promise<User[]> {
 		return (await this.userRepository.createQueryBuilder('user')
 			.leftJoinAndSelect("user.blockTo", "blockTo")

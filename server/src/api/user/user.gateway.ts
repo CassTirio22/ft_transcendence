@@ -1,3 +1,5 @@
+import { BlockService } from '@/api/user/block/block.service';
+import { MessageService } from './../message/message.service';
 import { channel } from 'diagnostics_channel';
 import { FriendshipService } from './friendship/friendship.service';
 import { UserService } from './user.service';
@@ -15,6 +17,9 @@ import { AuthHelper } from "./auth/auth.helper";
 import { User } from "./user.entity";
 import { Channel } from '../message/channel/channel.entity';
 import { Direct } from '../message/direct/direct.entity';
+import { StartCompetitiveGameDto } from '../game/game.dto';
+import { distinctUntilChanged } from 'rxjs';
+import { IsObject } from 'class-validator';
 
 interface ConnectionMessage {
 	user_id: number;
@@ -37,6 +42,8 @@ class UserGatewayUtil {
 		private friendshipService: FriendshipService,
 		@Inject(UserService)
 		private userService: UserService,
+		@Inject(MessageService)
+		private messageService: MessageService,
 	) {}
 
 
@@ -51,14 +58,14 @@ class UserGatewayUtil {
 		BIG DEFINITION OF WHAT WILL HAPPEN NEXT: 
 			-No need to check if muted/kick/ban because we can check if inside the channel
 			-To be ok with the DB we check at connection which channel client is muted or banned
-				-(we will need more than  an array of strings for that)
+				-(we will need more than  an array of strings for that) OK
 			-We will neeed to update channels and clients while status of members/users change
 				-first scenario : someone join/leave/is added to a channel
 				-second scenario : someone is muted/kicked/banned
 				-third scenario : timed mute/kick is over for someone
 			-The whole instructions above are there to avoid to check all members+users in each channel
 			
-			-Will still need to check who is blocked in the DB, not very compatible with the channel system
+			-Will still need to check who is blocked in the DB
 				-indeed always check who blocked the sender to not see the message
 				-from there creating a temporary room with all persons that should not receive the message and use except key word before the emit keyword
 				-https://github.com/socketio/socket.io/issues/3629
@@ -68,7 +75,7 @@ class UserGatewayUtil {
 		HOW TO STOCK THE CHANNELS? => map(channelId: string, channel: Channel | Direct)
 	*/
 
-	public emitMessage(client: Socket, message: DiscussionMessage): boolean {
+	public async emitMessage(client: Socket, message: DiscussionMessage): Promise<boolean | never> {
 		let channelId: string = this.defineChannelId(message);
 		//SOMETHING TO DO
 		//just check if client in channel, will have to check about mute/ban, blocked
@@ -76,6 +83,9 @@ class UserGatewayUtil {
 		if (!client.rooms.has(channelId)) { //won't be enough since have to check if muted/kicked/blocked
 			return false;
 		}
+		const user: User = await this.userService.userBySocket(client.id);
+		if (message.channel_id)
+			await this.messageService.sendChannel({origin: message.channel_id, content: message.content}, user);
 		client.to(channelId).emit('message', message);
 		return true;
 	}
@@ -100,24 +110,22 @@ class UserGatewayUtil {
 			const message: ConnectionMessage = {user_id: user.id , status: false};
 			this.emitToFriends(clients, client.id, message, this.emitConnection);
 		}
-
 		//delete socket and remove it from socket list
 		await this.userService.deleteSocket(client.id);
 		clients.splice(clients.indexOf(client), 1);
 	}
 
-	async getUserChannels(user: User): Promise<string[] | never>
+	async getUserChannels(user: User): Promise<Map<string, (Channel | Direct)> | never>
 	{
-		let channelIds: string[] = [];
+		let channels: Map<string, (Channel | Direct)> = new Map<string, (Channel | Direct)>();
 		let discussions: (Channel | Direct)[] = await this.userService.discussions(user);
-		//SOMETHING TO DO : CHECK IF BANNED/KICKED FROM CHANNEL (WILL BE ACCESSIBLE LATER)
 		discussions.forEach(discussion => {
 			let id: {direct_id: number, channel_id: number};
 			id.direct_id = ('user1_id' in discussion) ? discussion.id : null;
 			id.channel_id = ('name' in discussion) ? discussion.id : null;
-			channelIds.push(this.defineChannelId(id));
+			channels.set(this.defineChannelId(id), discussion);
 		});
-		return channelIds;
+		return channels;
 	}
 
 	defineChannelId(settings : {direct_id: number, channel_id: number}): string | null {
@@ -139,8 +147,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	server: Server;
 
 	private clients:	Socket[];
-	private channels:	string[];
-	private directs:	string[];
+	private channels:	Map<string, (Channel | Direct)>;
 	private util:		UserGatewayUtil
 
 	constructor(
@@ -150,11 +157,12 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private userService: UserService,
 		@Inject(FriendshipService)
 		private friendshipService: FriendshipService,
+		@Inject(MessageService)
+		private messageService: MessageService,
 	) {
 		this.clients = [];
-		this.channels = [];
-		this.directs = [];
-		this.util = new UserGatewayUtil(friendshipService, userService);
+		this.channels = new Map<string, (Channel | Direct)>();
+		this.util = new UserGatewayUtil(friendshipService, userService, messageService);
 	}
 
 	//regular loop
@@ -192,8 +200,9 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.util.emitConnection(client, message);
 
 			//create and join all channels/directs
-			let discussions: string[] = await this.util.getUserChannels(user);
-			discussions.forEach( discussion => this.joinChannel(client, discussion));
+			let discussions: Map<string, (Channel | Direct)> = await this.util.getUserChannels(user);
+			for (let key of discussions.keys())
+				this.joinChannel(client, key, discussions[key]);
 		}
 		catch (error) {
 			client.emit('error', {message: 'Connection unauthorized.'});
@@ -211,26 +220,39 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	//client send message to channel
 	@SubscribeMessage("message")
-	handleMessage(client: Socket, data: DiscussionMessage)
-	{
+	handleMessage(client: Socket, data: DiscussionMessage) {
 		//check if client has the right to send to channel
 		if (!this.util.emitMessage(client, data))
 			client.emit('error', {message: 'Sending messages in this channel unauthorized.'});
 	}
 
 	//ACTIONS TO DO ;
+	//client join an channel
+	@SubscribeMessage("join")
+	handleJoin(client: Socket, data: number){
+		
+	}
+
+	//client is added to channel
+
+	//client leave a channel
+
+	//client create a direct
+
+	//client create a channel
+
+	//client delete channel
+	
+	
 	// JOIN/LEAVE CHANNEL
 	// ADD USER TO CHANNEL
 	// BLOCK USER
 	// MUTE/KICK FROM CHANNEL (ALSO CHANGE TIMING)
-	// 
+	//
 
-	// @SubscribeMessage("join")
-	// handleJoin(client: Socket, data)
-
-	joinChannel(client: Socket, channelId: string): void {
-		if (!this.channels.includes(channelId))
-			this.channels.push(channelId);
+	joinChannel(client: Socket, channelId: string, channelValue: (Direct | Channel)): void {
+		if (!this.channels.has(channelId))
+			this.channels.set(channelId, channelValue);
 		client.join(channelId);
 	}
 }

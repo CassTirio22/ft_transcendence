@@ -1,9 +1,7 @@
-import { BlockService } from '@/api/user/block/block.service';
 import { MessageService } from './../message/message.service';
-import { channel } from 'diagnostics_channel';
 import { FriendshipService } from './friendship/friendship.service';
 import { UserService } from './user.service';
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject } from "@nestjs/common";
 import { 
 	OnGatewayConnection, 
 	OnGatewayDisconnect, 
@@ -17,9 +15,7 @@ import { AuthHelper } from "./auth/auth.helper";
 import { User } from "./user.entity";
 import { Channel } from '../message/channel/channel.entity';
 import { Direct } from '../message/direct/direct.entity';
-import { StartCompetitiveGameDto } from '../game/game.dto';
-import { distinctUntilChanged } from 'rxjs';
-import { IsObject } from 'class-validator';
+import { SocketReadyState } from 'net';
 
 interface ConnectionMessage {
 	user_id: number;
@@ -45,7 +41,6 @@ class UserGatewayUtil {
 		@Inject(MessageService)
 		private messageService: MessageService,
 	) {}
-
 
 	/* MESSAGES EMITION */
 
@@ -225,28 +220,68 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		if (!this.util.emitMessage(client, data))
 			client.emit('error', {message: 'Sending messages in this channel unauthorized.'});
 	}
+	
 
 	//ACTIONS TO DO ;
-	//client join an channel
+	//THE BIG QUESTION : do we do all these actions in the db right now or at first client do it by HTTP request then send message depending on the response
+	//it wouldn't stop someone to manually send messages through socket without using our GUI but we can still if everything is in order in the DB
+
+
+	//client join a channel
 	@SubscribeMessage("join")
-	handleJoin(client: Socket, data: number){
-		
+	async handleJoin(client: Socket, data: number) {
+		const user: User = await this.userService.userBySocket(client.id);
+		try {
+			//add in DB using channelService, maybe directly use socket ID to create member ?
+		}
+		catch {
+			//send error
+		}
+		//emit to all from channel even blocker (seems justified that blocker know that you are here)
 	}
 
 	//client is added to channel
+	@SubscribeMessage("add")
+	async handleAdd(client: Socket, data: number) {
+		//try to add using channelService or send error
+		//notify everybody in channel
+	}
 
 	//client leave a channel
+	@SubscribeMessage("leave")
+	async handleLeave(client: Socket, data: number) {
+		//remove member from channel, probably don't have to try if channel is OK
+		//notify everybody in channel
+	}
 
 	//client create a direct
+	@SubscribeMessage("direct")
+	async handleDirect(client: Socket, data: number) {
+		//try to create the direct else return error socker
+		//only notify the other concerned
+	}
 
 	//client create a channel
+	@SubscribeMessage("channel") 
+	async handleChannel(client: Socket, data: number){
+		//wille need something else than a number if we want to do that
+		//create channel in db, i don't think it can fail
+		//no notification, only response to client
+	}
 
 	//client delete channel
+	@SubscribeMessage('delete')
+	async handleDelete(client: Socket, data: number) {
+		//try to delete channel with channelService or send error
+		//notify everybody in channel
+	}
 	
-	
-	// JOIN/LEAVE CHANNEL
-	// ADD USER TO CHANNEL
-	// BLOCK USER
+	//block another user
+	@SubscribeMessage('block')
+	async handleBlock(client: Socket, data: number) {
+		//block other user (if user id is ok shouldn't be needed to try)
+		//notify only the blocked one
+	}
 	// MUTE/KICK FROM CHANNEL (ALSO CHANGE TIMING)
 	//
 

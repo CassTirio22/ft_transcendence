@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository } from 'typeorm';
 import {Game, GameType, GameStatus} from './game.entity';
 import { DeleteGameDto, StartCompetitiveGameDto, StartFriendlyGameDto, UpdateGameDto, JoinGameDto } from './game.dto';
-import { User } from '../user/user.entity';
+import { User, UserStatus } from '../user/user.entity';
 import { Request } from 'express';
 import { MemberStatus } from '../message/channel/member/member.entity';
 
@@ -167,13 +167,16 @@ export class GameService {
 	}
 
 	private async _updatePlayers(players: UpdateGameSettings): Promise<number> {
+		let query: any = this.userRepository.createQueryBuilder().update();
 		if (players.interrupted)
-			return 0;
-		return ( await this.userRepository.createQueryBuilder()
-			.update(User)
-			.set ({
+			query = query.set({status: UserStatus.online});
+		else
+			query = query.set ({
 				gamesNumber: () => `CASE WHEN id = ${players.loser.id} THEN ${players.loser.gamesNumber} ELSE ${players.winner.gamesNumber} END`,
-				score: () => `CASE WHEN id = ${players.loser.id} THEN ${players.loser.score} ELSE ${players.winner.score} END`})
+				score: () => `CASE WHEN id = ${players.loser.id} THEN ${players.loser.score} ELSE ${players.winner.score} END`,
+				status: UserStatus.online
+			});
+		return (await query
 			.where("id IN (:...playerIds)", {playerIds: [players.loser.id, players.winner.id]})
 			.execute()).affected;
 	}

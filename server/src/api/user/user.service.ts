@@ -84,6 +84,24 @@ export class UserService {
 			.getMany())
 	}
 
+	public async inGame(user: number): Promise <number | never> {
+		return (await this.repository.createQueryBuilder('user')
+			.update()
+			.where("user.id = :userId", {userId: user})
+			.set({status: UserStatus.inGame})
+			.execute()
+		).affected;
+	}
+
+	public async outGame(user: number): Promise <number | never> {
+		return (await this.repository.createQueryBuilder('user')
+			.update()
+			.where("user.id = :userId", {userId: user})
+			.set({status: UserStatus.online})
+			.execute()
+		).affected;
+	}
+
 	public async saveSocket(user: User, id: string): Promise<number | never> {
 		return (await this.repository.createQueryBuilder()
 			.update()

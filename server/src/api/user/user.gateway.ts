@@ -17,7 +17,7 @@ import { Channel } from '../message/channel/channel.entity';
 import { Direct } from '../message/direct/direct.entity';
 import { SocketReadyState } from 'net';
 
-interface ConnectionMessage {
+export interface ConnectionMessage {
 	user_id: number;
 	status: boolean;
 }
@@ -32,7 +32,7 @@ interface DiscussionMessage {
 type MessageFormats = ConnectionMessage | DiscussionMessage;
 type MessageMethod = (client: Socket, message: MessageFormats) => boolean;
 
-class UserGatewayUtil {
+export class UserGatewayUtil {
 	constructor(
 		@Inject(FriendshipService)
 		private friendshipService: FriendshipService,
@@ -143,7 +143,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	private clients:	Socket[];
 	private channels:	Map<string, (Channel | Direct)>;
-	private util:		UserGatewayUtil
+	private util:		UserGatewayUtil;
 
 	constructor(
 		@Inject(AuthHelper)
@@ -210,7 +210,8 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		const user: User = await this.userService.userBySocket(client.id);
 		await this.util.userDisconnection(this.clients, user, client);
 		//leave every channels joined (should remove each empty room at some point)
-		client.rooms.forEach( room => { client.leave(room);} )
+		client.rooms.forEach( room => { client.leave(room)} );
+		const message: ConnectionMessage = {user_id: user.id, status: false};
 	}
 
 	//client send message to channel

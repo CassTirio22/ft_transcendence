@@ -2,8 +2,8 @@ import { GameService } from './game.service';
 import { Game } from './game.entity';
 import { MessageService } from './../message/message.service';
 import { FriendshipService } from './../user/friendship/friendship.service';
-import { UserGatewayUtil, ConnectionMessage } from './../user/user.gateway';
-import { User, UserStatus } from './../user/user.entity';
+import { UserGatewayUtil } from './../user/user.gateway';
+import { User } from './../user/user.entity';
 import { UserService } from './../user/user.service';
 import { AuthHelper } from './../user/auth/auth.helper';
 import { Inject } from "@nestjs/common";
@@ -11,11 +11,9 @@ import {
 	OnGatewayConnection, 
 	OnGatewayDisconnect, 
 	OnGatewayInit, 
-	SubscribeMessage, 
 	WebSocketGateway,
 } from "@nestjs/websockets";
 import { Socket } from "socket.io";
-import { isArgumentsObject } from 'util/types';
 
 
 interface IGame {
@@ -43,11 +41,59 @@ class Pong {
 
 }
 
+class GameGatewayUtil {
+	constructor(
+		@Inject(GameService)
+		private gameService: GameService,
+	) {}
+
+	public findGameByClient(client: Socket, games: IGame[]): number | null {
+		games.forEach( (game, index) => {
+			if (game.player1.socket == client || game.player2.socket == client) {
+				return index;
+			}
+		});
+		return null;
+	}
+
+	public findGameByUser(user: User, games: IGame[]): number | null {
+		games.forEach( (game, index) => {
+			if (game.player1.user.id == user.id || game.player2.user.id == user.id) {
+				return index;
+			}
+		});
+		return null;
+	}
+
+	public findWaiterByUser(user: User, waiters: Map<Socket, User>): boolean {
+		return Array.from(waiters.values()).map(user => {return user.id}).includes(user.id);
+	}
+
+	public disconnectDuringGame(games: IGame[], position: number, client: Socket): IGame[] {
+		this.gameService.updateGame({
+			gameId: games[position].game.id,
+			winnerId: games[position].game.winner_id,
+			winnerScore: 0,
+			loserScore: 0,
+			didInterrupt: true
+		}); //put players as online in DB anyway
+		games.splice(position);
+		if (client == games[position].player1.socket)
+			games[position].player2.socket.emit("disconnection");
+		else
+			games[position].player1.socket.emit('disconnection');
+		return games;
+	}
+}
+
+
+
 @WebSocketGateway()
-export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
+export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	private waiters: Map<Socket, User>;
 	private games: IGame[];
 	private util:	UserGatewayUtil;
+	private gameUtil: GameGatewayUtil;
 
 	constructor(
 		@Inject(AuthHelper)
@@ -64,6 +110,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.waiters = new Map<Socket, User>();
 			this.games = [];
 			this.util = new UserGatewayUtil(friendshipService, userService, messageService);
+			this.gameUtil = new GameGatewayUtil(gameService);
 		}
 
 
@@ -75,14 +122,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}, 1000);
 	}
 
-    async handleConnection(client: Socket, ...args: any[]): Promise<any | never> {
+    async handleConnection(client: Socket, args: any): Promise<any | never> {
 		try {
 			//manage auth
 			const token: string = <string>client.handshake.headers.authorization;
 			const user: User = await this.authHelper.getUser(token);
-			if ( await this.userService.inGame(user.id) == 0 )
+			if ( !args.status || this.gameUtil.findGameByUser(user, this.games) != null || this.gameUtil.findWaiterByUser(user, this.waiters))
 				throw new Error("Unauthorized");
-			this.waiters.set(client, user);
+			if (args.status = 'competitive')
+				this.waiters.set(client, user);
+			else if (args.status = 'friendly')
 
 			//emit connection to friends
 			// const message: ConnectionMessage = {user_id: user.id, status: true};
@@ -103,19 +152,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.waiters.delete(client);
 		}
 		else {
-			this.games.forEach( (game, index) => {
-				if (game.player1.socket == client || game.player2.socket == client) {
-					//service for interruption
-					this.gameService.updateGame({
-						gameId: game.game.id,
-						winnerId: game.game.winner_id,
-						winnerScore: 0,
-						loserScore: 0,
-						didInterrupt: true
-					}); //put players as online in DB anyway
-					this.games.splice(index);
-				}
-			});
+			let pos: number | null = this.gameUtil.findGameByClient(client, this.games);
+			if (pos != null)
+				this.games = this.gameUtil.disconnectDuringGame(this.games, pos, client);
 		}
 		client.rooms.forEach( room => { client.leave(room) } );
 		//SIMILAR DIFFICULTY THAN CONNECTION =>

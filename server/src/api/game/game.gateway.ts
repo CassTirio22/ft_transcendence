@@ -92,6 +92,7 @@ class GameGatewayUtil {
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	private waiters: Map<Socket, User>;
 	private games: IGame[];
+	private waitingGames: IGame[];
 	private util:	UserGatewayUtil;
 	private gameUtil: GameGatewayUtil;
 
@@ -132,6 +133,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			if (args.status = 'competitive')
 				this.waiters.set(client, user);
 			else if (args.status = 'friendly')
+				{} //add to waiting Games, check if service already check if correct friend accept
+			else if (args.status = 'channel')
+				{} //exactly same but can be anyone in channel and not only the invited friend
 
 			//emit connection to friends
 			// const message: ConnectionMessage = {user_id: user.id, status: true};
@@ -146,7 +150,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
     async handleDisconnect(client: Socket): Promise<any> {
-		//out of game, the rest is DB problem
 		if (this.waiters.has(client)) {
 			await this.userService.outGame(this.waiters.get(client).id);
 			this.waiters.delete(client);
@@ -169,20 +172,4 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//I am waiting for someone to join me (channel) => directly creating a waiting IGame
 		//I am inviting someone (friend) => directly creating a waiting IGame (can be interrupted of the other refuses)
 
-
-
-	// @SubscribeMessage("friendly")
-	// async handleFriendlyGame(client: Socket, data: number) {
-	// 	//try catch the DB method to see if possible
-	// 	try {
-	// 		this.gameService.startUserGame( , false);
-	// 	}
-	// 	catch {
-
-	// 	}
-	// 	const gameInterface: IGame = {game: null, player1: null, player2: null};
-		//add them in 'players' array
-		//start game mate
-
-	// }
 }

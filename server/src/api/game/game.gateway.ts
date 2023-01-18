@@ -65,8 +65,8 @@ class GameGatewayUtil {
 		return null;
 	}
 
-	public findWaiterByUser(user: User, waiters: Map<Socket, User>): boolean {
-		return Array.from(waiters.values()).map(user => {return user.id}).includes(user.id);
+	public findWaiterByUser(user: User, waiters: Player[]): Player | undefined {
+		return waiters.find( waiter => waiter.user == user);
 	}
 
 	public disconnectDuringGame(games: IGame[], position: number, client: Socket): IGame[] {
@@ -90,7 +90,7 @@ class GameGatewayUtil {
 
 @WebSocketGateway()
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-	private waiters: Map<Socket, User>;
+	private waiters: Player[];
 	private games: IGame[];
 	private waitingGames: IGame[];
 	private util:	UserGatewayUtil;
@@ -108,7 +108,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		@Inject(GameService)
 		private gameService: GameService,
 		) {
-			this.waiters = new Map<Socket, User>();
+			this.waiters = [];
 			this.games = [];
 			this.util = new UserGatewayUtil(friendshipService, userService, messageService);
 			this.gameUtil = new GameGatewayUtil(gameService);
@@ -119,7 +119,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//loop all 10secs
 		//check if disconnected
 		setInterval(() => {
-			//method to order the list and match people
+			this.waiters.sort( (player_1, player_2) => (player_1.user.score - player_2.user.score) );
+			for (var i = 0; i < this.waiters.length - 1; i+=2) {
+				await this.gameService.startUserGame({
+					player1Id: this.waiters[i].user.id, 
+					player2Id: this.waiters[i+1].user.id}, 
+					true);
+				this.games.push({player1: waiters[i], player2: waiters[i+1], }); //add in list of games
+				//add game in database
+				//emit to the 2 players
+				//splice from waiters
+			}
+
+			//method to order the list and match people -> emit to the 2 people that will be in it
 		}, 1000);
 	}
 
@@ -128,10 +140,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			//manage auth
 			const token: string = <string>client.handshake.headers.authorization;
 			const user: User = await this.authHelper.getUser(token);
-			if ( !args.status || this.gameUtil.findGameByUser(user, this.games) != null || this.gameUtil.findWaiterByUser(user, this.waiters))
+			if ( !args.status || this.gameUtil.findGameByUser(user, this.games) != null || this.gameUtil.findWaiterByUser(user, this.waiters) != undefined)
 				throw new Error("Unauthorized");
 			if (args.status = 'competitive')
-				this.waiters.set(client, user);
+				this.waiters.push({socket: client, user: user});
 			else if (args.status = 'friendly')
 				{} //add to waiting Games, check if service already check if correct friend accept
 			else if (args.status = 'channel')
@@ -150,13 +162,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
     async handleDisconnect(client: Socket): Promise<any> {
-		if (this.waiters.has(client)) {
-			await this.userService.outGame(this.waiters.get(client).id);
-			this.waiters.delete(client);
+		let waiter: Player = this.waiters.find( waiter => waiter.socket == client );
+		let pos: number | null = this.gameUtil.findGameByClient(client, this.games);
+		if (waiter != undefined)
+		{
+					await this.userService.outGame(waiter.user.id);
+					this.waiters.splice(this.waiters.indexOf(waiter));
 		}
-		else {
-			let pos: number | null = this.gameUtil.findGameByClient(client, this.games);
-			if (pos != null)
+		else if (pos != null) {
 				this.games = this.gameUtil.disconnectDuringGame(this.games, pos, client);
 		}
 		client.rooms.forEach( room => { client.leave(room) } );

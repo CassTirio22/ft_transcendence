@@ -59,7 +59,7 @@ export class UserGatewayUtil {
 				-second scenario : someone is muted/kicked/banned
 				-third scenario : timed mute/kick is over for someone
 			-The whole instructions above are there to avoid to check all members+users in each channel
-			
+
 			-Will still need to check who is blocked in the DB
 				-indeed always check who blocked the sender to not see the message
 				-from there creating a temporary room with all persons that should not receive the message and use except key word before the emit keyword

@@ -14,6 +14,7 @@ import {
 	WebSocketGateway,
 } from "@nestjs/websockets";
 import { Socket } from "socket.io";
+import { isArgumentsObject } from 'util/types';
 
 
 interface IGame {
@@ -120,16 +121,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//check if disconnected
 		setInterval(() => {
 			this.waiters.sort( (player_1, player_2) => (player_1.user.score - player_2.user.score) );
+			let gamesSettings: IGame[] = [];
 			for (var i = 0; i < this.waiters.length - 1; i+=2) {
-				await this.gameService.startUserGame({
-					player1Id: this.waiters[i].user.id, 
-					player2Id: this.waiters[i+1].user.id}, 
-					true);
-				this.games.push({player1: waiters[i], player2: waiters[i+1], }); //add in list of games
-				//add game in database
-				//emit to the 2 players
-				//splice from waiters
+				gamesSettings.push( {player1: this.waiters[i], player2: this.waiters[i+1], game: null} );
 			}
+			const dto: {id_1: number, id_2: number}[] = gamesSettings.map( settings => { return {id_1: settings.player1.user.id, id_2: settings.player2.user.id}});
+			// const games: Game[] = this.gameService.startCompetitiveSet( dto );
+			// this.games.push({player1: waiters[i], player2: waiters[i+1], }); //add in list of games once all is done
+			//splice from waiters
+			//emit to the 2 players
 
 			//method to order the list and match people -> emit to the 2 people that will be in it
 		}, 1000);
@@ -166,11 +166,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let pos: number | null = this.gameUtil.findGameByClient(client, this.games);
 		if (waiter != undefined)
 		{
-					await this.userService.outGame(waiter.user.id);
-					this.waiters.splice(this.waiters.indexOf(waiter));
+			await this.userService.outGame(waiter.user.id);
+			this.waiters.splice(this.waiters.indexOf(waiter));
 		}
 		else if (pos != null) {
-				this.games = this.gameUtil.disconnectDuringGame(this.games, pos, client);
+			this.games = this.gameUtil.disconnectDuringGame(this.games, pos, client);
 		}
 		client.rooms.forEach( room => { client.leave(room) } );
 		//SIMILAR DIFFICULTY THAN CONNECTION =>

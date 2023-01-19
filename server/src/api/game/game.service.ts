@@ -9,6 +9,12 @@ import { User, UserStatus } from '../user/user.entity';
 import { Request } from 'express';
 import { MemberStatus } from '../message/channel/member/member.entity';
 
+interface GameSettings {
+	winner_id: number;
+	loser_id: number;
+	type: GameType;
+	status: GameStatus;
+}
 
 interface UpdateGameSettings {
 	id:				number;
@@ -81,6 +87,20 @@ export class GameService {
 			.insert()
 			.values({winner: user, type: GameType.friendly, channel: id})
 			.execute()).generatedMaps[0] as Game;
+	}
+
+	//no checking since it will be used in socket service anyway
+	public async startCompetitiveSet(players: {id_1: number, id_2: number}[]): Promise<Game[] | never> {
+		const games: GameSettings[] = players.map( pair =>  { return {
+			winner_id: pair.id_1, 
+			loser_id: pair.id_2, 
+			type: GameType.competitive, 
+			status: GameStatus.ongoing
+		}});
+		return (await this.gameRepository.createQueryBuilder()
+			.insert()
+			.values(games)
+			.execute()).generatedMaps as Game[];
 	}
 
 	public async updateGame(body: UpdateGameDto): Promise<number> {

@@ -81,7 +81,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 		current_conversation = props.messages.direct.filter((elem: Channel) => elem.id == props.messages.current.id)[0];
 	}
 
-	if (current_conversation.members.length == 0) {
+	if (!current_conversation?.members || current_conversation.members.length == 0) {
 		return null;
 	}
 
@@ -97,6 +97,9 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 				{
 					[...current_conversation.messages].map((message: Message, id: number) => {
 						const sender: User = current_conversation.members.filter((mem: User) => mem.id == message.author_id)[0];
+
+						if (!sender)
+							return null
 						const created_at = new Date(message.date);
 						return (
 							<div className='message-div' key={id}>

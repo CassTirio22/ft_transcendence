@@ -46,7 +46,7 @@ let bot2_color = 0;
 
 const draw_game = (context: any, player1_y: number, player2_y: number, ball_x: number, ball_y: number) => {
 	context.clearRect(-100, -100, context.canvas.width + 100, context.canvas.height + 100);
-	context.fillStyle = '#fff';
+	context.fillStyle = '#616B78';
 	context.fillRect(ball_x - 5, ball_y - 5, 10, 10);
 	context.fill();
 	context.fillStyle = `rgba(255, 112, 67, 0.${bot1_color < 10 ? "0" + bot1_color.toString() : bot1_color})`;

@@ -6,6 +6,14 @@
     background-color: var(--surface);
     padding-top: 60px;
 
+    .body-header-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        justify-content: space-between;
+        height: calc(100vh - 60px);
+    }
+
     .conversation-header {
         position: fixed;
         display: flex;
@@ -21,7 +29,7 @@
 
     .conversation-body {
         overflow: auto;
-        height: calc(100vh - 120px);
+        max-height: calc(100vh - 120px);
 
         .message-div {
             display: flex;
@@ -62,5 +70,38 @@
                 background-color: rgba($color: #fff, $alpha: .1);
             }
         }
+    }
+
+    .conversation-footer {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        align-items: flex-end;
+        height: fit-content;
+        padding: 10px;
+
+        .new-message {
+            width: 100%;
+            border-radius: var(--border_radius);
+            padding: 10px;
+            background-color: var(--surface);
+            border: 1px solid var(--divider);
+
+            .text-area-new {
+                width: 100%;
+                resize: none;
+                border: none;
+                background-color: transparent;
+            }
+
+            .send-message {
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-end;
+                width: 100%;
+            }
+        }
+
+        
     }
 }

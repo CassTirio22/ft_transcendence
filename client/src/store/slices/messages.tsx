@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice, current, Dispatch } from "@reduxjs/toolkit";
+import { useParams } from "react-router-dom";
 import axios from "../../service/axios"
 
 
@@ -13,14 +14,21 @@ const test: Channel[] = []
 
 type fetch_params = {
 	user: any,
-	friends: any
+	friends: any,
+	channel_id: number,
+	direct_id: number
+}
+
+export type NewMessage = {
+	origin: number,
+	content: String,
 }
 
 export const fetchMessages = createAsyncThunk(
 	"messages/fetchMessages",
 	async (params: fetch_params) => {
 		const response = await axios.get("/user/discussions");
-		return {data: response.data, user: params.user, friends: params.friends};
+		return {data: response.data, user: params.user, friends: params.friends, channel_id: params.channel_id, direct_id: params.direct_id};
 	}
 )
 
@@ -41,6 +49,23 @@ export const fetchSpecificDirect = createAsyncThunk(
 	}
 )
 
+export const sendDirect = createAsyncThunk(
+	"messages/sendDirect",
+	async (new_message: NewMessage) => {
+		const response = await axios.post("/message/sendDirect", new_message);
+		return response.data;
+	}
+)
+
+export const sendChannel = createAsyncThunk(
+	"messages/sendChannel",
+	async (new_message: NewMessage) => {
+		const response = await axios.post("/message/sendChannel", new_message);
+		return response.data;
+	}
+)
+
+
 const messagesSlice = createSlice({
 	name: "messages",
 	initialState: {
@@ -58,7 +83,7 @@ const messagesSlice = createSlice({
 	},
 	extraReducers: builder => {
         builder.addCase(fetchMessages.fulfilled, (state, {payload}) => {
-			const {data, user, friends} = payload;
+			const {data, user, friends, channel_id, direct_id} = payload;
 			const user_id = payload.user?.id;
 			let cha: Channel[] = [];
 			let direct: Channel[] = [];
@@ -101,15 +126,27 @@ const messagesSlice = createSlice({
 			}
 			state.channels = cha;
 			state.direct = direct;
-			if (cha.length) {
+			if (channel_id && cha.filter(elem => elem.id == channel_id).length != 0) {
 				state.current = {
 					is_channel: true,
-					id: cha[0].id,
+					id: channel_id,
 				}
-			} else if (direct.length) {
+			} else if (direct_id && direct.filter(elem => elem.id == direct_id).length != 0) {
 				state.current = {
 					is_channel: false,
-					id: direct[0].id,
+					id: direct_id,
+				}
+			} else if (!channel_id && !direct_id) {
+				if (cha.length) {
+					state.current = {
+						is_channel: true,
+						id: cha[0].id,
+					}
+				} else if (direct.length) {
+					state.current = {
+						is_channel: false,
+						id: direct[0].id,
+					}
 				}
 			}
         })
@@ -148,7 +185,9 @@ export const messagesMethods = {
 	fetchMessages,
 	selectConversation,
 	fetchSpecificChannel,
-	fetchSpecificDirect
+	fetchSpecificDirect,
+	sendDirect,
+	sendChannel
 }
 
 export default messagesSlice

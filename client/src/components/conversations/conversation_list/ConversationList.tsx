@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
+import AddIcon from '@mui/icons-material/Add';
 import "./style.scss"
 
 
@@ -41,6 +42,10 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 					</div>
 				))
 			}
+			<div className='add-box'>
+				<AddIcon />
+				<span>Add channel</span>
+			</div>
 			<h3>Messages directs</h3>
 			{
 				props.messages.direct.map((elem: Direct, id: number) => (
@@ -49,6 +54,10 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 					</div>
 				))
 			}
+			<div className='add-box'>
+				<AddIcon />
+				<span>Add direct</span>
+			</div>
 		</div>
 	)
 }

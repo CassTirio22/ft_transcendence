@@ -22,20 +22,10 @@ const Conversations: React.FC<Props> = (props: Props) => {
 
 	useEffect(() => {
 		if (props.friends.length && !loaded.current) {
-			props.fetchMessages({user: user, friends: props.friends});
+			props.fetchMessages({user: user, friends: props.friends, channel_id: channel_id, direct_id: direct_id});
 			loaded.current = true;
 		}
 	}, [props.friends])
-	
-	useEffect(() => {
-		setTimeout(() => {
-			if (direct_id && !isNaN(Number(direct_id))) {
-				props.selectConversation({is_channel: false, id: parseInt(direct_id)});
-			} else if (channel_id && !isNaN(Number(channel_id))) {
-				props.selectConversation({is_channel: true, id: parseInt(channel_id)});
-			}
-		}, 100);
-	}, [])
 	
 
 	return (

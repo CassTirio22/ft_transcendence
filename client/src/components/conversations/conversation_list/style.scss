@@ -33,4 +33,31 @@
             background-color: var(--background);
         }
     }
+
+    .add-box {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin: 10px 5px 20px 5px;
+        cursor: pointer;
+
+        svg {
+            fill: var(--divider);
+        }
+
+        span {
+            color: var(--divider);
+            transition: .3s;
+        }
+
+        &:hover {
+            svg {
+                fill: var(--text);
+            }
+    
+            span {
+                color: var(--text);
+            }
+        }
+    }
 }

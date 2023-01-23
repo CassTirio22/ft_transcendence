@@ -30,6 +30,8 @@ export class DirectService {
 		let blocked: number[] = (await this.blockService.getEitherBlockedList(user)).map( (obj) => (obj.id) );
 		let query: any = this.directRepository.createQueryBuilder('direct')
 			.leftJoinAndSelect("direct.messages", "messages")
+			.leftJoinAndSelect("direct.user1", "user1")
+			.leftJoinAndSelect("direct.user2", "user2")
 			.leftJoin("direct.messages", "next_messages", "messages.date < next_messages.date")
 			.select()
 			.where("next_messages.id IS NULL")

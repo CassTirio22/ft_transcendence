@@ -21,16 +21,17 @@
             color: var(--secondary_text);
         }
 
-        &.active,
         &:hover {
+            background-color: var(--background);
+        }
+
+        &:hover,
+        &.active {
             background-color: var(--primary);
 
             span {
                 color: var(--on_primary);
             }
-        }
-        &:hover {
-            background-color: var(--background);
         }
     }
 

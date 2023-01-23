@@ -16,7 +16,7 @@ const root = ReactDOM.createRoot(
 const [ctx, AuthProvider] = createCtx();
 export const AuthContext = ctx;
 
-const [ctxe, PopupProvider] = createPopupCtx();
+export const [ctxe, PopupProvider] = createPopupCtx();
 export const PopupContext = ctxe;
 
 const theme = createTheme({
@@ -29,9 +29,7 @@ root.render(
 	<Provider store={store}>
 		<AuthProvider>
 			<ThemeProvider theme={theme}>
-				<PopupProvider>
-						<App/>
-				</PopupProvider>
+				<App/>
 			</ThemeProvider>
 		</AuthProvider>
 	</Provider>

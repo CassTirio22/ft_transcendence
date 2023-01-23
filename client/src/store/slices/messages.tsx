@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "../../service/axios"
 
 
-type Channel = {
+export type Channel = {
 	id: number,
 	messages: any,
 	title: string,
@@ -14,7 +14,6 @@ const test: Channel[] = []
 
 type fetch_params = {
 	user: any,
-	friends: any,
 	channel_id: number,
 	direct_id: number
 }
@@ -28,7 +27,7 @@ export const fetchMessages = createAsyncThunk(
 	"messages/fetchMessages",
 	async (params: fetch_params) => {
 		const response = await axios.get("/user/discussions");
-		return {data: response.data, user: params.user, friends: params.friends, channel_id: params.channel_id, direct_id: params.direct_id};
+		return {data: response.data, user: params.user, channel_id: params.channel_id, direct_id: params.direct_id};
 	}
 )
 
@@ -65,6 +64,14 @@ export const sendChannel = createAsyncThunk(
 	}
 )
 
+export const createDirect = createAsyncThunk(
+	"messages/createDirect",
+	async (user_id: number) => {
+		const response = await axios.post("/direct/create", {id: user_id});
+		return response.data.id;
+	}
+)
+
 
 const messagesSlice = createSlice({
 	name: "messages",
@@ -83,29 +90,27 @@ const messagesSlice = createSlice({
 	},
 	extraReducers: builder => {
         builder.addCase(fetchMessages.fulfilled, (state, {payload}) => {
-			const {data, user, friends, channel_id, direct_id} = payload;
+			const {data, user, channel_id, direct_id} = payload;
 			const user_id = payload.user?.id;
 			let cha: Channel[] = [];
 			let direct: Channel[] = [];
 			for (let index = 0; index < data.length; index++) {
 				const conv = data[index];
 				if (conv.user1_id) {
-					const id_other = conv.user1_id == user_id ? conv.user2_id : conv.user1_id;
-					const fr = friends.filter((elem: Channel) => elem.id == id_other)[0];
 					const direct_elem = {
 						id: conv.id,
 						messages: conv.messages,
-						title: fr.name,
+						title: user_id == conv.user1.id ? conv.user2.name : conv.user1.name,
 						members: [
 							{
-								id: user_id,
-								full_name: user.name,
-								image_path: user.name
+								id: conv.user1.id,
+								full_name: conv.user1.name,
+								image_path: conv.user1.name
 							},
 							{
-								id: user_id,
-								full_name: fr.name,
-								image_path: fr.name
+								id: conv.user2.id,
+								full_name: conv.user2.name,
+								image_path: conv.user2.name
 							},
 						]
 					}
@@ -126,12 +131,12 @@ const messagesSlice = createSlice({
 			}
 			state.channels = cha;
 			state.direct = direct;
-			if (channel_id && cha.filter(elem => elem.id == channel_id).length != 0) {
+			if (channel_id) {
 				state.current = {
 					is_channel: true,
 					id: channel_id,
 				}
-			} else if (direct_id && direct.filter(elem => elem.id == direct_id).length != 0) {
+			} else if (direct_id) {
 				state.current = {
 					is_channel: false,
 					id: direct_id,
@@ -174,6 +179,22 @@ const messagesSlice = createSlice({
 			}
 			state.direct.splice(state.direct.indexOf(old[0]), 1, {...state.direct[state.direct.indexOf(old[0])], messages: payload.messages})
 		})
+
+		builder.addCase(sendChannel.fulfilled , (state, {payload}) => {
+			console.log("full")
+		})
+
+		builder.addCase(sendChannel.rejected , (state, {payload}) => {
+			console.log("err")
+		})
+
+		builder.addCase(sendDirect.fulfilled , (state, {payload}) => {
+			console.log("dfull")
+		})
+
+		builder.addCase(sendDirect.rejected , (state, {payload}) => {
+			console.log("derr")
+		})
       }
 })
 
@@ -187,7 +208,8 @@ export const messagesMethods = {
 	fetchSpecificChannel,
 	fetchSpecificDirect,
 	sendDirect,
-	sendChannel
+	sendChannel,
+	createDirect
 }
 
 export default messagesSlice

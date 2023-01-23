@@ -1,7 +1,7 @@
 import { Button, Menu, MenuItem, TextareaAutosize } from '@mui/material';
 import React, { createRef, useContext, useEffect, useRef, useState } from 'react'
 import { connect } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext, PopupContext } from '../../..';
 import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
 import { sendChannel, sendDirect } from '../../../store/slices/messages';
@@ -43,6 +43,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 	const {show_profile} = useContext(PopupContext);
 	const scroll_view = createRef<HTMLDivElement>();
 	let { channel_id, direct_id } = useParams();
+	let navigate = useNavigate();
 
 	const handleClick = (event: any) => {
 		setAnchorEl(event.currentTarget);
@@ -59,16 +60,32 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 			if (props.messages.current.id != -1) {
 				let msg_count;
 				if (props.messages.current.is_channel) {
-					msg_count = props.messages.channels.filter((elem: Channel) => elem.id == props.messages.current.id)[0];
+					msg_count = props.messages.channels.filter((elem: Channel) => elem.id == props.messages.current.id);
+					if (msg_count.length)
+						msg_count = msg_count[0]
+					else
+						msg_count = null;
 				} else {
-					msg_count = props.messages.direct.filter((elem: Channel) => elem.id == props.messages.current.id)[0];
+					msg_count = props.messages.direct.filter((elem: Channel) => elem.id == props.messages.current.id);
+					if (msg_count.length)
+						msg_count = msg_count[0]
+					else
+						msg_count = null;
 				}
 
-				if (msg_count.messages.length <= 1) {
-					if (props.messages.current.is_channel)
+				if (msg_count && msg_count.messages.length <= 1) {
+					if (props.messages.current.is_channel) {
 						props.fetchSpecificChannel(msg_count.id)
-					else
+						if (!direct_id && !channel_id) {
+							navigate(`/conversations/channel/${msg_count.id}`)
+						}
+					}
+					else {
 						props.fetchSpecificDirect(msg_count.id)
+						if (!direct_id && !channel_id) {
+							navigate(`/conversations/direct/${msg_count.id}`)
+						}
+					}
 				}
 			}
 		
@@ -134,7 +151,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 	}
 
 	if (!current_conversation?.members || current_conversation.members.length == 0) {
-		return null;
+		return <EmptyConvOrSelect/>;
 	}
 
 

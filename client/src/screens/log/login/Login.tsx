@@ -19,8 +19,8 @@ function AlreadyLogged() {
 
 function LogInForm()
 {
-	const [userName, setUserName] = useState("trash.todev@gmail.com");
-	const [password, setPassword] = useState("Django07");
+	const [userName, setUserName] = useState("1@gmail.com");
+	const [password, setPassword] = useState("12345678");
 	const {user, signIn, profile} = useContext(AuthContext)
 	const {set_toast} = useContext(PopupContext);
 
@@ -53,7 +53,7 @@ function LogInForm()
 			</div>
 			<form className="form" onSubmit={() => console.log("first")}>
 				<input autoComplete='username' placeholder='Email or username' type="username" value={userName} onChange={(e) => setUserName(e.target.value)} />
-				<input onKeyDown={handleKeyDown} placeholder='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+				<input autoComplete='password' onKeyDown={handleKeyDown} placeholder='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 			</form>
 			<Button disable={!validateEntry()} title="Sign in" onPress={handleSubmit} width="300px" />
 		</section>

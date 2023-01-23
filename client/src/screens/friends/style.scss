@@ -5,7 +5,7 @@
 	flex-direction: column;
 	align-items: flex-start;
 	justify-content: flex-start;
-	padding: 50px 0 0 calc(60px + 10%);
+	padding: 50px calc(60px + 10%) 0 calc(60px + 10%);
 
     h1 {
 		font-size: 2rem;
@@ -14,5 +14,62 @@
 
 	>p {
 		margin-bottom: 80px;
+	}
+
+	.friends-wrapper {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		gap: 10px;
+	}
+	
+	.friend-elem {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+
+		.friend-picture-name {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+
+			.image-div {
+				border-radius: var(--border_radius);
+				background-color: var(--surface);
+				overflow: hidden;
+				margin-right: 10px;
+
+				img {
+					width: 64px;
+					height: 64px;
+				}
+			}
+			>span {
+				font-weight: bold;
+				font-size: 1.2rem;
+			}
+		}
+
+		.friend-more {
+			display: flex;
+			flex-direction: row;
+			gap: 10px;
+			align-items: center;
+
+			.friend-score {
+				background-color: var(--primary);
+				padding: 2px 4px;
+				border-radius: var(--border_radius);
+
+				font-size: 1rem;
+				font-weight: bold;
+			}
+			
+			svg {
+				cursor: pointer;
+			}
+		}
 	}
 }

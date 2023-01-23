@@ -10,10 +10,11 @@ import Navbar from "./components/nav/vertical_nav/Navbar";
 import Main from "./Main";
 import { mapDispatchToProps, mapStateToProps } from "./store/dispatcher";
 import { fetchMessages } from "./store/slices/messages";
-import { AuthContext } from ".";
+import { AuthContext, PopupProvider } from ".";
 import Landing from "./screens/landing/Landing";
 import LandingNavbar from "./components/nav/horizontal_nav/LandingNavbar";
 import LandingMain from "./LandingMain";
+import { createPopupCtx } from "./contexts/PopupContext";
 
 export type Props = {
 	messages?: any,
@@ -54,7 +55,9 @@ const App: React.FC<Props> = (props) => {
 			<div>
 				<Navbar/>
 				<div className="content">
-					<Main />
+					<PopupProvider>
+							<Main/>
+					</PopupProvider>
 				</div>
 			</div>
 		</HashRouter>

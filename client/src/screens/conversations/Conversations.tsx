@@ -22,7 +22,7 @@ const Conversations: React.FC<Props> = (props: Props) => {
 
 	useEffect(() => {
 		if (props.friends.length && !loaded.current) {
-			props.fetchMessages({user: user, friends: props.friends, channel_id: channel_id, direct_id: direct_id});
+			props.fetchMessages({user: user, channel_id: channel_id, direct_id: direct_id});
 			loaded.current = true;
 		}
 	}, [props.friends])

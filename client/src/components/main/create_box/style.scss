@@ -1,0 +1,71 @@
+
+
+.create-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba($color: #000000, $alpha: .6);
+
+    .create-box-center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        background-color: var(--background);
+        border-radius: var(--border_radius);
+        overflow: hidden;
+        width: 350px;
+
+        .create-box-header,
+        .create-box-footer {
+            background-color: var(--surface);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 10px;
+            width: 100%;
+        }
+
+        .create-box-footer {
+            justify-content: flex-end;
+
+            button {
+                margin-left: 10px;
+            }
+        }
+
+        .create-box-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 20px;
+
+            >* {
+                margin: 6px 0;
+            }
+
+            .time-input {
+                width: 100%;
+                background-color: var(--background);
+                border: 1px solid var(--divider);
+                color: var(--text);
+                padding: 10px 15px;
+                border-radius: var(--border_radius);
+                outline: none;
+            }
+
+            ::-webkit-calendar-picker-indicator {
+                filter: invert(1);
+            }
+        }
+    }
+}

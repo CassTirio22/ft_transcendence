@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
 import AddIcon from '@mui/icons-material/Add';
 import "./style.scss"
+import CreateBox from '../../main/create_box/CreateBox';
 
 
 type Props = {
@@ -25,6 +26,8 @@ type Direct = {
 
 const ConversationList: React.FC<Props> = (props: Props) => {
 
+	const [newConversation, setNewConversation] = useState("");
+
 	const navigate = useNavigate();
 
 	const redirect_set_conv = (is_channel: boolean, id: number) => {
@@ -42,7 +45,7 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 					</div>
 				))
 			}
-			<div className='add-box'>
+			<div onClick={() => setNewConversation("channel")} className='add-box'>
 				<AddIcon />
 				<span>Add channel</span>
 			</div>
@@ -54,10 +57,15 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 					</div>
 				))
 			}
-			<div className='add-box'>
+			<div onClick={() => setNewConversation("direct")} className='add-box'>
 				<AddIcon />
 				<span>Add direct</span>
 			</div>
+			<CreateBox visible={newConversation != ""} cancel={() => setNewConversation("")} submit_text="Create" title={newConversation == "direct" ? "New direct conversation" : "New channel"}>
+				<div>
+					<p>coucou</p>
+				</div>
+			</CreateBox>
 		</div>
 	)
 }

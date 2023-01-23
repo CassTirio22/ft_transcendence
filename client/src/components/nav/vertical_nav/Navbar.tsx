@@ -19,14 +19,6 @@ function Navbar() {
 					<li className="logo unhover">
 						<div className="navigation_elem">
 							<img alt="Pong logo" src={logo} />
-							{
-								isLoggedIn() ?
-								null :
-								<div className="log_div">
-									<Link className='nav_button outline' to='/login'><p>Sign in</p></Link>
-									<Link className='nav_button' to='/register'><p>Sign up</p></Link>
-								</div> 
-							}
 						</div>
 					</li>
 
@@ -61,8 +53,16 @@ function Navbar() {
 					</li>
 					<li>
 						<div className="separator">
-							<h2 className="separator_title">Conversations</h2>
+							<h2 className="separator_title">Social</h2>
 						</div>
+					</li>
+					<li className={location.pathname === "/friends" ? "active hov" : "hov" }>
+						<Link to='/friends'>
+							<div className="navigation_elem">
+								<i className="fas fa-users"></i>
+								<p>Friends</p>
+							</div>
+						</Link>
 					</li>
 					<li className={location.pathname === "/conversations" ? "active hov" : "hov" }>
 						<Link to='/conversations'>

@@ -108,10 +108,21 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 			</div>
 		)
 	}
+
+	const EmptyConvOrSelect = () => {
+		return (
+			<div className='current-conversation empty'>
+				<div className='current-empty-div'>
+					<h1>Welcome to your conversations</h1>
+					<p>Select one of your conversations or create one from the menu on the left of the screen to start chatting with crazy pong players!</p>
+				</div>
+			</div>
+		)
+	}
 	
 
 	if (props.messages.current.id == -1) {
-		return null;
+		return <EmptyConvOrSelect/>;
 	}
 
 	let current_conversation: Channel = {} as Channel;

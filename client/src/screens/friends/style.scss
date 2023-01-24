@@ -29,29 +29,7 @@
 		align-items: center;
 		justify-content: space-between;
 		width: 100%;
-
-		.friend-picture-name {
-			display: flex;
-			flex-direction: row;
-			align-items: center;
-
-			.image-div {
-				border-radius: var(--border_radius);
-				background-color: var(--surface);
-				overflow: hidden;
-				margin-right: 10px;
-
-				img {
-					width: 64px;
-					height: 64px;
-				}
-			}
-			>span {
-				font-weight: bold;
-				font-size: 1.2rem;
-			}
-		}
-
+		
 		.friend-more {
 			display: flex;
 			flex-direction: row;
@@ -71,5 +49,27 @@
 				cursor: pointer;
 			}
 		}
+	}
+}
+
+.friend-picture-name {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	.image-div {
+		border-radius: var(--border_radius);
+		background-color: var(--surface);
+		overflow: hidden;
+		margin-right: 10px;
+
+		img {
+			width: 64px;
+			height: 64px;
+		}
+	}
+	>span {
+		font-weight: bold;
+		font-size: 1.2rem;
 	}
 }

@@ -8,6 +8,7 @@ import { createCtx } from './contexts/AuthContext';
 import { store } from './store';
 import { createPopupCtx } from './contexts/PopupContext';
 import { createTheme, ThemeProvider } from '@mui/material';
+import { createToastCtx } from './contexts/ToastContext';
 
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
@@ -19,6 +20,9 @@ export const AuthContext = ctx;
 export const [ctxe, PopupProvider] = createPopupCtx();
 export const PopupContext = ctxe;
 
+export const [ctxt, ToastProvider] = createToastCtx();
+export const ToastContext = ctxt;
+
 const theme = createTheme({
 	palette: {
 		mode: "dark",
@@ -29,7 +33,9 @@ root.render(
 	<Provider store={store}>
 		<AuthProvider>
 			<ThemeProvider theme={theme}>
-				<App/>
+				<ToastProvider>
+					<App/>
+				</ToastProvider>
 			</ThemeProvider>
 		</AuthProvider>
 	</Provider>

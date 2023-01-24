@@ -1,6 +1,6 @@
 
 import React, { useContext, useState } from 'react'
-import { AuthContext, PopupContext } from '../../..';
+import { AuthContext, PopupContext, ToastContext } from '../../..';
 import "./login.scss"
 import logo from "../../../assets/images/test.png"
 import Button from '../../../components/button/Button';
@@ -22,7 +22,7 @@ function LogInForm()
 	const [userName, setUserName] = useState("1@gmail.com");
 	const [password, setPassword] = useState("12345678");
 	const {user, signIn, profile} = useContext(AuthContext)
-	const {set_toast} = useContext(PopupContext);
+	const {set_toast} = useContext(ToastContext);
 
 	const handleSubmit = async () => {
 		const response = await signIn(userName, password);

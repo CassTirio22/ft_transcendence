@@ -174,7 +174,7 @@ export class MemberService {
 			throw new HttpException('Not Found. You and/or the other user are no members of this channel.', HttpStatus.NOT_FOUND);
 		}
 		else if (userMember.level == MemberLevel.regular || 
-				(userMember.level == MemberLevel.administrator && wantedMember.level != MemberLevel.regular)) {
+				(userMember.level == MemberLevel.administrator && wantedMember.level == MemberLevel.owner)) {
 			throw new HttpException('Unauthorized. The other user have at least the same member level as you.', HttpStatus.UNAUTHORIZED);
 		}
 		return ourChannel;

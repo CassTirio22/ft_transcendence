@@ -32,6 +32,18 @@ export class FriendshipController {
 		return this.service.friends(<User>user);
 	}
 
+	@Get('asked')
+	@UseGuards(JwtAuthGuard)
+	private asked(@Req() { user }: Request): Promise< User[] | never> {
+		return this.service.asked(<User>user);
+	}
+
+	@Get('askers')
+	@UseGuards(JwtAuthGuard)
+	private askers(@Req() { user }: Request): Promise< User[] | never> {
+		return this.service.askers(<User>user);
+	}
+
 	@Delete('delete')
 	@UseGuards(JwtAuthGuard)
 	private deleteFriend(@Body() body: DeleteFriendDto, @Req() req: Request): Promise<number>{

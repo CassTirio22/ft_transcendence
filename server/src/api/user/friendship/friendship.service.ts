@@ -66,6 +66,22 @@ export class FriendshipService {
 			.getMany());
 	}
 
+	public async asked(user: User): Promise< User[] | never > {
+		return (await this.userRepository.createQueryBuilder('user')
+			.leftJoin("user.received", "rec", "rec.status = :recStatus", {recStatus: FriendshipStatus.pending})
+			.select()
+			.where("rec.applicant = :appId", {appId: user.id})
+			.getMany());
+	}
+
+	public async askers(user: User): Promise< User[] | never > {
+		return (await this.userRepository.createQueryBuilder('user')
+			.leftJoin("user.sent", "sent", "sent.status = :sentStatus", {sentStatus: FriendshipStatus.pending})
+			.select()
+			.where("sent.solicited = :solId", {solId: user.id})
+			.getMany());
+	}
+
 	public async friendsBySocket(socket: string): Promise<User[] | never> {
 		return (await this.userRepository.createQueryBuilder('user')
 			.leftJoin("user.received", "rec", "rec.status = :recStatus", {recStatus: FriendshipStatus.accepted})

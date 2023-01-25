@@ -20,23 +20,29 @@ export class UserController {
 	private edit(@Body() body: EditUserDto, @Req() req: Request): Promise<string | never> {
 		return this.service.edit(body, req);
 		}
-	
+
 	@Get('profile')
 	@UseGuards(JwtAuthGuard)
 	private profile(@Req() { user }: Request): Promise<User | never> {
 		return this.service.profile(<User>user);
 	}
-	
+
 	@Get('other/:id')
 	@UseGuards(JwtAuthGuard)
 	private otherProfile(@Param('id') id: number, @Req() { user }: Request): Promise<User | never> {
 		return this.service.otherProfile(id, <User>user);
 	}
-	
+
 	@Get('ladder')
 	@UseGuards(JwtAuthGuard)
-	private ladder(@Req() { user }: Request): Promise<User[]> {
+	private ladder(@Req() { user }: Request): Promise<User[] | never> {
 		return this.service.ladder();
+	}
+
+	@Get('others')
+	@UseGuards(JwtAuthGuard)
+	private others(@Req() { user }: Request):  Promise<User[] | never> {
+		return 
 	}
 	
 	@Get('discussions')

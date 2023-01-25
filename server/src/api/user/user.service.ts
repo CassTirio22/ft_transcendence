@@ -77,11 +77,27 @@ export class UserService {
 			.getOne());
 	}
 
-	public async ladder(): Promise<User[]> {
+	public async ladder(): Promise<User[] | never> {
 		return (await this.repository.createQueryBuilder('user')
 			.select()
 			.orderBy('user.score', 'ASC')
 			.getMany())
+	}
+
+	//rec.applicant != user || rec IS NULL
+	//AND
+	//sent.solicited != user || sent IS NULL
+	public async others(user: User): Promise<User[] | never> {
+		return (await this.repository.createQueryBuilder('user')
+			.leftJoin("user.received", "rec", "rec.status = :recStatus")
+			.leftJoin("user.sent", "sent", "sent.status = :sentStatus")
+			.select()
+			.where("")
+
+			.where("rec.applicant != :appId", {appId: user.id})
+			.andWhere("sent.solicited != :solId", {solId: user.id})
+
+			.getMany());
 	}
 
 	public async inGame(user: number): Promise <number | never> {

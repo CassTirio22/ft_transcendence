@@ -83,23 +83,6 @@ export class UserService {
 			.orderBy('user.score', 'ASC')
 			.getMany())
 	}
-
-	//rec.applicant != user || rec IS NULL
-	//AND
-	//sent.solicited != user || sent IS NULL
-	public async others(user: User): Promise<User[] | never> {
-		return (await this.repository.createQueryBuilder('user')
-			.leftJoin("user.received", "rec", "rec.status = :recStatus")
-			.leftJoin("user.sent", "sent", "sent.status = :sentStatus")
-			.select()
-			.where("")
-
-			.where("rec.applicant != :appId", {appId: user.id})
-			.andWhere("sent.solicited != :solId", {solId: user.id})
-
-			.getMany());
-	}
-
 	public async inGame(user: number): Promise <number | never> {
 		return (await this.repository.createQueryBuilder('user')
 			.update()
@@ -144,7 +127,7 @@ export class UserService {
 	public async discussions(user: User): Promise<(Direct | Channel)[]> {
 		let discussions: (Channel | Direct)[] = await this.channelService.myChannels(user.id);
 		discussions = discussions.concat(await this.directService.directs(user));
-		return (discussions.sort( (A, B) => (new Date(A.date)).getTime() - (new Date(B.date)).getTime()));
+		return (discussions.sort( (A, B) => (new Date(A.date)).getTime() - (new Date(B.date)).getTime() ));
 	}
 
 	public async uploadPicture(picture: any, req: Request): Promise<number> {

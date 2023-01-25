@@ -3,11 +3,17 @@ import { read } from 'fs';
 import { Block } from './../block/block.entity';
 import { Injectable, HttpException, HttpStatus, Catch, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, Not, QueryResult, QueryBuilder, InsertResult, Brackets } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Friendship, FriendshipStatus } from './friendship.entity';
 import { User } from '../user.entity';
 import { RequestFriendDto, ResponseFriendDto, DeleteFriendDto } from './friendship.dto';
 import { Request } from 'express';
+
+export interface Others {
+	nonFriends: User[];
+	askers: User[];
+	asked: User[];
+}
 
 @Injectable()
 export class FriendshipService {
@@ -81,6 +87,22 @@ export class FriendshipService {
 			.where("sent.solicited = :solId", {solId: user.id})
 			.getMany());
 	}
+
+	public async others(user: User): Promise<Others | never> {
+		let others: Others = {nonFriends: [], asked: [], askers: []};
+		others.nonFriends = (await this.userRepository.createQueryBuilder('user')
+			.leftJoin("user.received", "rec", "rec.applicant = :appId", {appId: user.id})
+			.leftJoin("user.sent", "sent", "sent.solicited = :solId", {solId: user.id})
+			.select()
+			.where("rec IS NULL")
+			.andWhere("sent IS NULL")
+			.andWhere("user.id != :userId", {userId: user.id})
+			.getMany());
+		others.asked = await this.asked(user);
+		others.askers = await this.askers(user);
+		return others;
+	}
+
 
 	public async friendsBySocket(socket: string): Promise<User[] | never> {
 		return (await this.userRepository.createQueryBuilder('user')

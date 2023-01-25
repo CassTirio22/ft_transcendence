@@ -38,12 +38,6 @@ export class UserController {
 	private ladder(@Req() { user }: Request): Promise<User[] | never> {
 		return this.service.ladder();
 	}
-
-	@Get('others')
-	@UseGuards(JwtAuthGuard)
-	private others(@Req() { user }: Request):  Promise<User[] | never> {
-		return 
-	}
 	
 	@Get('discussions')
 	@UseGuards(JwtAuthGuard)

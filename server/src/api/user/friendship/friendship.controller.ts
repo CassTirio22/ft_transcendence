@@ -3,7 +3,7 @@ import { Friendship } from './friendship.entity';
 import { User } from '../user.entity';
 import { DeleteFriendDto, RequestFriendDto, ResponseFriendDto } from './friendship.dto';
 import { JwtAuthGuard } from '..//auth/auth.guard';
-import { FriendshipService } from './friendship.service';
+import { FriendshipService, Others } from './friendship.service';
 import { Request } from 'express';
 
 
@@ -42,6 +42,12 @@ export class FriendshipController {
 	@UseGuards(JwtAuthGuard)
 	private askers(@Req() { user }: Request): Promise< User[] | never> {
 		return this.service.askers(<User>user);
+	}
+
+	@Get('others')
+	@UseGuards(JwtAuthGuard)
+	private others(@Req() { user }: Request): Promise< Others | never> {
+		return this.service.others(<User>user);
 	}
 
 	@Delete('delete')

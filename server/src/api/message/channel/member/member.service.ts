@@ -1,3 +1,4 @@
+import { Socket } from 'socket.io';
 import * as bcrypt from 'bcryptjs';
 import { Block } from './../../../user/block/block.entity';
 import { BlockService } from '@/api/user/block/block.service';
@@ -90,6 +91,16 @@ export class MemberService {
 			throw new HttpException('Unauthorized. You are no member of this channel.', HttpStatus.UNAUTHORIZED);
 		}
 		return members;
+	}
+
+	public async membersFromSockets(sockets: string[]): Promise<{socket: string, member: Member}[] | never> {
+		let ret: {socket: string, member: Member}[] = [];
+		const members: Member[] = (await this.memberRepository.createQueryBuilder()
+			.innerJoinAndSelect("user", "user", "user.socket IN :socketIds", {socketIds: sockets})
+			.select()
+			.getMany());
+		members.forEach( (member) => { ret.push( {socket: member.user.socket, member: member} ) } );
+		return ret;
 	}
 
 	public async changeStatus(body: ChangeMemberStatusDto, req: Request): Promise<number> {

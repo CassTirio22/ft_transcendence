@@ -134,4 +134,4 @@ const ProfileView = (props: Props) => {
 	)
 }
 
-export default connect(friendsStateToProps, mapDispatchToProps)(ProfileView);
+export default connect(mapStateToProps, mapDispatchToProps)(ProfileView);

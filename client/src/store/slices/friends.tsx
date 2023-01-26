@@ -37,7 +37,8 @@ export const removeFriendRequest = createAsyncThunk(
 type friend = {
     id: number,
     full_name: string,
-    image_path: string
+    image_path: string,
+	status: number
 }
 
 const test: friend[] = []
@@ -45,7 +46,14 @@ const test: friend[] = []
 const friendsSlice = createSlice({
 	name: "friends",
 	initialState: test,
-	reducers: {},
+	reducers: {
+		changeFriendStatus: (state, action) => {
+			const last = state.filter((e: any) => e.id == action.payload.user_id);
+			if (last.length) {
+				last[0].status = !action.payload.status ? 1 : 0;
+			}
+        },
+	},
 	extraReducers: builder => {
         builder.addCase(fetchFriends.fulfilled, (state, {payload}) => {
 			return payload
@@ -53,11 +61,16 @@ const friendsSlice = createSlice({
       }
 })
 
+export const changeFriendStatus = (type: any) => (dispatch: any) => {
+	dispatch(friendsSlice.actions.changeFriendStatus(type));
+}
+
 export const friendsMethods = {
 	fetchFriends,
 	newFriendRequest,
 	acceptFriendRequest,
-	removeFriendRequest
+	removeFriendRequest,
+	changeFriendStatus
 }
 
 export default friendsSlice

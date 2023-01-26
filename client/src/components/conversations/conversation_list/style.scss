@@ -13,22 +13,29 @@
     }
 
     .conversation-elem {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
         width: 100%;
         padding: 5px 10px;
         cursor: pointer;
+
+        svg {
+            font-size: 1rem;
+            fill: var(--divider);
+        }
 
         span {
             color: var(--secondary_text);
         }
 
         &:hover {
-            background-color: var(--background);
+            color: var(--background);
         }
 
         &:hover,
         &.active {
-            background-color: var(--primary);
-
             span {
                 color: var(--on_primary);
             }
@@ -94,6 +101,26 @@
 
         form >div {
             margin-top: 10px;
+        }
+
+        .channel-elem {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            border: 2px solid var(--divider);
+            padding: 5px 10px;
+            border-radius: var(--border_radius);
+            cursor: pointer;
+
+            svg {
+                fill: var(--divider);
+            }
+
+            &.selected {
+                border-color: var(--primary);
+            }
         }
     }
 }

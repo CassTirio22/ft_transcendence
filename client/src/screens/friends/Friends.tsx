@@ -112,7 +112,7 @@ const Friends = (props: Props) => {
                 return (
                   <li className='friend-elem' key={id}>
                     <div className='friend-picture-name'>
-                      <ImageBox user={elem} />
+                      <ImageBox onClick={() => show_profile(elem.id)} user={elem} />
                       <span>{elem.name}</span>
                     </div>
                   </li>
@@ -132,7 +132,7 @@ const Friends = (props: Props) => {
                 return (
                   <li className='friend-elem' key={id}>
                     <div className='friend-picture-name'>
-                      <ImageBox user={elem} />
+                      <ImageBox onClick={() => show_profile(elem.id)} user={elem} />
                       <span>{elem.name}</span>
                     </div>
                     <div className='accept-buttons'>
@@ -156,7 +156,7 @@ const Friends = (props: Props) => {
                 return (
                   <li className='friend-elem' key={id}>
                     <div className='friend-picture-name'>
-                      <ImageBox user={elem} />
+                      <ImageBox onClick={() => show_profile(elem.id)} user={elem} />
                       <span>{elem.name}</span>
                     </div>
                     <div className='friend-more'>

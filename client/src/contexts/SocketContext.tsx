@@ -16,6 +16,7 @@ let type_value = "";
 type Props = {
 	children?: JSX.Element,
     addMessage?: any,
+    changeFriendStatus?: any,
 }
 
 export function createSocketCtx() {
@@ -64,7 +65,7 @@ export function createSocketCtx() {
                 });
 
                 socket.current.on('connection', (e: any) => {
-                    //console.log(e)
+                    props.changeFriendStatus(e);
                 });
             }
         }, [user])

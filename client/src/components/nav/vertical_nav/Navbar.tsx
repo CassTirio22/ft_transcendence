@@ -51,6 +51,14 @@ function Navbar() {
 							</div>
 						</Link>
 					</li>
+					<li className={location.pathname === "/ranking" ? "active hov" : "hov" }>
+						<Link to='/ranking'>
+							<div className="navigation_elem">
+								<i className="fas fa-trophy"></i>
+								<p>Ranking</p>
+							</div>
+						</Link>
+					</li>
 					<li>
 						<div className="separator">
 							<h2 className="separator_title">Social</h2>
@@ -69,14 +77,6 @@ function Navbar() {
 							<div className="navigation_elem">
 								<i className="fas fa-comments"></i>
 								<p>Conversations</p>
-							</div>
-						</Link>
-					</li>
-					<li className={location.pathname === "/ranking" ? "active hov" : "hov" }>
-						<Link to='/ranking'>
-							<div className="navigation_elem">
-								<i className="fas fa-trophy"></i>
-								<p>Ranking</p>
 							</div>
 						</Link>
 					</li>

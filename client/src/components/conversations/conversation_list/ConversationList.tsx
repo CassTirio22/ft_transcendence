@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { connect } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
@@ -9,6 +9,8 @@ import Checkbox from '@mui/material/Checkbox';
 import { AuthContext, PopupContext, ToastContext } from '../../..';
 import { TOAST_LVL } from '../../../constants/constants';
 import { Button, TextField } from '@mui/material';
+import axios from "../../../service/axios"
+import LockIcon from '@mui/icons-material/Lock';
 
 
 type Props = {
@@ -18,11 +20,13 @@ type Props = {
 	friends?: any;
 	createDirect?: any;
 	createChannel?: any;
+	joinChannel?: any;
 };
 
 type Channel = {
 	id: number,
 	title: string,
+	status: number
 }
 
 type ChannelFull = {
@@ -46,6 +50,7 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 	const [newConversation, setNewConversation] = useState("");
 	const {user} = useContext(AuthContext);
 	const selected = useRef<number[]>([]);
+	const selected_channel = useRef(-1);
 	const new_channel = useRef<CreateChannel>({type: "", password: "", name: ""});
 	const {set_toast} = useContext(ToastContext);
 
@@ -73,7 +78,7 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 			}
 			selected.current = [];
 			setNewConversation("");
-		} else {
+		} else if (selected_channel.current == -1) {
 			if (new_channel.current.type == "") {
 				set_toast(TOAST_LVL.WARNING, "Selection needed", `Please select one kind of channel`)
 				return;
@@ -82,6 +87,9 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 				return;
 			} else if (new_channel.current.type == "protected" && new_channel.current.password == "") {
 				set_toast(TOAST_LVL.WARNING, "Password needed", `Please create a password for your protected channel`)
+				return;
+			} else if (new_channel.current.type == "protected" && new_channel.current.password.length < 6) {
+				set_toast(TOAST_LVL.WARNING, "Stronger password needed", `Please use a password longer or equal than 6 characters`)
 				return;
 			}
 			props.createChannel({
@@ -92,6 +100,18 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 				props.fetchMessages({user: user, channel_id: e.payload.id, direct_id: undefined});
 			});
 			new_channel.current = {type: "", password: "", name: ""};
+			selected_channel.current = -1;
+			setNewConversation("");
+		} else {
+			props.joinChannel({
+				channel: selected_channel.current,
+				password: new_channel.current.password == "" ? "undefined" : new_channel.current.password
+			}).then((e: any) => {
+				props.fetchMessages({user: user, channel_id: selected_channel.current, direct_id: undefined});
+				
+			});
+			new_channel.current = {type: "", password: "", name: ""};
+			selected_channel.current = -1;
 			setNewConversation("");
 		}
 	}
@@ -100,6 +120,21 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 
 		const [toggle, setToggle] = useState(false);
 		const [currentStep, setCurrentStep] = useState(0);
+		const [otherChannels, setOtherChannels] = useState<any[]>([]);
+
+		const get_other_channels = async () => {
+			const res = await axios.get("/channel/otherChannels")
+			.then(e => e.data)
+			.catch(e => null)
+			if (res) {
+				setOtherChannels(res);
+			}
+		}
+
+		useEffect(() => {
+			get_other_channels();
+		}, [])
+		
 
 		const toggle_id = (id: number) => {
 			if (newConversation == "direct") {
@@ -147,7 +182,7 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 			return (
 				<div className='new-create-channel'>
 					<Button onClick={() => setCurrentStep(1)} fullWidth variant='outlined'>Create a new channel</Button>
-					<Button fullWidth variant='outlined'>Join an existing channel</Button>
+					<Button onClick={() => setCurrentStep(10)} fullWidth variant='outlined'>Join an existing channel</Button>
 				</div>
 			)
 		} else if (currentStep == 1) {
@@ -178,6 +213,32 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 					</form>
 				</div>
 			)
+		} else if (currentStep == 10) {
+
+			return (
+				<div className='new-create-channel'>
+					{
+						otherChannels.map((elem: any, id: number) => (
+							<div className={`channel-elem ${elem.id == selected_channel.current ? "selected" : ""}`} onClick={() => {selected_channel.current = elem.id;setToggle(toggle => !toggle);if(elem.status == 1)setCurrentStep(11)}} key={id}>
+								<span>{elem.name}</span>
+								{
+									elem.status ? <LockIcon/> : null
+								}
+							</div>
+						))
+					}
+				</div>
+			);
+		} else if (currentStep == 11) {
+			return (
+				<div className='new-create-channel'>
+					<h4>Enter the channel password</h4>
+					<form style={{width: "100%"}}>
+						<TextField fullWidth onChange={(e) => {new_channel.current.name = e.target.value}} autoComplete='username' id="outlined" label="Name" variant="outlined" sx={{display: "none"}} />
+						<TextField fullWidth onChange={(e) => {new_channel.current.password = e.target.value}} autoComplete='new-password' id="outlined-basic" label="Password" type="password" variant="outlined" />
+					</form>
+				</div>
+			)
 		}
 
 		return null;
@@ -190,6 +251,7 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 				props.messages.channels.map((elem: Channel, id: number) => (
 					<div onClick={() => redirect_set_conv(true, elem.id)} key={id} className={`conversation-elem${props.messages.current.id == elem.id && props.messages.current.is_channel ? " active" : ""}`}>
 						<span>{elem.title}</span>
+						{elem.status ? <LockIcon/> : null}
 					</div>
 				))
 			}
@@ -209,7 +271,7 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 				<AddIcon />
 				<span>Add direct</span>
 			</div>
-			<CreateBox visible={newConversation != ""} submit={submit} submitable={true} cancel={() => {selected.current = [];setNewConversation("")}} submit_text="Create" title={newConversation == "direct" ? "New direct conversation" : "New channel"}>
+			<CreateBox visible={newConversation != ""} submit={submit} submitable={true} cancel={() => {selected.current = [];setNewConversation("")}} submit_text="Next" title={newConversation == "direct" ? "New direct conversation" : "New channel"}>
 				<CreateChannelOrDirect/>
 			</CreateBox>
 		</div>

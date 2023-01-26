@@ -24,6 +24,12 @@ type CreateChannel = {
 	name: String
 }
 
+type JoinChannel = {
+	channel: number,
+	password?: String
+}
+
+
 export type NewMessage = {
 	origin: number,
 	content: String,
@@ -79,9 +85,17 @@ export const createDirect = createAsyncThunk(
 )
 
 export const createChannel = createAsyncThunk(
-	"messages/channel",
+	"messages/createChannel",
 	async (new_channel: CreateChannel) => {
 		const response = await axios.post("/channel/create", new_channel);
+		return response.data.id;
+	}
+)
+
+export const joinChannel = createAsyncThunk(
+	"messages/joinChannel",
+	async (join_channel: JoinChannel) => {
+		const response = await axios.post("/member/become", join_channel);
 		return response.data.id;
 	}
 )
@@ -147,13 +161,13 @@ const messagesSlice = createSlice({
 								id: conv.user1.id,
 								full_name: conv.user1.name,
 								image_path: conv.user1.name,
-								status: conv.user1.status
+								name: conv.user1.name
 							},
 							{
 								id: conv.user2.id,
 								full_name: conv.user2.name,
 								image_path: conv.user2.name,
-								status: conv.user2.status
+								name: conv.user1.name
 							},
 						]
 					}
@@ -163,6 +177,7 @@ const messagesSlice = createSlice({
 						id: conv.id,
 						messages: conv.messages,
 						title: conv.name,
+						status: conv.status,
 						members: []
 					}
 					cha.push(direct_elem)
@@ -208,7 +223,8 @@ const messagesSlice = createSlice({
 				return {
 					id: user.user_id,
 					full_name: user.user.name,
-					image_path: user.user.name
+					image_path: user.user.name,
+					name: user.user.name
 				}
 			})
 			state.channels.splice(state.channels.indexOf(old[0]), 1, {...state.channels[state.channels.indexOf(old[0])], messages: payload.messages, members: members})
@@ -250,7 +266,8 @@ export const messagesMethods = {
 	sendChannel,
 	createDirect,
 	createChannel,
-	addMessage
+	addMessage,
+	joinChannel
 }
 
 export default messagesSlice

@@ -73,6 +73,7 @@ export class UserGatewayUtil {
 
 		console.log("shoudl send message to sockets: " + clients.filter( client => client.rooms.has(channelId) ));
 		client.to(channelId).emit('messages', message);
+		client.emit('messages', message);
 
 		// blockerSockets.forEach( blocker => blocker.leave('blockRoom'));
 

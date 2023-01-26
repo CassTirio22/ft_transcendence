@@ -9,6 +9,14 @@ export const fetchFriends = createAsyncThunk(
 	}
 )
 
+export const newFriendRequest = createAsyncThunk(
+	"friends/newFriendRequest",
+	async (id: number) => {
+		const response = await axios.post("/friendship/request", {id: id});
+		return response.data;
+	}
+)
+
 type friend = {
     id: number,
     full_name: string,
@@ -29,7 +37,8 @@ const friendsSlice = createSlice({
 })
 
 export const friendsMethods = {
-	fetchFriends
+	fetchFriends,
+	newFriendRequest
 }
 
 export default friendsSlice

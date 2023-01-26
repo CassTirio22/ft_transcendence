@@ -57,7 +57,8 @@ export class UserGatewayUtil {
 
 	public async emitMessage(client: Socket, message: DiscussionMessage, clients: Socket[]): Promise<boolean | never> {
 		let channelId: string = this.defineChannelId(message);
-		let member: any = await this.memberService.memberBySocket(client.id);
+		let member: Member = await this.memberService.memberBySocket(client.id);
+		let user: User = await this.userService.userBySocket(client.id);
 		if (!client.rooms.has(channelId) || member.status == MemberStatus.muted) {
 			return false;
 		}
@@ -65,7 +66,7 @@ export class UserGatewayUtil {
 		// if (message.channel_id)
 		// 	await this.messageService.sendChannel({origin: message.channel_id, content: message.content}, user);
 		
-		const blockers: User[] = await this.blockService.getBlockerList(member.user);
+		const blockers: User[] = await this.blockService.getBlockerList(user);
 		const blockerSockets: Socket[] = clients;
 		blockerSockets.filter( elem => blockers.find( blocker => blocker.socket == elem.id ) != undefined );
 		blockerSockets.forEach( blocker => blocker.join('blockRoom') )

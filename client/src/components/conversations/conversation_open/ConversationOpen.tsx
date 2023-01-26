@@ -8,6 +8,7 @@ import { sendChannel, sendDirect } from '../../../store/slices/messages';
 import "./style.scss"
 import no_yet from "../../../assets/images/no_friends_yet.svg"
 import ImageBox from '../../main/image_box/ImageBox';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 type Props = {
 	messages?: any;
@@ -100,15 +101,14 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 			}
 			send_message(direct_id ? parseInt(direct_id) : null, channel_id ? parseInt(channel_id) : null, message);
 			setMessage("");
-			need_add.current = true;
 			setTimeout(() => {
 				document.getElementById("message-input")?.focus();
 			}, 100);
 		}
 
-		const set_message_shift = (key: string) => {
+		const set_message_shift = (key: string, e: any) => {
 			if (key == "Enter" && last_key.current != "Shift") {
-				need_add.current = false;
+				e.preventDefault();
 				send();
 			} else {
 				last_key.current = key;
@@ -124,8 +124,8 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 						className='text-area-new'
 						placeholder='Send a message'
 						value={message}
-						onChange={(e) => need_add ? setMessage(e.target.value) : null}
-						onKeyDown={(e) => set_message_shift(e.key)}
+						onChange={(e) => setMessage(e.target.value)}
+						onKeyDown={(e) => set_message_shift(e.key, e)}
 						maxRows={5}
 					/>
 					<div className='send-message'>
@@ -171,6 +171,10 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 				<div>
 					<span>{current_conversation.title}</span>
 				</div>
+				{
+					props.messages.current.is_channel ?
+					<MoreHorizIcon onClick={() => navigate("infos")} /> : null
+				}
 			</div>
 			<div className='body-header-container'>
 				<div ref={scroll_view} className='conversation-body'>

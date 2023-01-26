@@ -139,6 +139,17 @@ const messagesSlice = createSlice({
 						content: message.content
 					})
 				}
+			} else {
+				const ind = state.channels.filter((e: any) => e.id == message.channel_id);
+				if (ind.length) {
+					const value = ind[0];
+					value.messages.push({
+						id: makeid(16),
+						author_id: message.author_id,
+						date: new Date().toJSON(),
+						content: message.content
+					})
+				}
 			}
 		}
 	},

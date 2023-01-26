@@ -1,5 +1,6 @@
 
 import { Routes, Route } from 'react-router-dom';
+import ChannelInfo from './components/conversations/channel_info/ChannelInfo';
 import DevAreWorking from './components/DevAreWorking/DevAreWorking';
 import Loading from './components/main/loading/Loading';
 import Conversations from './screens/conversations/Conversations';
@@ -19,6 +20,7 @@ return (
 		<Route path='/' element={<DevAreWorking/>} />
 		<Route path='/conversations' element={<Conversations/>} />
 		<Route path='/conversations/channel/:channel_id' element={<Conversations/>} />
+		<Route path='/conversations/channel/:channel_id/infos' element={<ChannelInfo/>} />
 		<Route path='/conversations/direct/:direct_id' element={<Conversations/>} />
 		<Route path='/friends' element={<Friends/>} />
 		<Route path='/play' element={<DevAreWorking/>} />

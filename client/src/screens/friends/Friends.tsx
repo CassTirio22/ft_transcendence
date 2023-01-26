@@ -12,6 +12,9 @@ import { TOAST_LVL } from '../../constants/constants';
 type Props = {
 	friends?: any,
   newFriendRequest?: any,
+  acceptFriendRequest?: any,
+  removeFriendRequest?: any,
+  fetchFriends?: any,
 };
 
 type Others = {
@@ -24,7 +27,7 @@ let timout: any | null = null;
 let click_outside = true;
 
 const Friends = (props: Props) => {
-  const {show_profile} = useContext(PopupContext);
+  const {show_profile, open_confirm} = useContext(PopupContext);
   const [others, setOthers] = useState<Others | null>(null);
   const [search, setSearch] = useState<any[]>([]);
   const [openSearch, setOpenSearch] = useState(false);
@@ -65,6 +68,22 @@ const Friends = (props: Props) => {
     timout = setTimeout(() => {
       real_search(input)
     }, 300);
+  }
+
+  const handle_request = (didAccept: Boolean, id: number, name: String) => {
+    if (didAccept) {
+      props.acceptFriendRequest(id).then(async (e: any) => {
+        set_toast(TOAST_LVL.SUCCESS, "Request accepted", `${name} and you are friend. You can now talk in private together.`)
+        await setup_lists();
+        props.fetchFriends();
+      })
+    } else {
+      props.removeFriendRequest(id).then(async (e: any) => {
+        set_toast(TOAST_LVL.SUCCESS, "Request rejected", `The friend request of ${name} has been removed.`)
+        await setup_lists();
+        props.fetchFriends();
+      })
+    }
   }
 
   useEffect(() => {
@@ -115,9 +134,9 @@ const Friends = (props: Props) => {
                       <div className='image-div'><img src={`https://avatars.dicebear.com/api/adventurer/${elem.name}.svg`} /></div>
                       <span>{elem.name}</span>
                     </div>
-                    <div>
-                      <Button variant="contained">Confirm</Button>
-                      <Button variant="outlined">Remove</Button>
+                    <div className='accept-buttons'>
+                      <Button onClick={() => handle_request(true, elem.id, elem.name)} variant="contained">Confirm</Button>
+                      <Button onClick={() => open_confirm("Reject friend request", "Are you sure you want to reject this friend request?", undefined, () => handle_request(false, elem.id, elem.name))} variant="outlined">Remove</Button>
                     </div>
                   </li>
                 )
@@ -125,28 +144,40 @@ const Friends = (props: Props) => {
             }
           </ul>
         }
-        <ul className='friends-wrapper'>
-          <li className='title-list'>
-            <h2>Friends</h2>
-          </li>
-          {
-            props.friends?.length ?
-            props.friends.map((elem: any, id: number) => {
-              return (
-                <li className='friend-elem' key={id}>
-                  <div className='friend-picture-name'>
-                    <div className='image-div'><img src={`https://avatars.dicebear.com/api/adventurer/${elem.name}.svg`} /></div>
-                    <span>{elem.name}</span>
-                  </div>
-                  <div className='friend-more'>
-                    <div className='friend-score'>{elem.score}</div>
-                    <MoreVertIcon onClick={() => show_profile(elem.id)} />
-                  </div>
-                </li>
-              )
-            }) : null
-          }
-        </ul>
+        {
+          !props.friends.length ? null :
+          <ul className='friends-wrapper'>
+            <li className='title-list'>
+              <h2>Friends</h2>
+            </li>
+            {
+              props.friends.map((elem: any, id: number) => {
+                return (
+                  <li className='friend-elem' key={id}>
+                    <div className='friend-picture-name'>
+                      <div className='image-div'><img src={`https://avatars.dicebear.com/api/adventurer/${elem.name}.svg`} /></div>
+                      <span>{elem.name}</span>
+                    </div>
+                    <div className='friend-more'>
+                      <div className='friend-score'>{elem.score}</div>
+                      <MoreVertIcon onClick={() => show_profile(elem.id)} />
+                    </div>
+                  </li>
+                )
+              })
+            }
+          </ul>
+        }
+        {
+          !props.friends.length && !others?.askers.length && !others?.asked.length ?
+          <div>
+            <h2>
+              Start a better Pong experience by adding some friends!
+            </h2>
+            <p>You can send friend request by clicking on the search button above.</p>
+          </div>
+          : null
+        }
         {
           !openSearch ? null :
           <div onClick={() => {if(click_outside){setSearch([]);setOpenSearch(false);};click_outside=true;}} className='search-div'>

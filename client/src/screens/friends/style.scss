@@ -70,6 +70,12 @@
 				cursor: pointer;
 			}
 		}
+
+		.accept-buttons {
+			display: flex;
+			flex-direction: row;
+			gap: 10px;
+		}
 	}
 
 	.search-div {

@@ -6,6 +6,7 @@ import { AuthContext, PopupContext } from '../../..';
 import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
 import { sendChannel, sendDirect } from '../../../store/slices/messages';
 import "./style.scss"
+import no_yet from "../../../assets/images/no_friends_yet.svg"
 
 type Props = {
 	messages?: any;
@@ -45,14 +46,6 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 	let { channel_id, direct_id } = useParams();
 	let navigate = useNavigate();
 
-	const handleClick = (event: any) => {
-		setAnchorEl(event.currentTarget);
-	};
-
-	const handleClose = () => {
-		setAnchorEl(null);
-	};
-
 	useEffect(() => {
 		if (scroll_view.current)
 			scroll_view.current.scrollTo(0, scroll_view.current.scrollHeight);
@@ -76,15 +69,11 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 				if (msg_count && msg_count.messages.length <= 1) {
 					if (props.messages.current.is_channel) {
 						props.fetchSpecificChannel(msg_count.id)
-						if (!direct_id && !channel_id) {
-							navigate(`/conversations/channel/${msg_count.id}`)
-						}
+						navigate(`/conversations/channel/${msg_count.id}`)
 					}
 					else {
 						props.fetchSpecificDirect(msg_count.id)
-						if (!direct_id && !channel_id) {
-							navigate(`/conversations/direct/${msg_count.id}`)
-						}
+						navigate(`/conversations/direct/${msg_count.id}`)
 					}
 				}
 			}
@@ -165,6 +154,16 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 			<div className='body-header-container'>
 				<div ref={scroll_view} className='conversation-body'>
 					{
+						current_conversation.messages.length == 0 && current_conversation.members.length == 1 ? 
+						<div className='empty-channel'>
+							<img src={no_yet} />
+							<h2>There is no member in this channel</h2>
+							<p>Invite members in your channel to start chatting with them!</p>
+							<Button>Add members</Button>
+						</div>
+						: null
+					}
+					{
 						[...current_conversation.messages].map((message: Message, id: number) => {
 							const sender: User = current_conversation.members.filter((mem: User) => mem.id == message.author_id)[0];
 
@@ -173,7 +172,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 							const created_at = new Date(message.date);
 							return (
 								<div className='message-div' key={id}>
-									<div profile-id={sender.id} onClick={handleClick} className='message-sender-image-container'>
+									<div profile-id={sender.id} onClick={() =>show_profile(sender.id.toString())} className='message-sender-image-container'>
 										<img src={`https://avatars.dicebear.com/api/adventurer/${sender.image_path}.svg`} />
 									</div>
 									<div className='message-content'>
@@ -192,19 +191,6 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 				</div>
 				<RenderSend/>
 			</div>
-			<Menu
-				id="basic-menu"
-				anchorEl={anchorEl}
-				open={open}
-				onClose={handleClose}
-				MenuListProps={{
-				'aria-labelledby': 'basic-button',
-				}}
-			>
-				<MenuItem onClick={() => {if (anchorEl != null){show_profile(anchorEl.getAttribute("profile-id")!)};handleClose()}}>Voir le profil</MenuItem>
-				<MenuItem onClick={() => {console.log("first");handleClose()}}>Parler en priver</MenuItem>
-				<MenuItem onClick={() => {console.log("first");handleClose()}}>Bloquer l'utilisateur</MenuItem>
-			</Menu>
 		</div>
 	)
 }

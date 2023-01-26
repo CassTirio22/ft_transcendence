@@ -84,4 +84,16 @@
             }
         }
     }
+
+    .new-create-channel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px;
+        width: 100%;
+
+        form >div {
+            margin-top: 10px;
+        }
+    }
 }

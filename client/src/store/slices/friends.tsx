@@ -17,6 +17,23 @@ export const newFriendRequest = createAsyncThunk(
 	}
 )
 
+export const acceptFriendRequest = createAsyncThunk(
+	"friends/acceptFriendRequest",
+	async (id: number) => {
+		const response = await axios.put("/friendship/response", {applicant: id, didAccept: true});
+		return response.data;
+	}
+)
+
+export const removeFriendRequest = createAsyncThunk(
+	"friends/removeFriendRequest",
+	async (id: number) => {
+		const response = await axios.put("/friendship/response", {applicant: id, didAccept: false});
+		return response.data;
+	}
+)
+
+
 type friend = {
     id: number,
     full_name: string,
@@ -38,7 +55,9 @@ const friendsSlice = createSlice({
 
 export const friendsMethods = {
 	fetchFriends,
-	newFriendRequest
+	newFriendRequest,
+	acceptFriendRequest,
+	removeFriendRequest
 }
 
 export default friendsSlice

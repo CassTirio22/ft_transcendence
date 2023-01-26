@@ -9,6 +9,7 @@ import { store } from './store';
 import { createPopupCtx } from './contexts/PopupContext';
 import { createTheme, ThemeProvider } from '@mui/material';
 import { createToastCtx } from './contexts/ToastContext';
+import Socket from './contexts/Socket';
 
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
@@ -32,11 +33,13 @@ const theme = createTheme({
 root.render(
 	<Provider store={store}>
 		<AuthProvider>
-			<ThemeProvider theme={theme}>
-				<ToastProvider>
-					<App/>
-				</ToastProvider>
-			</ThemeProvider>
+			<Socket>
+				<ThemeProvider theme={theme}>
+					<ToastProvider>
+						<App/>
+					</ToastProvider>
+				</ThemeProvider>
+			</Socket>
 		</AuthProvider>
 	</Provider>
 );

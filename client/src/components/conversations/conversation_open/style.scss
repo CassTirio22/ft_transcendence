@@ -31,6 +31,22 @@
         overflow: auto;
         max-height: calc(100vh - 120px);
 
+        .empty-channel {
+            display: flex;
+            min-height: calc(100vh - 180px);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 10px;
+
+            img {
+                width: 40%;
+            }
+        }
+
         .message-div {
             display: flex;
             align-items: flex-start;

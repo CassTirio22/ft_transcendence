@@ -18,6 +18,12 @@ type fetch_params = {
 	direct_id: number
 }
 
+type CreateChannel = {
+	status: String,
+	password?: String,
+	name: String
+}
+
 export type NewMessage = {
 	origin: number,
 	content: String,
@@ -68,6 +74,14 @@ export const createDirect = createAsyncThunk(
 	"messages/createDirect",
 	async (user_id: number) => {
 		const response = await axios.post("/direct/create", {id: user_id});
+		return response.data.id;
+	}
+)
+
+export const createChannel = createAsyncThunk(
+	"messages/channel",
+	async (new_channel: CreateChannel) => {
+		const response = await axios.post("/channel/create", new_channel);
 		return response.data.id;
 	}
 )
@@ -209,7 +223,8 @@ export const messagesMethods = {
 	fetchSpecificDirect,
 	sendDirect,
 	sendChannel,
-	createDirect
+	createDirect,
+	createChannel
 }
 
 export default messagesSlice

@@ -52,6 +52,20 @@ export class ChannelService {
 			.getMany());
 	}
 
+	public async otherChannels(userId: number): Promise<Channel[]> {
+		return ( await this.channelRepository.createQueryBuilder('channel')
+			.innerJoin("channel.members", "members", "members.status != :bannedStatus", {bannedStatus: MemberStatus.banned})
+			.leftJoinAndSelect("channel.messages", "messages")
+			.leftJoin("channel.messages", "next_messages", "messages.date < next_messages.date")
+			.select()
+			.where("next_messages.id IS NULL")
+			.andWhere( new Brackets  (query => { query
+				.where("members.user_id != :memberId", {memberId: userId})
+				.andWhere("channel.status IN (:...status)", {status: [ChannelStatus.public, ChannelStatus.protected]})
+			}))
+			.getMany());
+	}
+
 	public async myChannels(userId: number): Promise<Channel[]> {
 		const channels: Channel[] = ( await this.channelRepository.createQueryBuilder('channel')
 			.innerJoinAndSelect("channel.members", "members", "members.status != :bannedStatus", {bannedStatus: MemberStatus.banned})

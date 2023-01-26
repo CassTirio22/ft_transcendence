@@ -110,11 +110,12 @@ const messagesSlice = createSlice({
 			let direct: Channel[] = [];
 			for (let index = 0; index < data.length; index++) {
 				const conv = data[index];
-				if (conv.user1_id) {
+				console.log(conv, conv.user1_id, user.id)
+				if (conv.user1_id != undefined) {
 					const direct_elem = {
 						id: conv.id,
 						messages: conv.messages,
-						title: user_id == conv.user1.id ? conv.user2.name : conv.user1.name,
+						title: user_id == conv.user1_id ? conv.user2.name : conv.user1.name,
 						members: [
 							{
 								id: conv.user1.id,

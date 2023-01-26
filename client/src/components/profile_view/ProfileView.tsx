@@ -77,7 +77,6 @@ const ProfileView = (props: Props) => {
 	else
 		exist = null;
 	
-	console.log(exist)
 	
 	return (
 		<div id="profile-view">

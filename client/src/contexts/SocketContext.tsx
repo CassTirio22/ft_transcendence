@@ -32,10 +32,10 @@ export function createSocketCtx() {
         const {user, isLoggedIn} = useContext(AuthContext);
 
         useEffect(() => {
-            if (isLoggedIn()) {
+            if (user.token) {
                 socket.current = io(socket_url, {
                     extraHeaders: {
-                      Authorization: `Bearer ${user.token}`
+                      Authorization: `${user.token}`
                     }
                 });
 
@@ -50,6 +50,19 @@ export function createSocketCtx() {
                 socket.current.on('message', (e: any) => {
                     console.log(e)
                 });
+
+                socket.current.on('connection', (e: any) => {
+                    console.log(e)
+                });
+
+                setTimeout(() => {
+                    socket.current.emit("message", {
+                        author_id: user.id,
+                        direct_id: 18,
+                        channel_id: null,
+                        content: "string",
+                    })
+                }, 1000);
             }
         }, [user])
 

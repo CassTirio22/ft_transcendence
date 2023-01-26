@@ -130,6 +130,7 @@ export function createCtx() {
 			if (token) {
 				set_instance_token(token);
 				profile();
+				setUser({...user, token: token})
 			}
 		}, [])
 		

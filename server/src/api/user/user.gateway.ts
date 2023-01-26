@@ -57,7 +57,7 @@ export class UserGatewayUtil {
 
 	public async emitMessage(client: Socket, message: DiscussionMessage, clients: Socket[]): Promise<boolean | never> {
 		let channelId: string = this.defineChannelId(message);
-		let member: Member = await this.memberService.memberBySocket(client.id);
+		let member: any = await this.memberService.memberBySocket(client.id);
 		if (!client.rooms.has(channelId) || member.status == MemberStatus.muted) {
 			return false;
 		}

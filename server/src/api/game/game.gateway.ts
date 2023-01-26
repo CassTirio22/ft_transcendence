@@ -1,3 +1,5 @@
+import { BlockService } from '@/api/user/block/block.service';
+import { MemberService } from './../message/channel/member/member.service';
 import { GameService } from './game.service';
 import { Game } from './game.entity';
 import { MessageService } from './../message/message.service';
@@ -108,10 +110,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private messageService: MessageService,
 		@Inject(GameService)
 		private gameService: GameService,
+		@Inject(MemberService)
+		private memberService: MemberService,
+		@Inject(BlockService)
+		private blockService: BlockService,
 		) {
 			this.waiters = [];
 			this.games = [];
-			this.util = new UserGatewayUtil(friendshipService, userService, messageService);
+			this.util = new UserGatewayUtil(
+				friendshipService, 
+				userService, 
+				messageService,
+				memberService,
+				blockService
+			);
 			this.gameUtil = new GameGatewayUtil(gameService);
 		}
 

@@ -1,4 +1,4 @@
-import { channel } from 'diagnostics_channel';
+import { BlockService } from './block/block.service';
 import { MemberService } from './../message/channel/member/member.service';
 import { Member, MemberStatus } from './../message/channel/member/member.entity';
 import { MessageService } from './../message/message.service';
@@ -13,12 +13,11 @@ import {
 	WebSocketGateway,
 	WebSocketServer, 
 } from "@nestjs/websockets";
-import { Socket, Server, ServerOptions } from "socket.io";
+import { Socket, Server } from "socket.io";
 import { AuthHelper } from "./auth/auth.helper";
 import { User } from "./user.entity";
 import { Channel } from '../message/channel/channel.entity';
 import { Direct } from '../message/direct/direct.entity';
-import { SocketReadyState } from 'net';
 
 export interface ConnectionMessage {
 	user_id: number;
@@ -43,6 +42,10 @@ export class UserGatewayUtil {
 		private userService: UserService,
 		@Inject(MessageService)
 		private messageService: MessageService,
+		@Inject(MemberService)
+		private memberService: MemberService,
+		@Inject(BlockService)
+		private blockService: BlockService,
 	) {}
 
 	/* MESSAGES EMITION */
@@ -52,43 +55,25 @@ export class UserGatewayUtil {
 		return true;
 	}
 
-	/*
-		BIG DEFINITION OF WHAT WILL HAPPEN NEXT: 
-			-No need to check if muted/kick/ban because we can check if inside the channel
-			-To be ok with the DB we check at connection which channel client is muted or banned
-				-(we will need more than  an array of strings for that) OK
-			-We will neeed to update channels and clients while status of members/users change
-				-first scenario : someone join/leave/is added to a channel
-				-second scenario : someone is muted/kicked/banned
-				-third scenario : timed mute/kick is over for someone
-			-The whole instructions above are there to avoid to check all members+users in each channel
-
-			-Will still need to check who is blocked in the DB
-				-indeed always check who blocked the sender to not see the message
-				-from there creating a temporary room with all persons that should not receive the message and use except key word before the emit keyword
-				-https://github.com/socketio/socket.io/issues/3629
-
-			-When someone block someone else also send through a socket -> just notif, can be hidden in the front until the page is reloaded
-
-		HOW TO STOCK THE CHANNELS? => map(channelId: string, channel: Channel | Direct)
-	*/
-
-	public async emitMessage(client: Socket, message: DiscussionMessage): Promise<boolean | never> {
+	public async emitMessage(client: Socket, message: DiscussionMessage, clients: Socket[]): Promise<boolean | never> {
 		let channelId: string = this.defineChannelId(message);
-		//SOMETHING TO DO
-		//won't be enough since have to check if muted -> service memberBySocket and check member.status
-		if (!client.rooms.has(channelId)) {
+		let member: Member = await this.memberService.memberBySocket(client.id);
+		if (!client.rooms.has(channelId) || member.status == MemberStatus.muted) {
 			return false;
 		}
-		const user: User = await this.userService.userBySocket(client.id);
 		//DON'T ADD IN DB ON GATEWAY-SIDE FOR NOW
 		// if (message.channel_id)
 		// 	await this.messageService.sendChannel({origin: message.channel_id, content: message.content}, user);
 		
-		//SOMETHING TO DO 
-		//except all blockers of user
-		//how to check bblock? => get all channel members users block/direct users, block see their status
-		client.to(channelId).emit('message', message);
+		const blockers: User[] = await this.blockService.getBlockerList(member.user);
+		const blockerSockets: Socket[] = clients;
+		blockerSockets.filter( elem => blockers.find( blocker => blocker.socket == elem.id ) != undefined );
+		blockerSockets.forEach( blocker => blocker.join('blockRoom') )
+
+		client.to(channelId).except('blockRoom').emit('message', message);
+
+		blockerSockets.forEach( blocker => blocker.leave('blockRoom'));
+
 		return true;
 	}
 
@@ -121,7 +106,7 @@ export class UserGatewayUtil {
 		let channels: Map<string, (Channel | Direct)> = new Map<string, (Channel | Direct)>();
 		let discussions: (Channel | Direct)[] = await this.userService.discussions(user);
 		discussions.forEach(discussion => {
-			let id: {direct_id: number, channel_id: number};
+			let id: {direct_id: number, channel_id: number} = {direct_id: null, channel_id: null};
 			id.direct_id = ('user1_id' in discussion) ? discussion.id : null;
 			id.channel_id = ('name' in discussion) ? discussion.id : null;
 			channels.set(this.defineChannelId(id), discussion);
@@ -162,40 +147,46 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private messageService: MessageService,
 		@Inject(MemberService)
 		private memberService: MemberService,
+		@Inject(BlockService)
+		private blockService: BlockService,
 	) {
 		this.clients = [];
 		this.channels = new Map<string, (Channel | Direct)>();
-		this.util = new UserGatewayUtil(friendshipService, userService, messageService);
+		this.util = new UserGatewayUtil(
+			friendshipService, 
+			userService, 
+			messageService, 
+			memberService, 
+			blockService
+		);
 	}
 
 	//regular loop
 	async afterInit(): Promise<any | never> {
 		const users: User[] = await this.userService.ladder();
-		setInterval(() => {
+		setInterval(async () => {
+			//managing disconnection part
 			this.clients.forEach((async (client) => {
 				if (client.disconnected) {
 					this.clients = await this.util.userDisconnection(this.clients, users.find( (obj) => (obj.socket == client.id) ), client);
-					//leave every channels joined (should remove each empty room at some point)
 					client.rooms.forEach( room => { client.leave(room);} )
 				}
 			}));
-		}, 10000); //every 10 secs
-		setInterval(() => {
-			//call a member service that would update every members status!!!!
-			//update our dear map of channels also maybe(maybe not necessary, we'll see)
 
-			// const members: {socket: string, member: Member}[] = await this.memberService.membersFromSockets(this.clients.map( (socket) => socket.id));
-			// members.forEach( (member, index) => {
-			// 	const client: Socket = this.clients.find( (client) => {return client.id == member.socket} );
-			// 	const channelId = "channel" + member.member.channel_id;
-			// 	if (member.member.status == MemberStatus.regular && !client.rooms.has(channelId)) {
-			// 		this.joinChannel(client, channelId, this.channels[channelId]);
-			// 	}
-			// 	else if (member.member.status == MemberStatus.banned && client.rooms.has(channelId)) {
-			// 		client.leave(channelId);
-			// 	}
-			// });
-		}, 1000); //every sec
+			//managing evolution of member status over time
+			await this.memberService.updateStatus();
+			const members: {socket: string, member: Member}[] = await this.memberService.membersFromSockets(this.clients.map( (socket) => socket.id));
+			members.forEach( (member) => {
+				const client: Socket = this.clients.find( (client) => {return client.id == member.socket} );
+				const channelId = "channel" + member.member.channel_id;
+				if (member.member.status == MemberStatus.regular && !client.rooms.has(channelId)) {
+					this.joinChannel(client, channelId, this.channels[channelId]);
+				}
+				else if (member.member.status == MemberStatus.banned && client.rooms.has(channelId)) {
+					client.leave(channelId);
+				}
+			});
+		}, 1000); //every 1 sec
 	}
 
 	//client connect
@@ -206,7 +197,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const user: User = await this.authHelper.getUser(token); //not ok if wrong token
 			await this.userService.saveSocket(user, client.id);
 			this.clients.push(client);
-
+			
 			//emit connection to friends
 			const message: ConnectionMessage = {user_id: user.id, status: true};
 			this.util.emitToFriends(this.clients, client.id, message, this.util.emitConnection);
@@ -234,7 +225,7 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	//client send message to channel
 	@SubscribeMessage("message")
 	handleMessage(client: Socket, data: DiscussionMessage) {
-		if (!this.util.emitMessage(client, data))
+		if (!this.util.emitMessage(client, data, this.clients))
 			client.emit('error', {message: 'Sending messages in this channel unauthorized.'});
 	}
 	

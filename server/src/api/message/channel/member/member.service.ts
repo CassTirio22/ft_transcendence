@@ -81,6 +81,13 @@ export class MemberService {
 		.getOne());
 	}
 
+	public async memberBySocket(socket: string): Promise<Member | never> {
+		return (await this.memberRepository.createQueryBuilder('member')
+			.innerJoinAndSelect("user", "user", "user.socket = :socketId", {socketId: socket})
+			.select()
+			.getOne());
+	}
+
 	public async members(channel: number, user: User): Promise<Member[]> {
 		let members: Member[] = (await this.memberRepository.createQueryBuilder('members')
 			.innerJoinAndSelect("members.user", "user")
@@ -95,9 +102,10 @@ export class MemberService {
 
 	public async membersFromSockets(sockets: string[]): Promise<{socket: string, member: Member}[] | never> {
 		let ret: {socket: string, member: Member}[] = [];
-		const members: Member[] = (await this.memberRepository.createQueryBuilder()
-			.innerJoinAndSelect("user", "user", "user.socket IN :socketIds", {socketIds: sockets})
+		const members: Member[] = (await this.memberRepository.createQueryBuilder('members')
+			.innerJoinAndSelect("members.user", "user")
 			.select()
+			.where( "user.socket = ANY(:socketIds)", {socketIds: sockets})
 			.getMany());
 		members.forEach( (member) => { ret.push( {socket: member.user.socket, member: member} ) } );
 		return ret;
@@ -129,6 +137,14 @@ export class MemberService {
 			.set({ level: this._stringToLevel(level) })
 			.where("member.user_id = :memberId", {memberId: member})
 			.andWhere("member.channel_id = :channelId", {channelId: channel})
+			.execute()).affected;
+	}
+
+	public async updateStatus(): Promise<number> {
+		return (await this.memberRepository.createQueryBuilder('member')
+			.update()
+			.where("member.block_until < :time", {time: new Date()})
+			.set({ status: MemberStatus.regular})
 			.execute()).affected;
 	}
 

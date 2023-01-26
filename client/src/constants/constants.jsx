@@ -11,3 +11,6 @@ export const TOAST_LVL = {
     WARNING: "warning",
     ERROR: "error"
 }
+
+export const base_url = "http://localhost:5000";
+export const socket_url = "ws://localhost:5000";

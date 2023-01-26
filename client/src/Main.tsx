@@ -8,6 +8,7 @@ import Home from './screens/home/Home';
 import Login from './screens/log/login/Login';
 import Register from './screens/log/register/Register';
 import Profile from './screens/profile/Profile';
+import Ranking from './screens/ranking/Ranking';
 /**
  *	React Component
  *	Describe the different possible routes and UI rendered consequently.
@@ -22,6 +23,7 @@ return (
 		<Route path='/friends' element={<Friends/>} />
 		<Route path='/play' element={<DevAreWorking/>} />
 		<Route path='/watch' element={<DevAreWorking/>} />
+		<Route path='/ranking' element={<Ranking/>} />
 		<Route path='/me/profile' element={<Profile/>} />
 		<Route path='*' element={<Loading/>} />
 	</Routes>

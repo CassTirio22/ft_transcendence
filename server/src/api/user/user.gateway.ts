@@ -127,7 +127,7 @@ export class UserGatewayUtil {
 }
 
 
-@WebSocketGateway()
+@WebSocketGateway({cors: true})
 export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
 	@WebSocketServer()
 	server: Server;

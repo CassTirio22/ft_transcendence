@@ -145,3 +145,11 @@ a.button_primary {
 		color: var(--primary);
 	}
 }
+
+.main-view {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+	padding: 50px calc(60px + 10%) 60px calc(60px + 10%);
+}

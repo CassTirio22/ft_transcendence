@@ -64,11 +64,19 @@ function Navbar() {
 							</div>
 						</Link>
 					</li>
-					<li className={location.pathname === "/conversations" ? "active hov" : "hov" }>
+					<li className={location.pathname.includes("conversations") ? "active hov" : "hov" }>
 						<Link to='/conversations'>
 							<div className="navigation_elem">
 								<i className="fas fa-comments"></i>
 								<p>Conversations</p>
+							</div>
+						</Link>
+					</li>
+					<li className={location.pathname === "/ranking" ? "active hov" : "hov" }>
+						<Link to='/ranking'>
+							<div className="navigation_elem">
+								<i className="fas fa-trophy"></i>
+								<p>Ranking</p>
 							</div>
 						</Link>
 					</li>

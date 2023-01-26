@@ -5,6 +5,7 @@ export const fetchFriends = createAsyncThunk(
 	"friends/fetchFriends",
 	async () => {
 		const response = await axios.get("/friendship/friends");
+		console.log(response.data)
 		return response.data;
 	}
 )

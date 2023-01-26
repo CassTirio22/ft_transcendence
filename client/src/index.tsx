@@ -10,6 +10,7 @@ import { createPopupCtx } from './contexts/PopupContext';
 import { createTheme, ThemeProvider } from '@mui/material';
 import { createToastCtx } from './contexts/ToastContext';
 import Socket from './contexts/Socket';
+import { createSocketCtx } from './contexts/SocketContext';
 
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
@@ -24,6 +25,9 @@ export const PopupContext = ctxe;
 export const [ctxt, ToastProvider] = createToastCtx();
 export const ToastContext = ctxt;
 
+export const [ctxs, SocketProvider] = createSocketCtx();
+export const SocketContext = ctxt;
+
 const theme = createTheme({
 	palette: {
 		mode: "dark",
@@ -33,13 +37,13 @@ const theme = createTheme({
 root.render(
 	<Provider store={store}>
 		<AuthProvider>
-			<Socket>
+			<SocketProvider>
 				<ThemeProvider theme={theme}>
 					<ToastProvider>
 						<App/>
 					</ToastProvider>
 				</ThemeProvider>
-			</Socket>
+			</SocketProvider>
 		</AuthProvider>
 	</Provider>
 );

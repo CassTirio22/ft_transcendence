@@ -12,7 +12,7 @@ export const fetchFriends = createAsyncThunk(
 export const newFriendRequest = createAsyncThunk(
 	"friends/newFriendRequest",
 	async (id: number) => {
-		const response = await axios.post("/friendship/request", {id: id});
+		const response = await axios.post("/friendship/request", {id: id})
 		return response.data;
 	}
 )

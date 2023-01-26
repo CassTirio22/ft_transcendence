@@ -66,16 +66,15 @@ export class UserGatewayUtil {
 		// if (message.channel_id)
 		// 	await this.messageService.sendChannel({origin: message.channel_id, content: message.content}, user);
 		
-		// const blockers: User[] = await this.blockService.getBlockerList(user);
-		// const blockerSockets: Socket[] = clients;
-		// blockerSockets.filter( elem => blockers.find( blocker => blocker.socket == elem.id ) != undefined );
-		// blockerSockets.forEach( blocker => blocker.join('blockRoom') )
+		const blockers: User[] = await this.blockService.getBlockerList(user);
+		const blockerSockets: Socket[] = clients;
+		blockerSockets.filter( elem => blockers.find( blocker => blocker.socket == elem.id ) != undefined );
+		blockerSockets.forEach( blocker => blocker.join('blockRoom') )
 
-		console.log("shoudl send message to sockets: " + clients.filter( client => client.rooms.has(channelId) ));
 		client.to(channelId).emit('messages', message);
 		client.emit('messages', message);
 
-		// blockerSockets.forEach( blocker => blocker.leave('blockRoom'));
+		blockerSockets.forEach( blocker => blocker.leave('blockRoom'));
 
 		return true;
 	}
@@ -230,7 +229,6 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	//client send message to channel
 	@SubscribeMessage("message")
 	handleMessage(client: Socket, data: DiscussionMessage) {
-		console.log("received message : " + data);
 		if (!this.util.emitMessage(client, data, this.clients))
 			client.emit('error', {message: 'Sending messages in this channel unauthorized.'});
 	}

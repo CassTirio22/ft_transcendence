@@ -21,7 +21,7 @@ export function createCtx() {
 	const rename = async(name: string) => "null";
 	const signIn = async (email: string, password: string) => "null";
 	const signOut = async () => "null";
-	const profile = async () => "null";
+	const profile = async (token: String) => "null";
 	const isLoggedIn = () => false;
 
 	const ctx = createContext({
@@ -90,7 +90,7 @@ export function createCtx() {
 			set_instance_token(token);
 			setUser({...user, token: token});
 			sessionStorage.setItem("token", token);
-			const name = await profile();
+			const name = await profile(token);
 			return name;
 		}
 
@@ -101,15 +101,15 @@ export function createCtx() {
 			return "";
 		}
 
-		const profile = async () => {
-			const user = await axios.get("user/profile"/*, {user}, { withCredentials: true }*/)
+		const profile = async (token: String) => {
+			const user = await axios.get("user/profile")
 			.then(response => {
 				return response.data;
 			})
 			.catch(e => {
 				return null;
 			})
-			setUser({...user, email: user.email});
+			setUser({...user, email: user.email, token: token});
 			return user.name;
 		}
 
@@ -129,8 +129,7 @@ export function createCtx() {
 			const token = sessionStorage.getItem("token");
 			if (token) {
 				set_instance_token(token);
-				profile();
-				setUser({...user, token: token})
+				profile(token);
 			}
 		}, [])
 		

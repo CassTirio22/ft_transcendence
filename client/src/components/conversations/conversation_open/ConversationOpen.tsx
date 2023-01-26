@@ -2,7 +2,7 @@ import { Button, Menu, MenuItem, TextareaAutosize } from '@mui/material';
 import React, { createRef, useContext, useEffect, useRef, useState } from 'react'
 import { connect } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AuthContext, PopupContext } from '../../..';
+import { AuthContext, PopupContext, SocketContext } from '../../..';
 import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
 import { sendChannel, sendDirect } from '../../../store/slices/messages';
 import "./style.scss"
@@ -41,6 +41,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 	const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement|null>(null);
 	const open = Boolean(anchorEl);
 	const {user} = useContext(AuthContext);
+	const {send_message} = useContext(SocketContext);
 	const {show_profile} = useContext(PopupContext);
 	const scroll_view = createRef<HTMLDivElement>();
 	let { channel_id, direct_id } = useParams();
@@ -94,6 +95,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 			} else if (direct_id) {
 				props.sendDirect({origin: parseInt(direct_id), content: message})
 			}
+			send_message(direct_id ? parseInt(direct_id) : null, channel_id ? parseInt(channel_id) : null, message);
 			setMessage("");
 		}
 

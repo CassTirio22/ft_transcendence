@@ -86,6 +86,17 @@ export const createChannel = createAsyncThunk(
 	}
 )
 
+function makeid(length: number) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+}
 
 const messagesSlice = createSlice({
 	name: "messages",
@@ -101,6 +112,21 @@ const messagesSlice = createSlice({
 		selectConversation: (state, action) => {
 			state.current = action.payload;
         },
+		addMessage: (state, action) => {
+			const message = action.payload;
+			if (message.direct_id) {
+				const ind = state.direct.filter((e: any) => e.id == message.direct_id);
+				if (ind.length) {
+					const value = ind[0];
+					value.messages.push({
+						id: makeid(16),
+						author_id: message.author_id,
+						date: new Date().toJSON(),
+						content: message.content
+					})
+				}
+			}
+		}
 	},
 	extraReducers: builder => {
         builder.addCase(fetchMessages.fulfilled, (state, {payload}) => {
@@ -110,7 +136,7 @@ const messagesSlice = createSlice({
 			let direct: Channel[] = [];
 			for (let index = 0; index < data.length; index++) {
 				const conv = data[index];
-				console.log(conv, conv.user1_id, user.id)
+				
 				if (conv.user1_id != undefined) {
 					const direct_elem = {
 						id: conv.id,
@@ -195,26 +221,22 @@ const messagesSlice = createSlice({
 			state.direct.splice(state.direct.indexOf(old[0]), 1, {...state.direct[state.direct.indexOf(old[0])], messages: payload.messages})
 		})
 
-		builder.addCase(sendChannel.fulfilled , (state, {payload}) => {
-			console.log("full")
-		})
+		builder.addCase(sendChannel.fulfilled , (state, {payload}) => {})
 
-		builder.addCase(sendChannel.rejected , (state, {payload}) => {
-			console.log("err")
-		})
+		builder.addCase(sendChannel.rejected , (state, {payload}) => {})
 
-		builder.addCase(sendDirect.fulfilled , (state, {payload}) => {
-			console.log("dfull")
-		})
+		builder.addCase(sendDirect.fulfilled , (state, {payload}) => {})
 
-		builder.addCase(sendDirect.rejected , (state, {payload}) => {
-			console.log("derr")
-		})
+		builder.addCase(sendDirect.rejected , (state, {payload}) => {})
       }
 })
 
 export const selectConversation = (type: any) => (dispatch: any) => {
 	dispatch(messagesSlice.actions.selectConversation(type));
+}
+
+export const addMessage = (type: any) => (dispatch: any) => {
+	dispatch(messagesSlice.actions.addMessage(type));
 }
 
 export const messagesMethods = {
@@ -225,7 +247,8 @@ export const messagesMethods = {
 	sendDirect,
 	sendChannel,
 	createDirect,
-	createChannel
+	createChannel,
+	addMessage
 }
 
 export default messagesSlice

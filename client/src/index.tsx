@@ -26,7 +26,7 @@ export const [ctxt, ToastProvider] = createToastCtx();
 export const ToastContext = ctxt;
 
 export const [ctxs, SocketProvider] = createSocketCtx();
-export const SocketContext = ctxt;
+export const SocketContext = ctxs;
 
 const theme = createTheme({
 	palette: {

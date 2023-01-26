@@ -14,12 +14,13 @@ import { AuthContext } from '..';
 let type_value = "";
 
 type Props = {
-	children?: JSX.Element
+	children?: JSX.Element,
+    addMessage?: any,
 }
 
 export function createSocketCtx() {
 
-    const send_message = () => {}
+    const send_message = (direct_id: number | null, channel_id: number | null, content: String) => {}
 
 	const ctx = createContext({
 		send_message: send_message,
@@ -31,6 +32,17 @@ export function createSocketCtx() {
 
         const {user, isLoggedIn} = useContext(AuthContext);
 
+        const send_message = (direct_id: number | null, channel_id: number | null, content: String) => {
+            if (socket.current) {
+                socket.current.emit("message", {
+                    author_id: user.id,
+                    direct_id: direct_id,
+                    channel_id: channel_id,
+                    content: content,
+                })
+            }
+        }
+
         useEffect(() => {
             if (user.token) {
                 socket.current = io(socket_url, {
@@ -40,25 +52,25 @@ export function createSocketCtx() {
                 });
 
                 socket.current.on('connect', () => {
-                    console.log("connected")
+                    //console.log("connected")
                 });
 
                 socket.current.on('disconnect', () => {
-                    console.log("disconnected")
+                    //console.log("disconnected")
                 });
 
-                socket.current.on('message', (e: any) => {
-                    console.log(e)
+                socket.current.on('messages', (e: any) => {
+                    props.addMessage(e);
                 });
 
                 socket.current.on('connection', (e: any) => {
-                    console.log(e)
+                    //console.log(e)
                 });
 
                 setTimeout(() => {
                     socket.current.emit("message", {
                         author_id: user.id,
-                        direct_id: 18,
+                        direct_id: 1,
                         channel_id: null,
                         content: "string",
                     })

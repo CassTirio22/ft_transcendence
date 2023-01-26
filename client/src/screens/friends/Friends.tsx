@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { connect } from 'react-redux';
-import { mapDispatchToProps, mapStateToProps } from '../../store/dispatcher';
+import { friendsStateToProps, mapDispatchToProps, mapStateToProps } from '../../store/dispatcher';
 import "./style.scss"
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { PopupContext, ToastContext } from '../..';
@@ -8,6 +8,7 @@ import axios from "../../service/axios"
 import { Button } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { TOAST_LVL } from '../../constants/constants';
+import ImageBox from '../../components/main/image_box/ImageBox';
 
 type Props = {
 	friends?: any,
@@ -111,7 +112,7 @@ const Friends = (props: Props) => {
                 return (
                   <li className='friend-elem' key={id}>
                     <div className='friend-picture-name'>
-                      <div className='image-div'><img src={`https://avatars.dicebear.com/api/adventurer/${elem.name}.svg`} /></div>
+                      <ImageBox user={elem} />
                       <span>{elem.name}</span>
                     </div>
                   </li>
@@ -131,7 +132,7 @@ const Friends = (props: Props) => {
                 return (
                   <li className='friend-elem' key={id}>
                     <div className='friend-picture-name'>
-                      <div className='image-div'><img src={`https://avatars.dicebear.com/api/adventurer/${elem.name}.svg`} /></div>
+                      <ImageBox user={elem} />
                       <span>{elem.name}</span>
                     </div>
                     <div className='accept-buttons'>
@@ -155,7 +156,7 @@ const Friends = (props: Props) => {
                 return (
                   <li className='friend-elem' key={id}>
                     <div className='friend-picture-name'>
-                      <div className='image-div'><img src={`https://avatars.dicebear.com/api/adventurer/${elem.name}.svg`} /></div>
+                      <ImageBox user={elem} />
                       <span>{elem.name}</span>
                     </div>
                     <div className='friend-more'>
@@ -207,4 +208,4 @@ const Friends = (props: Props) => {
   )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Friends)
+export default connect(friendsStateToProps, mapDispatchToProps)(Friends)

@@ -3,7 +3,7 @@ import "./style.scss"
 import axios from "../../service/axios"
 import { Button } from '@mui/material';
 import { connect } from 'react-redux';
-import { mapDispatchToProps, mapStateToProps } from '../../store/dispatcher';
+import { friendsStateToProps, mapDispatchToProps, mapStateToProps } from '../../store/dispatcher';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext, ToastContext } from '../..';
 import { TOAST_LVL } from '../../constants/constants';
@@ -106,13 +106,17 @@ const ProfileView = (props: Props) => {
 						</div>
 						<div className='profile-content'>
 							{
-								in_friend.length ?
+								in_friend.length && profile.id != user.id ?
 								<div className='profile-actions'>
 									<Button onClick={() => send_direct(profile.id)} variant='contained'>Send private message</Button>
 									<Button onClick={() => navigate("/")} variant='outlined'>Block</Button>
 								</div> :
+								profile.id != user.id ?
 								<div>
 									<Button onClick={() => send_friend_request()} variant='contained'>Send friend request</Button>
+								</div> :
+								<div>
+									<Button onClick={() => {navigate("/me/profile");setProfile({...profile, id: -1})}} variant='contained'>Edit profile</Button>
 								</div>
 							}
 							<div className='profile-data'>
@@ -130,4 +134,4 @@ const ProfileView = (props: Props) => {
 	)
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ProfileView);
+export default connect(friendsStateToProps, mapDispatchToProps)(ProfileView);

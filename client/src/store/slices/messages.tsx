@@ -146,12 +146,14 @@ const messagesSlice = createSlice({
 							{
 								id: conv.user1.id,
 								full_name: conv.user1.name,
-								image_path: conv.user1.name
+								image_path: conv.user1.name,
+								status: conv.user1.status
 							},
 							{
 								id: conv.user2.id,
 								full_name: conv.user2.name,
-								image_path: conv.user2.name
+								image_path: conv.user2.name,
+								status: conv.user2.status
 							},
 						]
 					}

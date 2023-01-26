@@ -66,15 +66,6 @@ export function createSocketCtx() {
                 socket.current.on('connection', (e: any) => {
                     //console.log(e)
                 });
-
-                setTimeout(() => {
-                    socket.current.emit("message", {
-                        author_id: user.id,
-                        direct_id: 1,
-                        channel_id: null,
-                        content: "string",
-                    })
-                }, 1000);
             }
         }, [user])
 

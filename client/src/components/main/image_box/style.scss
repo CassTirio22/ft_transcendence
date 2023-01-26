@@ -1,0 +1,27 @@
+
+
+.message-sender-image-container {
+
+    border-radius: var(--border_radius);
+    background-color: var(--surface);
+    overflow: hidden;
+    margin-right: 10px;
+
+    img {
+        width: 64px;
+        height: 64px;
+    }
+
+    &.connected {
+        border: 2px solid var(--success);
+    }
+    
+    &.disconnected {
+        border: 2px solid var(--error);
+    }
+
+    &.unknown {
+        border: 2px solid var(--divider);
+    }
+}
+

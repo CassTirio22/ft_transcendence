@@ -1,4 +1,4 @@
-import React, { Component, useContext, useEffect } from "react";
+import React, { Component, useContext, useEffect, useState } from "react";
 import {
   Route,
   NavLink,
@@ -15,6 +15,7 @@ import Landing from "./screens/landing/Landing";
 import LandingNavbar from "./components/nav/horizontal_nav/LandingNavbar";
 import LandingMain from "./LandingMain";
 import { createPopupCtx } from "./contexts/PopupContext";
+import Loading from "./components/main/loading/Loading";
 
 export type Props = {
 	messages?: any,
@@ -30,10 +31,11 @@ export type Props = {
 const App: React.FC<Props> = (props) => {
 
 	const {isLoggedIn, user} = useContext(AuthContext);
+	const [loaded, setLoaded] = useState(false);
 
 	useEffect(() => {
 		if (isLoggedIn())
-	  		props.fetchFriends();
+	  		props.fetchFriends().then(setLoaded(true));
 	}, [user])
 	
 
@@ -50,6 +52,9 @@ const App: React.FC<Props> = (props) => {
 		)
 	}
 
+	if (!loaded)
+		return <Loading/>
+
 	return (
 		<HashRouter>
 			<div>
@@ -64,4 +69,4 @@ const App: React.FC<Props> = (props) => {
 	);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default connect(null, mapDispatchToProps)(App);

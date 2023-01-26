@@ -7,6 +7,7 @@ import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
 import { sendChannel, sendDirect } from '../../../store/slices/messages';
 import "./style.scss"
 import no_yet from "../../../assets/images/no_friends_yet.svg"
+import ImageBox from '../../main/image_box/ImageBox';
 
 type Props = {
 	messages?: any;
@@ -88,6 +89,8 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 
 	const RenderSend = () => {
 		const [message, setMessage] = useState("");
+		const last_key = useRef("");
+		const need_add = useRef(true);
 
 		const send = () => {
 			if (channel_id) {
@@ -97,16 +100,32 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 			}
 			send_message(direct_id ? parseInt(direct_id) : null, channel_id ? parseInt(channel_id) : null, message);
 			setMessage("");
+			need_add.current = true;
+			setTimeout(() => {
+				document.getElementById("message-input")?.focus();
+			}, 100);
+		}
+
+		const set_message_shift = (key: string) => {
+			if (key == "Enter" && last_key.current != "Shift") {
+				need_add.current = false;
+				send();
+			} else {
+				last_key.current = key;
+			}
 		}
 
 		return (
 			<div className='conversation-footer'>
 				<div className='new-message'>
 					<TextareaAutosize
+						id={"message-input"}
+						autoFocus
 						className='text-area-new'
 						placeholder='Send a message'
 						value={message}
-						onChange={(e) => setMessage(e.target.value)}
+						onChange={(e) => need_add ? setMessage(e.target.value) : null}
+						onKeyDown={(e) => set_message_shift(e.key)}
 						maxRows={5}
 					/>
 					<div className='send-message'>
@@ -174,9 +193,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 							const created_at = new Date(message.date);
 							return (
 								<div className='message-div' key={id}>
-									<div profile-id={sender.id} onClick={() =>show_profile(sender.id.toString())} className='message-sender-image-container'>
-										<img src={`https://avatars.dicebear.com/api/adventurer/${sender.image_path}.svg`} />
-									</div>
+									<ImageBox is_you={user.id == sender.id} user={sender} onClick={() =>show_profile(sender.id.toString())} />
 									<div className='message-content'>
 										<div className='message-header'>
 											<span className='message-sender-name'>{sender.full_name}{sender.id == user.id ? " ( you )" : ""}</span>

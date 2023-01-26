@@ -7,3 +7,5 @@ export const mapDispatchToProps = {
 }
 
 export const mapStateToProps = (state: any) => state;
+
+export const friendsStateToProps = (state: any) => ({friends: state.friends});

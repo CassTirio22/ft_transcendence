@@ -1,11 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react'
 import "./style.scss"
 import axios from "../../service/axios"
-import { PopupContext } from '../..';
+import { AuthContext, PopupContext } from '../..';
 import StarsIcon from '@mui/icons-material/Stars';
+import ImageBox from '../../components/main/image_box/ImageBox';
+import { friendsStateToProps } from '../../store/dispatcher';
+import { connect } from 'react-redux';
 
 const Ranking = () => {
   const {show_profile} = useContext(PopupContext);
+  const {user} = useContext(AuthContext);
   const [ranking, setRanking] = useState<any[]>([]);
 
   const get_ranking = async () => {
@@ -40,9 +44,9 @@ const Ranking = () => {
               <tr key={id}>
                 <td><div className='ranking'>{id + 1} {id < 3 ? <StarsIcon className={"abc"[id]} /> : null}</div></td>
                 <td>
-                    <div onClick={() => show_profile(elem.id)} className='friend-picture-name'>
-                      <div className='image-div'><img src={`https://avatars.dicebear.com/api/adventurer/${elem.name}.svg`} /></div>
-                      <span>{elem.name}</span>
+                    <div className='friend-picture-name'>
+                      <ImageBox onClick={() => show_profile(elem.id)} user={elem} is_you={user.id == elem.id} />
+                      <span>{elem.name} {user.id == elem.id ? "(you)" : ""}</span>
                     </div>
                 </td>
                 <td>{elem.score}</td>
@@ -55,4 +59,4 @@ const Ranking = () => {
   )
 }
 
-export default Ranking
+export default connect(friendsStateToProps, null)(Ranking)

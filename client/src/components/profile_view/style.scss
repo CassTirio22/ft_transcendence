@@ -22,32 +22,103 @@
 #profile-view {
     .profile {
         display: flex;
+        flex-direction: column;
         align-items: flex-start;
         justify-content: flex-start;
 
-        .img-container {
-            padding: 10px;
-            background-color: var(--divider);
-            border-radius: var(--border_radius);
-            box-shadow: var(--box_shadow);
-            margin-right: 20px;
-
-            img {
-                width: 64px;
-                height: 64px;
-            }
-        }
-
-        .profile-content {
+        .profile-top {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            margin-bottom: 40px;
 
-            .profile-actions {
-                margin-bottom: 20px;
-                button:first-child {
-                    margin-right: 10px;
+            .profile-top-right {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                height: 86px;
+
+                .profile-name-status {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    width: 100%;
+
+                    h1 {
+                        font-size: 1.4rem;
+                    }
+
+                    span {
+                        display: flex;
+                        flex-direction: row;
+                        gap: 8px;
+                        align-items: center;
+
+                        .bubble {
+                            display: block;
+                            width: 10px;
+                            height: 10px;
+                            background-color: var(--divider);
+                            border-radius: 5px;
+
+                            &.connected {
+                                background-color: var(--success);
+                            }
+
+                            &.disconnected {
+                                background-color: var(--error);
+                            }
+                        }
+                    }
+                }
+
+                .profile-content {
+                    display: flex;
+                    flex-direction: column;
+        
+                    .profile-actions {
+                        button:first-child {
+                            margin-right: 10px;
+                        }
+                    }
+                }
+            }
+
+            .img-container {
+                background-color: var(--divider);
+                border-radius: var(--border_radius);
+                box-shadow: var(--box_shadow);
+                margin-right: 20px;
+    
+                img {
+                    width: 84px;
+                    height: 84px;
                 }
             }
         }
+
+        .profile-data {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            justify-content: space-evenly;
+
+            div {
+                display: flex;
+                width: 100px;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+
+                span {
+                    &:last-child {
+                        font-weight: bold;
+                        font-size: 1.2rem;
+                        margin-top: 10px;
+                    }
+                }
+            }
+        }
+
     }
 }

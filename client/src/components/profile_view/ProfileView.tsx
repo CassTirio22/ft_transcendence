@@ -78,6 +78,18 @@ const ProfileView = (props: Props) => {
 		})
 	}
 
+	let status = props.friends.filter((elem: any) => elem.id == profile.id);
+    if (status.length) {
+        if (!status[0].status)
+            status = "connected"
+        else
+            status = "disconnected"
+    } else {
+        status = "unknown"
+    }
+    if (profile.id == user.id)
+        status = "connected"
+
 	useEffect(() => {
 		props.reference.current = (id: string) => get_profile(id)
 	}, [])
@@ -101,31 +113,36 @@ const ProfileView = (props: Props) => {
 			<div onClick={() => {if (!surf){setVisible(false);setProfile({...profile, id: -1})};surf = false;}} className='absolute-top-all'>
 				<div onClick={() => surf = true} className='absolute-top-center'>
 					<div className='profile'>
-						<div className='img-container'>
-							<img src={`https://avatars.dicebear.com/api/adventurer/${profile.image}.svg`} />
-						</div>
-						<div className='profile-content'>
-							{
-								in_friend.length && profile.id != user.id ?
-								<div className='profile-actions'>
-									<Button onClick={() => send_direct(profile.id)} variant='contained'>Send private message</Button>
-									<Button onClick={() => navigate("/")} variant='outlined'>Block</Button>
-								</div> :
-								profile.id != user.id ?
-								<div>
-									<Button onClick={() => send_friend_request()} variant='contained'>Send friend request</Button>
-								</div> :
-								<div>
-									<Button onClick={() => {navigate("/me/profile");setProfile({...profile, id: -1})}} variant='contained'>Edit profile</Button>
-								</div>
-							}
-							<div className='profile-data'>
-								<div>Name: <span>{profile.name}</span></div>
-								<div>Email: <span>{profile.email}</span></div>
-								<div>Game number: <span>{profile.gamesNumber}</span></div>
-								<div>Score: <span>{profile.score}</span></div>
-								<div>Status: <span>{profile.status}</span></div>
+						<div className='profile-top'>
+							<div className='img-container'>
+								<img src={`https://avatars.dicebear.com/api/adventurer/${profile.image}.svg`} />
 							</div>
+							<div className='profile-top-right'>
+								<div className='profile-name-status'>
+									<h1>{profile.name}</h1>
+									<span><span className={`bubble ${status}`}></span>{status}</span>
+								</div>
+								<div className='profile-content'>
+									{
+										in_friend.length && profile.id != user.id ?
+										<div className='profile-actions'>
+											<Button onClick={() => send_direct(profile.id)} variant='contained'>Send private message</Button>
+											<Button onClick={() => navigate("/")} variant='outlined'>Block</Button>
+										</div> :
+										profile.id != user.id ?
+										<div>
+											<Button onClick={() => send_friend_request()} variant='contained'>Send friend request</Button>
+										</div> :
+										<div>
+											<Button onClick={() => {navigate("/me/profile");setProfile({...profile, id: -1})}} variant='contained'>Edit profile</Button>
+										</div>
+									}
+								</div>
+							</div>
+						</div>
+						<div className='profile-data'>
+							<div><span>Game number</span><span>{profile.gamesNumber}</span></div>
+							<div><span>Score</span><span>{profile.score}</span></div>
 						</div>
 					</div>
 				</div>

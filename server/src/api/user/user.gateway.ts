@@ -218,6 +218,8 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     async handleDisconnect(client: Socket): Promise<any> {
 		const user: User = await this.userService.userBySocket(client.id);
 		client.rooms.forEach( room => { client.leave(room)} );
+		if (!user)
+			return ;
 		this.clients = await this.util.userDisconnection(this.clients, user, client);
 		const message: ConnectionMessage = {user_id: user.id, status: false};
 	}

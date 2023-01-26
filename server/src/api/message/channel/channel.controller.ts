@@ -22,6 +22,12 @@ export class ChannelController {
 		return this.channelService.channels( (<User>req.user).id );
 	}
 
+	@Get('myChannels')
+	@UseGuards(JwtAuthGuard)
+	private myChannels(@Req() req: Request) {
+		return this.channelService.myChannels( (<User>req.user).id );
+	}
+
 	@Put('edit')
 	@UseGuards(JwtAuthGuard)
 	private change(@Body() body: EditChannelDto, @Req() req: Request) {

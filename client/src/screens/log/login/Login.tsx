@@ -3,8 +3,9 @@ import React, { useContext, useState } from 'react'
 import { AuthContext, PopupContext, ToastContext } from '../../..';
 import "./login.scss"
 import logo from "../../../assets/images/test.png"
-import Button from '../../../components/button/Button';
 import { TOAST_LVL } from '../../../constants/constants';
+import { Button, TextField } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 function AlreadyLogged() {
 	return (
@@ -23,9 +24,11 @@ function LogInForm()
 	const [password, setPassword] = useState("12345678");
 	const {user, signIn, profile} = useContext(AuthContext)
 	const {set_toast} = useContext(ToastContext);
+	const navigate = useNavigate();
 
 	const handleSubmit = async () => {
 		const response = await signIn(userName, password);
+		navigate("/");
 		if (response == "error") {
 			console.log(response)
 		} else {
@@ -51,11 +54,13 @@ function LogInForm()
 				<img src={logo} />
 				<h2>Sign in</h2>
 			</div>
-			<form className="form" onSubmit={() => console.log("first")}>
-				<input autoComplete='username' placeholder='Email or username' type="username" value={userName} onChange={(e) => setUserName(e.target.value)} />
-				<input autoComplete='password' onKeyDown={handleKeyDown} placeholder='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-			</form>
-			<Button disable={!validateEntry()} title="Sign in" onPress={handleSubmit} width="300px" />
+			<div className='center-input'>
+				<form className="form" onSubmit={() => console.log("first")}>
+					<TextField size='small' fullWidth autoComplete='username' label='Email or username' type="username" value={userName} onChange={(e) => setUserName(e.target.value)} />
+					<TextField size='small' fullWidth autoComplete='password' onKeyDown={handleKeyDown} label='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+				</form>
+				<Button disabled={!validateEntry()} variant="contained" onClick={handleSubmit} fullWidth >Sign in</Button>
+			</div>
 		</section>
 	)
 }

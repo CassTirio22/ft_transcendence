@@ -13,10 +13,10 @@ function Profile() {
 	const {user, profile} = useContext(AuthContext)
 	const [file, setFile] = useState<any | null>(null);
 	const {open_confirm, set_toast} = useContext(PopupContext)
-
-	let user_name = useRef("");
-	let old_password = useRef("");
-	let new_password = useRef("");
+	const [userName, setUserName] = useState(user.name);
+	const [password, setPassword] = useState("");
+	const [newPassword, setNewPassword] = useState("");
+	console.log(user.picture)
 
 	const change_picture = async (file_list: FileList | null) => {
 		if (file_list) {
@@ -31,12 +31,35 @@ function Profile() {
 		}
 	}
 
-	const save_changes = () => {
-		set_toast(TOAST_LVL.SUCCESS, "Updated", "Your profile has been correctly updated");
+	const save_changes = async () => {
+		const change = await axios.put("/user/edit", {
+			name: userName
+		})
+		.then(e => e.data)
+		.catch(e => null)
+		if (change) {
+			
+			profile(change);
+			setTimeout(() => {
+				set_toast(TOAST_LVL.SUCCESS, "Updated", "Your profile has been correctly updated");
+			}, 100);
+		}
 	}
 
-	const change_password = () => {
-		set_toast(TOAST_LVL.SUCCESS, "Updated", "Your password has been correctly updated");
+	const change_password = async () => {
+		const change = await axios.put("/user/edit", {
+			password: password
+		})
+		.then(e => e.data)
+		.catch(e => null)
+		if (change) {
+			profile(change);
+			setTimeout(() => {
+				set_toast(TOAST_LVL.SUCCESS, "Updated", "Your password has been correctly updated");
+			}, 100);
+			setPassword("");
+			setNewPassword("");
+		}
 	}
 
 	const delete_picture = async (need_ask: boolean) => {
@@ -48,7 +71,11 @@ function Profile() {
 		}
 	}
 
-	console.log(user.picture)
+	const cancel = () => {
+		setUserName(user.name);
+		setPassword("");
+		setNewPassword("");
+	}
 
 	return (
 		<div id='profile-main'>
@@ -72,19 +99,20 @@ function Profile() {
 			</div>
 			<div className='update-container'>
 				<h2>My data</h2>
-				<TextField defaultValue={user.name} fullWidth  className='value-input' id="outlined-basic" label={"User name"} variant="outlined" />
+				<TextField value={userName} onChange={(e) => setUserName(e.target.value)} fullWidth  className='value-input' label={"User name"} variant="outlined" />
 			</div>
 			<div className='change-password'>
 				<h2>Change password</h2>
-				<div className='password-row'>
-					<TextField fullWidth  className='value-input' id="outlined-basic" label={"Old password"} variant="outlined" />
-					<TextField fullWidth  className='value-input' id="outlined-basic" label={"New password"} variant="outlined" />
-					<Button variant="contained" onClick={() => change_password()}>Save password</Button>
-				</div>
+				<form className='password-row'>
+					<TextField autoComplete='username' sx={{display: "none"}} />
+					<TextField autoComplete='new-password' type={"password"} fullWidth value={password} onChange={(e) => setPassword(e.target.value)} className='value-input' label={"New password"} variant="outlined" />
+					<TextField autoComplete='new-password' type={"password"} fullWidth value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className='value-input' label={"New password confirmation"} variant="outlined" />
+					<Button disabled={password.length < 6 || newPassword != password} variant="contained" onClick={() => change_password()}>Save password</Button>
+				</form>
 			</div>
 			<div className='update-footer'>
-				<Button variant="outlined" onClick={() => console.log("first")}>Cancel</Button>
-				<Button variant="contained" onClick={() => save_changes()}>Save changes</Button>
+				<Button variant="outlined" onClick={cancel}>Cancel</Button>
+				<Button disabled={userName == user.name} variant="contained" onClick={() => save_changes()}>Save changes</Button>
 			</div>
 		</div>
 	)

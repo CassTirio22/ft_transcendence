@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString, MinLength } from "class-validator";
+import { ChannelStatus } from "./channel.entity";
 
 export class CreateChannelDto {
 	@IsString()
@@ -27,6 +28,9 @@ export class EditChannelDto {
 	@IsNumber()
 	@IsNotEmpty()
 	public readonly channel: number;
+
+	@IsOptional()
+	public readonly status: ChannelStatus;
 }
 
 export class DeleteChannelDto {

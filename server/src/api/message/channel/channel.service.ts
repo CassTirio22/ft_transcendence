@@ -83,6 +83,8 @@ export class ChannelService {
 		}));
 	}
 
+	//if we don't want to edit password: null
+	//if we want to delete it : ""
 	public async edit(body: EditChannelDto, req: Request): Promise<number> {
 		const user: User = <User>req.user;
 		let { name, password, channel}: EditChannelDto = body;
@@ -95,8 +97,11 @@ export class ChannelService {
 			throw new HttpException('Unauthorized. You must be the owner of this channel for this action.', HttpStatus.UNAUTHORIZED);
 		}
 		name = (name != null) ? name : ourChannel.name;
-		password = (password != null) ? password : ourChannel.password;
-		return (await this.update({name: name, password: password, channel: channel}, user));
+		if (password == null)
+			return (await this.update({name: name, password: ourChannel.password, channel: channel, status: ourChannel.status}, user));
+		else if (password == "")
+			return (await this.update({name:name, password: null, channel: channel, status: ChannelStatus.public}, user));
+		return (await this.update({name: name, password: password, channel: channel, status: ChannelStatus.protected}, user));
 	}
 
 	public async update(body: EditChannelDto, user: User): Promise<number> {

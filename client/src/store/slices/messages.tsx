@@ -29,6 +29,10 @@ type JoinChannel = {
 	password?: String
 }
 
+type AddMember = {
+	channel: number,
+	member: number
+}
 
 export type NewMessage = {
 	origin: number,
@@ -96,6 +100,14 @@ export const joinChannel = createAsyncThunk(
 	"messages/joinChannel",
 	async (join_channel: JoinChannel) => {
 		const response = await axios.post("/member/become", join_channel);
+		return response.data.id;
+	}
+)
+
+export const addMember = createAsyncThunk(
+	"messages/addMember",
+	async (add_member: AddMember) => {
+		const response = await axios.post("/member/add", add_member);
 		return response.data.id;
 	}
 )
@@ -288,7 +300,8 @@ export const messagesMethods = {
 	createDirect,
 	createChannel,
 	addMessage,
-	joinChannel
+	joinChannel,
+	addMember
 }
 
 export default messagesSlice

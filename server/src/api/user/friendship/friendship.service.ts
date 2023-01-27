@@ -41,7 +41,8 @@ export class FriendshipService {
 			throw new HttpException('Not found. No user was found with those criterias.', HttpStatus.NOT_FOUND)
 		}
 		else if (user.id == id || friend.sent.length > 0 || friend.received.length > 0) {
-			throw new HttpException("Conflict. You already sent a request to this user OR this user already sent you a request OR you sent it to yourself.", HttpStatus.CONFLICT);
+			return ;
+			// throw new HttpException("Conflict. You already sent a request to this user OR this user already sent you a request OR you sent it to yourself.", HttpStatus.CONFLICT);
 		}
 		return (await this.friendshipRepository.createQueryBuilder()
 			.insert()

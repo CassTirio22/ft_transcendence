@@ -12,7 +12,7 @@ import { User, UserStatus } from './user.entity';
 import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
 import { DirectService } from '../message/direct/direct.service';
-import { unlinkSync, writeFileSync } from 'fs';
+import { unlinkSync, writeFileSync, existsSync } from 'fs';
 import {extname} from 'path';
 
 @Injectable()
@@ -150,9 +150,10 @@ export class UserService {
 
 	public async uploadPicture(picture: any, req: Request): Promise<number> {
 		const user: User = <User>req.user;
-		const filePath = this.fileName(user, "jpg");
-		if (user.picture) {
-			unlinkSync(filePath);
+		const ext: string = extname(picture.originalname);
+		const filePath = this.fileName(user, ext);
+		if (user.picture && existsSync(user.picture)) {
+			unlinkSync(user.picture);
 		}
 		writeFileSync(filePath, picture.buffer);
 		return (await this.repository.createQueryBuilder()
@@ -184,6 +185,6 @@ export class UserService {
 	/* UTILS, PUT SOMEWHERE ELSE WHEN REFACTORING */
 
 	public fileName(user: User, ext: any) {
-		return `${process.cwd()}/uploads/pictures/profile_${user.id}.${ext}`;
+		return `${process.cwd()}/uploads/pictures/profile_${user.id}${ext}`;
 	}
 }

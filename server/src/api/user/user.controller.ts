@@ -55,7 +55,9 @@ export class UserController {
 	@Get('getPicture')
 	@UseGuards(JwtAuthGuard)
 	async getPicture(@Req() req: Request, @Res() res: Response)  {
-		res.sendFile(this.service.fileName(<User>req.user));
+		const pic: string = await this.service.getPicture(<User>req.user);
+		if (pic != null)
+			res.sendFile(pic);
 	}
 
 	@Delete('deletePicture')

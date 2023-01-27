@@ -1,3 +1,4 @@
+import { IsString } from 'class-validator';
 import { AuthHelper } from './auth/auth.helper';
 import { Block } from './block/block.entity';
 import { BlockService } from './block/block.service';
@@ -12,6 +13,7 @@ import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
 import { DirectService } from '../message/direct/direct.service';
 import { unlinkSync, writeFileSync } from 'fs';
+import {extname} from 'path';
 
 @Injectable()
 export class UserService {
@@ -148,7 +150,7 @@ export class UserService {
 
 	public async uploadPicture(picture: any, req: Request): Promise<number> {
 		const user: User = <User>req.user;
-		const filePath = this.fileName(user);
+		const filePath = this.fileName(user, "jpg");
 		if (user.picture) {
 			unlinkSync(filePath);
 		}
@@ -160,10 +162,17 @@ export class UserService {
 			.execute()).affected;
 	}
 
+	public async getPicture(user: User): Promise<string | null> {
+		return (await this.repository.createQueryBuilder()
+			.select()
+			.where("id = :userId", {userId: user.id})
+			.getOne()).picture;
+	}
+
 	public async deletePicture(req: Request) {
 		const user: User = <User>req.user;
 		if (user.picture) {
-			unlinkSync(this.fileName(user));
+			unlinkSync(user.picture);
 		}
 		return (await this.repository.createQueryBuilder()
 			.update()
@@ -174,7 +183,7 @@ export class UserService {
 
 	/* UTILS, PUT SOMEWHERE ELSE WHEN REFACTORING */
 
-	public fileName(user: User) {
-		return `${process.cwd()}/uploads/pictures/profile_${user.id}`;
+	public fileName(user: User, ext: any) {
+		return `${process.cwd()}/uploads/pictures/profile_${user.id}.${ext}`;
 	}
 }

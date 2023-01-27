@@ -25,6 +25,7 @@ interface UpdateGameSettings {
 	loser:			User;
 	winnerScore:	number;
 	loserScore:		number;
+	elo:			number;
 }  
 
 @Injectable()
@@ -126,7 +127,8 @@ export class GameService {
 			winner: (game.winner.id == winnerId) ? game.winner : game.loser,
 			loser: (game.winner.id == winnerId) ? game.loser : game.winner,
 			winnerScore: winnerScore,
-			loserScore: loserScore
+			loserScore: loserScore,
+			elo: 0,
 		})
 		await this._updatePlayers(settings);
 		return (await this._updateGame(settings));
@@ -185,7 +187,8 @@ export class GameService {
 			loser: settings.loser,
 			winner: settings.winner,
 			winnerScore: settings.winnerScore,
-			loserScore: settings.loserScore})
+			loserScore: settings.loserScore,
+			elo: settings.elo})
 		.where("id = :gameId", {gameId: settings.id})
 		.execute()).affected;
 	}
@@ -212,8 +215,9 @@ export class GameService {
 		let total: number = 1 / (1 + Math.pow(10, delta));
 		let k: number = (players.winner.id < 2100 && players.loser.id < 2100) ? 32 : ( (players.winner.id <= 2400 && players.loser.id <= 2400) ? 24 : 16);
 		total = k * (1 - total);
-		players.winner.score += Math.floor(total);
-		players.loser.score -= Math.floor(total);
+		players.elo = Math.floor(total);
+		players.winner.score += players.elo;
+		players.loser.score -= players.elo;
 		++players.winner.gamesNumber;
 		++players.loser.gamesNumber;
 		return players;

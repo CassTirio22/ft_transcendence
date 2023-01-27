@@ -39,9 +39,10 @@ html {
 }
 
 html.dark {
-	--background: #082032;
-	--background_transparent: rgba(8, 32, 50, 0.6);
-	--surface: #2C394B;
+	--background: #121212;
+	--background_transparent: rgba(18, 18, 18, 0.6);
+	--surface_transparent: rgba(28, 28, 28, 0.6);
+	--surface: #262626;
 	--text: #fff;
 	--strong_text: #fff;
 	--secondary_text: #909090;

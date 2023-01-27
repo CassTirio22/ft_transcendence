@@ -22,9 +22,11 @@ type Props = {
 export function createSocketCtx() {
 
     const send_message = (direct_id: number | null, channel_id: number | null, content: String) => {}
+    const in_game = (isPlaying: boolean) => {}
 
 	const ctx = createContext({
 		send_message: send_message,
+        in_game: in_game,
 	});
 
 	function SocketProvider(props: Props) {
@@ -40,6 +42,15 @@ export function createSocketCtx() {
                     direct_id: direct_id,
                     channel_id: channel_id,
                     content: content,
+                })
+            }
+        }
+
+        const in_game = (isPlaying: boolean) => {
+            if (socket.current) {
+                console.log("emit game: ", isPlaying)
+                socket.current.emit("game", {
+                    isPlaying: isPlaying,
                 })
             }
         }
@@ -64,7 +75,14 @@ export function createSocketCtx() {
                     props.addMessage(e);
                 });
 
+                socket.current.on('game', (e: any) => {
+                    console.log(e)
+                    e.game = true;
+                    props.changeFriendStatus(e);
+                });
+
                 socket.current.on('connection', (e: any) => {
+                    e.game = false;
                     props.changeFriendStatus(e);
                 });
             }
@@ -73,6 +91,7 @@ export function createSocketCtx() {
 		return (
 			<ctx.Provider value={{ 
                 send_message,
+                in_game
 			}}
 			{...props} >
                 {props.children}

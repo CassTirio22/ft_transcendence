@@ -50,7 +50,13 @@ const friendsSlice = createSlice({
 		changeFriendStatus: (state, action) => {
 			const last = state.filter((e: any) => e.id == action.payload.user_id);
 			if (last.length) {
-				last[0].status = !action.payload.status ? 1 : 0;
+				if (action.payload.game && action.payload.status) {
+					last[0].status = 2
+				} else if (!action.payload.game) {
+					last[0].status = !action.payload.status ? 1 : 0;
+				} else {
+					last[0].status = 0;
+				}
 			}
         },
 	},

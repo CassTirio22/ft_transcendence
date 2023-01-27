@@ -80,7 +80,9 @@ const ProfileView = (props: Props) => {
 
 	let status = props.friends.filter((elem: any) => elem.id == profile.id);
     if (status.length) {
-        if (!status[0].status)
+		if (status[0].status == 2)
+            status = "in-game"
+        else if (!status[0].status)
             status = "connected"
         else
             status = "disconnected"

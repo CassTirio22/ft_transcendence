@@ -23,5 +23,9 @@
     &.unknown {
         border: 2px solid var(--divider);
     }
+
+    &.in-game {
+        border: 2px solid var(--warning);
+    }
 }
 

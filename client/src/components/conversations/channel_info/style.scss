@@ -32,6 +32,16 @@
                 align-items: center;
                 justify-content: space-between;
 
+                .name-level {
+                    display: flex;
+                    flex-direction: column;
+
+                    span:first-child {
+                        font-weight: bold;
+                        font-size: 1.2rem;
+                    }
+                }
+
                 svg {
                     cursor: pointer;
                 }

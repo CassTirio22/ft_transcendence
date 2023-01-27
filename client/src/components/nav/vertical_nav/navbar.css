@@ -15,6 +15,10 @@ aside.navigation {
 	overflow-y: scroll;
 }
 
+body.full-screen aside.navigation {
+	display: none;
+}
+
 aside.navigation nav {
 	display: flex;
 	flex-direction: column;

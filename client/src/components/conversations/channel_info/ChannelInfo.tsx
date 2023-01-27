@@ -11,6 +11,7 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import CreateBox from '../../main/create_box/CreateBox'
+import { CONV_LVL } from '../../../constants/constants'
 
 type Props = {
   messages?: {
@@ -35,12 +36,14 @@ const ChannelInfo = (props: Props) => {
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
   const click_id = useRef(-1);
+  const click_lvl = useRef(-1);
   const selected = useRef<number[]>([]);
   const [newMembers, setNewMembers] = useState(false);
 
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>, id: number) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>, id: number, level: number) => {
     click_id.current = id;
+    click_lvl.current = level;
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
@@ -66,6 +69,10 @@ const ChannelInfo = (props: Props) => {
     props.fetchMessages({user: user, channel_id: parseInt(channel_id ? channel_id : "-1"), direct_id: undefined}).then((e: any) => {setLoaded(true)});
     setNewMembers(false);
     selected.current = [];
+  }
+
+  const toggle_role = () => {
+
   }
 
   const AddMembers = (memb: AlreadyMember) => {
@@ -119,10 +126,27 @@ const ChannelInfo = (props: Props) => {
   }
 
   const specific_channel = props.messages?.channels.filter((elem: any) => elem.id == parseInt(channel_id ? channel_id : "-1"))[0];
+  const user_status = specific_channel.members.filter((elem: any) => elem.id == user.id)[0].level;
 
   return (
     <div id="channel-info" className='main-view'>
         <h1>Channel infos</h1>
+        <div className='channel-setting-div'>
+          <div className='channel-setting-header'>
+            <h2>Channel</h2>
+          </div>
+          <div className='channel-setting-body'>
+            {
+              user_status == CONV_LVL.OWNER ?
+              <div>
+
+              </div> :
+              <div>
+                
+              </div>
+            }
+          </div>
+        </div>
         <div className='channel-setting-div'>
           <div className='channel-setting-header'>
             <h2>Members</h2>
@@ -135,11 +159,12 @@ const ChannelInfo = (props: Props) => {
                 <div className='friend-elem' key={id}>
                   <div className='friend-picture-name'>
                     <ImageBox onClick={() => show_profile(elem.id)} user={elem} is_you={elem.id == user.id} />
-                    <div>
+                    <div className="name-level">
                       <span>{elem.name} {elem.id == user.id ? "(you)" : ""}</span>
+                      <span>{elem.level == CONV_LVL.ADMIN ? "admin" : elem.level == CONV_LVL.OWNER ? "owner" : ""}</span>
                     </div>
                   </div>
-                  <MoreHorizIcon onClick={(e: any) => handleClick(e, elem.id)} />
+                  <MoreHorizIcon onClick={(e: any) => handleClick(e, elem.id, elem.level)} />
                 </div>
               )
             })
@@ -158,6 +183,15 @@ const ChannelInfo = (props: Props) => {
           <MenuItem onClick={() => {show_profile(click_id.current.toString());handleClose()}}>Profile</MenuItem>
           {
             click_id.current == user.id ? <MenuItem onClick={() => {navigate("/me/profile");handleClose()}}>Edit profile</MenuItem> : null
+          }
+          {
+            click_id.current != user.id && user_status == CONV_LVL.OWNER ? <MenuItem onClick={() => {handleClose()}}>Give ownership</MenuItem> : null
+          }
+          {
+            click_id.current != user.id && click_lvl.current != CONV_LVL.OWNER && (user_status == CONV_LVL.ADMIN || user_status == CONV_LVL.OWNER) ? 
+            <MenuItem onClick={() => {toggle_role();handleClose()}}>
+              {click_lvl.current == CONV_LVL.ADMIN ? "Make user" : "Make admin"}
+            </MenuItem> : null
           }
         </Menu>
         <CreateBox visible={newMembers} submit={submit} submitable={true} cancel={() => {setNewMembers(false)}} submit_text="Add" title="Add members to this channel">

@@ -68,6 +68,10 @@
                             &.disconnected {
                                 background-color: var(--error);
                             }
+
+                            &.in-game {
+                                background-color: var(--warning);
+                            }
                         }
                     }
                 }

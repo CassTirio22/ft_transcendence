@@ -27,7 +27,6 @@ function Profile() {
 			const result = await axios.post("/user/uploadPicture", formData)
 			.then(e => e.data)
 			.catch(e => {console.log(e);return null})
-			console.log(result)
 		}
 	}
 

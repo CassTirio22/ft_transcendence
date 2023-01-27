@@ -48,7 +48,6 @@ export function createSocketCtx() {
 
         const in_game = (isPlaying: boolean) => {
             if (socket.current) {
-                console.log("emit game: ", isPlaying)
                 socket.current.emit("game", {
                     isPlaying: isPlaying,
                 })
@@ -76,7 +75,6 @@ export function createSocketCtx() {
                 });
 
                 socket.current.on('game', (e: any) => {
-                    console.log(e)
                     e.game = true;
                     props.changeFriendStatus(e);
                 });

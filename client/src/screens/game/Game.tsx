@@ -10,8 +10,10 @@ const Game = () => {
 	const {in_game} = useContext(SocketContext);
 
 	useEffect(() => {
+		document.body.classList.add("full-screen");
 		in_game(true);
 		return () => {
+			document.body.classList.remove("full-screen");
 			in_game(false);
 		}
 	}, [])

@@ -191,6 +191,15 @@ const messagesSlice = createSlice({
 						status: conv.status,
 						members: []
 					}
+					direct_elem.members = conv.members.map((user: any) => {
+						return {
+							id: user.user_id,
+							full_name: user.user.name,
+							image_path: user.user.name,
+							name: user.user.name,
+							level: user.level
+						}
+					})
 					cha.push(direct_elem)
 				}
 			}
@@ -235,7 +244,8 @@ const messagesSlice = createSlice({
 					id: user.user_id,
 					full_name: user.user.name,
 					image_path: user.user.name,
-					name: user.user.name
+					name: user.user.name,
+					level: user.level
 				}
 			})
 			state.channels.splice(state.channels.indexOf(old[0]), 1, {...state.channels[state.channels.indexOf(old[0])], messages: payload.messages, members: members})

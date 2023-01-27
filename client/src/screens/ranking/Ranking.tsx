@@ -23,6 +23,9 @@ const Ranking = () => {
   useEffect(() => {
     get_ranking();
   }, [])
+
+  let position = 0;
+  let last_score = 0;
   
 
   return (
@@ -40,18 +43,24 @@ const Ranking = () => {
         </thead>
         <tbody>
           {
-            ranking.map((elem: any, id: number) => (
-              <tr key={id}>
-                <td><div className='ranking'>{id + 1} {id < 3 ? <StarsIcon className={"abc"[id]} /> : null}</div></td>
-                <td>
-                    <div className='friend-picture-name'>
-                      <ImageBox onClick={() => show_profile(elem.id)} user={elem} is_you={user.id == elem.id} />
-                      <span>{elem.name} {user.id == elem.id ? "(you)" : ""}</span>
-                    </div>
-                </td>
-                <td>{elem.score}</td>
-              </tr>
-            ))
+            ranking.map((elem: any, id: number) => {
+              if (elem.score > last_score) {
+                position += 1;
+                last_score = elem.score;
+              }
+              return (
+                <tr key={id}>
+                  <td><div className='ranking'>{position} {position < 3 ? <StarsIcon className={"abc"[position - 1]} /> : null}</div></td>
+                  <td>
+                      <div className='friend-picture-name'>
+                        <ImageBox onClick={() => show_profile(elem.id)} user={elem} is_you={user.id == elem.id} />
+                        <span>{elem.name} {user.id == elem.id ? "(you)" : ""}</span>
+                      </div>
+                  </td>
+                  <td>{elem.score}</td>
+                </tr>
+              )
+            })
           }
         </tbody>
       </table>

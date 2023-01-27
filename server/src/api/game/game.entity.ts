@@ -1,7 +1,6 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from "../user/user.entity"
 
-
 export enum GameType {
 	friendly,
 	competitive
@@ -51,5 +50,6 @@ export class Game extends BaseEntity {
 	@Column({ type: 'enum', enum: GameStatus, default: GameStatus.ongoing})
 	public status!: GameStatus;
 
-	// @Column({ type:  })
+	@Column({ type:  'varchar', unique: true })
+	public address!: string;
 }

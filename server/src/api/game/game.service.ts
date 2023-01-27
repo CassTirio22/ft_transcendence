@@ -8,12 +8,14 @@ import { DeleteGameDto, StartCompetitiveGameDto, StartFriendlyGameDto, UpdateGam
 import { User, UserStatus } from '../user/user.entity';
 import { Request } from 'express';
 import { MemberStatus } from '../message/channel/member/member.entity';
+import { generate } from 'shortid';
 
 interface GameSettings {
 	winner_id: number;
 	loser_id: number;
 	type: GameType;
 	status: GameStatus;
+	address: string;
 }
 
 interface UpdateGameSettings {
@@ -56,7 +58,8 @@ export class GameService {
 			.values({
 				winner: players[0], 
 				loser: players[1], 
-				type: competitive ? GameType.competitive : GameType.friendly
+				type: competitive ? GameType.competitive : GameType.friendly,
+				address: generate(),
 			})
 			.execute()).generatedMaps[0] as Game;
 	}
@@ -95,7 +98,8 @@ export class GameService {
 			winner_id: pair.id_1, 
 			loser_id: pair.id_2, 
 			type: GameType.competitive, 
-			status: GameStatus.ongoing
+			status: GameStatus.ongoing,
+			address: generate(),
 		}});
 		return (await this.gameRepository.createQueryBuilder()
 			.insert()

@@ -69,7 +69,7 @@ export class UserGatewayUtil {
 		let channelId: string = this.defineChannelId(message);
 		let member: Member = await this.memberService.memberBySocket(client.id);
 		let user: User = await this.userService.userBySocket(client.id);
-		if (!client.rooms.has(channelId) || (member != null && member.status == MemberStatus.muted)) {
+		if (!client.rooms.has(channelId) || member != null ||  member.status == MemberStatus.muted) {
 			return false;
 		}
 		//DON'T ADD IN DB ON GATEWAY-SIDE FOR NOW

@@ -31,7 +31,12 @@ interface DiscussionMessage {
 	content: string;
 }
 
-type MessageFormats = ConnectionMessage | DiscussionMessage;
+interface GameMessage {
+	user_id: number;
+	status: boolean;
+}
+
+type MessageFormats = ConnectionMessage | DiscussionMessage | GameMessage;
 type MessageMethod = (client: Socket, message: MessageFormats) => boolean;
 
 export class UserGatewayUtil {
@@ -52,6 +57,11 @@ export class UserGatewayUtil {
 
 	public emitConnection(client: Socket, message: ConnectionMessage): boolean {
 		client.emit('connection', message);
+		return true;
+	}
+
+	public emitGame(client: Socket, message: ConnectionMessage): boolean {
+		client.emit('game', message);
 		return true;
 	}
 
@@ -235,16 +245,16 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("game")
 	async handleGame(client: Socket, data: { isPlaying: boolean} ) {
-		let val: boolean = data.isPlaying;
+		const user: User = await this.userService.userBySocket(client.id);
+		const val: boolean = data.isPlaying;
+		let message: GameMessage = { user_id: user.id, status: val };
 		let ret: number = (val == true) ? (await this.userService.socketInGame(client.id)) : (await this.userService.socketOutGame(client.id));
-		if (ret && val == true) {
-			client.emit("game", {message: 'You are now seen as in game.'});
-		}
-		else if (ret && val == false) {
-			client.emit("game", {message: 'You are now seen as out of game.'});
+		if (ret) {
+			client.emit("game", message);
+			this.util.emitToFriends(this.clients, client.id, message, this.util.emitGame);
 		}
 		else {
-			client.emit("game", {message: "Your status didn't change."});
+			client.emit("error", {message: "Couldn't change your status."});
 		}
 	}
 	

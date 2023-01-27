@@ -1,4 +1,3 @@
-import { IsString } from 'class-validator';
 import { AuthHelper } from './auth/auth.helper';
 import { Block } from './block/block.entity';
 import { BlockService } from './block/block.service';

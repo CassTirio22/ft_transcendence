@@ -1,4 +1,3 @@
-import { Socket } from 'socket.io';
 import * as bcrypt from 'bcryptjs';
 import { Block } from './../../../user/block/block.entity';
 import { BlockService } from '@/api/user/block/block.service';
@@ -131,7 +130,8 @@ export class MemberService {
 		const user: User = <User>req.user;
 		const { member, level, channel }: ChangeMemberLevelDto = body;
 
-		await this._checkUserChangePermission({user: member, channel: channel}, user);
+		let ourChannel: Channel = await this._checkUserChangePermission({user: member, channel: channel}, user);
+		let userMember: Member = ourChannel.members.find( (obj) => {return obj.user_id == user.id} );
 		return (await this.memberRepository.createQueryBuilder('member')
 			.update()
 			.set({ level: this._stringToLevel(level) })
@@ -200,9 +200,20 @@ export class MemberService {
 		if (!wantedMember || !userMember) {
 			throw new HttpException('Not Found. You and/or the other user are no members of this channel.', HttpStatus.NOT_FOUND);
 		}
-		else if (userMember.level == MemberLevel.regular || 
-				(userMember.level == MemberLevel.administrator && wantedMember.level == MemberLevel.owner)) {
+		else if (
+			userMember.level == MemberLevel.regular || 
+			(userMember.level == MemberLevel.administrator && wantedMember.level == MemberLevel.owner) ||
+			(settings.level != null && settings.level == MemberLevel.owner && userMember.level != MemberLevel.owner)
+		) {
 			throw new HttpException('Unauthorized. The other user have at least the same member level as you.', HttpStatus.UNAUTHORIZED);
+		}
+		else if (settings.level != null && settings.level == MemberLevel.owner && userMember.level == MemberLevel.owner) {
+			await this.memberRepository.createQueryBuilder()
+				.update()
+				.where("user_id = :userId", {userId: userMember.user_id})
+				.andWhere("channel_id = :channelId", {channelId: userMember.channel_id})
+				.set({level: MemberLevel.administrator})
+				.execute();
 		}
 		return ourChannel;
 	}
@@ -216,11 +227,13 @@ export class MemberService {
 		let wantedMember: Member = ourChannel.members.find( (obj) => {return obj.user_id == settings.user} );
 		let friendship: Friendship = await this.friendshipService.friend(user, settings.user);
 		let block: Block = await this.blockService.getEitherBlock(user.id, settings.user);
-		if (userMember == undefined ||
+		if (
+			userMember == undefined ||
 			!friendship ||
 			block ||
 			(ourChannel.status == ChannelStatus.private && userMember.level == MemberLevel.regular) || 
-			userMember.status != MemberStatus.regular) {
+			userMember.status != MemberStatus.regular
+		) {
 			throw new HttpException('Unauthorized. You are not member if this channel OR you are not friend with this user\
 				 OR this user blocked you OR you blocked this user OR you are muted/banned in this channel OR your member level is not high enough (private channel)'
 			 , HttpStatus.UNAUTHORIZED);

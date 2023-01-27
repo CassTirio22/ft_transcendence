@@ -184,6 +184,6 @@ export class UserService {
 	/* UTILS, PUT SOMEWHERE ELSE WHEN REFACTORING */
 
 	public fileName(user: User, ext: any) {
-		return `/server/uploads/pictures/profile_${user.id}${ext}`;
+		return `/uploads/pictures/profile_${user.id}${ext}`;
 	}
 }

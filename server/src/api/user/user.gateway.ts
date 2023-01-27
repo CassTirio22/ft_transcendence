@@ -232,6 +232,21 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		if (!this.util.emitMessage(client, data, this.clients))
 			client.emit('error', {message: 'Sending messages in this channel unauthorized.'});
 	}
+
+	@SubscribeMessage("game")
+	async handleGame(client: Socket, data: { isPlaying: boolean} ) {
+		let val: boolean = data.isPlaying;
+		let ret: number = (val == true) ? (await this.userService.socketInGame(client.id)) : (await this.userService.socketOutGame(client.id));
+		if (ret && val == true) {
+			client.emit("game", {message: 'You are now seen as in game.'});
+		}
+		else if (ret && val == false) {
+			client.emit("game", {message: 'You are now seen as out of game.'});
+		}
+		else {
+			client.emit("game", {message: "Your status didn't change."});
+		}
+	}
 	
 	joinChannel(client: Socket, channelId: string, channelValue: (Direct | Channel)): void {
 		if (!this.channels.has(channelId))

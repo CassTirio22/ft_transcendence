@@ -117,6 +117,22 @@ export class UserService {
 			.execute()).affected;
 	}
 
+	public async socketInGame(id: string): Promise<number | never> {
+		return (await this.repository.createQueryBuilder()
+			.update()
+			.set({status: UserStatus.inGame})
+			.where("socket = :socketId", {socketId: id})
+			.execute()).affected;
+	}	
+	
+	public async socketOutGame(id: string): Promise<number | never> {
+		return (await this.repository.createQueryBuilder()
+			.update()
+			.set({status: UserStatus.online})
+			.where("socket = :socketId", {socketId: id})
+			.execute()).affected;
+	}
+
 	public async usersDefault(): Promise<number | never>{
 		return (await this.repository.createQueryBuilder()
 			.update()

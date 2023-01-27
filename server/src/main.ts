@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { join } from "path"
 
 /**
  * Every NestJS application needs to be boostrapped.
@@ -26,6 +27,11 @@ async function bootstrap() {
 		origin: true,
 		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
 		credentials:true,
+	});
+
+	app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+		index: false,
+		prefix: '/uploads',
 	});
 
 	await app.listen(port, () => {

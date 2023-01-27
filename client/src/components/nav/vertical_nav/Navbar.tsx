@@ -35,7 +35,7 @@ function Navbar() {
 							<h2 className="separator_title">Game</h2>
 						</div>
 					</li>
-					<li className={location.pathname === "/play" ? "active hov" : "hov" }>
+					<li className={location.pathname.includes("play") ? "active hov" : "hov" }>
 						<Link to='/play'>
 							<div className="navigation_elem">
 							<i className="fas fa-play"></i>

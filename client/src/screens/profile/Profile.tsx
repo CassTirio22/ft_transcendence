@@ -5,16 +5,31 @@ import "./profile.scss"
 import { debug } from 'console';
 import { Button, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { TOAST_LVL } from '../../constants/constants';
+import { base_url, TOAST_LVL } from '../../constants/constants';
+import axios from "../../service/axios"
 
 
 function Profile() {
 	const {user} = useContext(AuthContext)
+	const [file, setFile] = useState<any | null>(null);
 	const {open_confirm, set_toast} = useContext(PopupContext)
 
 	let user_name = useRef("");
 	let old_password = useRef("");
 	let new_password = useRef("");
+
+	const change_picture = async (file_list: FileList | null) => {
+		if (file_list) {
+			const file = file_list[0];
+			const formData = new FormData();
+			formData.append("file", file);
+			formData.append("name", "name");
+			const result = await axios.post("/user/uploadPicture", formData)
+			.then(e => e.data)
+			.catch(e => {console.log(e);return null})
+			console.log(result)
+		}
+	}
 
 	const save_changes = () => {
 		set_toast(TOAST_LVL.SUCCESS, "Updated", "Your profile has been correctly updated");
@@ -32,9 +47,9 @@ function Profile() {
 			<div className='update-picture-container'>
 				<h2>My profile picture</h2>
 				<div className='img-edit'>
-					<img src={`https://avatars.dicebear.com/api/adventurer/${user.name}.svg`} />
+					<img src={"http://localhost:5000/pictures/profile_1.svg"} />
 					<div className="profile-picture-edit">
-						<Button variant="contained" onClick={() => console.log("first")}>Change picture</Button>
+						<input type="file" onChange={e => change_picture(e.target?.files)} />
 						<Button sx={{color: "red"}} variant="outlined" startIcon={<DeleteIcon />} onClick={() => open_confirm("Delete profile picture", "You will remove your profile picture. This action is definitive. A random profile picture will be created for you", "Delete my picture", () => console.log("delete"))}>Delete</Button>
 					</div>
 				</div>

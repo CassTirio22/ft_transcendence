@@ -1,4 +1,4 @@
-import { Button } from '@mui/material'
+import { Button, Checkbox } from '@mui/material'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { connect } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -10,6 +10,7 @@ import "./style.scss"
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import CreateBox from '../../main/create_box/CreateBox'
 
 type Props = {
   messages?: {
@@ -17,6 +18,12 @@ type Props = {
   },
   fetchSpecificChannel?: any,
   fetchMessages?:any,
+  friends?:any,
+  addMember?:any,
+}
+
+type AlreadyMember = {
+  members: any[]
 }
 
 const ChannelInfo = (props: Props) => {
@@ -28,6 +35,10 @@ const ChannelInfo = (props: Props) => {
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
   const click_id = useRef(-1);
+  const selected = useRef<number[]>([]);
+  const [newMembers, setNewMembers] = useState(false);
+
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>, id: number) => {
     click_id.current = id;
     setAnchorEl(event.currentTarget);
@@ -40,12 +51,63 @@ const ChannelInfo = (props: Props) => {
     if (channel_id != undefined) {
       const specific_channel = props.messages?.channels.filter((elem: any) => elem.id == parseInt(channel_id ? channel_id : "-1"));
       if (specific_channel && !specific_channel.length) {
-        props.fetchMessages({user: user, channel_id: undefined, direct_id: parseInt(channel_id ? channel_id : "-1")}).then((e: any) => {})
+        props.fetchMessages({user: user, channel_id: parseInt(channel_id ? channel_id : "-1"), direct_id: undefined}).then((e: any) => {setLoaded(true)})
       } else if (specific_channel?.length) {
         setLoaded(true);
       }
     }
   }, [])
+
+  const submit = async () => {
+    for (let index = 0; index < selected.current.length; index++) {
+      const element: number = selected.current[index];
+      await props.addMember({member: element, channel: parseInt(channel_id ? channel_id : "-1")});
+    }
+    props.fetchMessages({user: user, channel_id: parseInt(channel_id ? channel_id : "-1"), direct_id: undefined}).then((e: any) => {setLoaded(true)});
+    setNewMembers(false);
+    selected.current = [];
+  }
+
+  const AddMembers = (memb: AlreadyMember) => {
+
+    const [toggle, setToggle] = useState(false);
+
+    const toggle_id = (id: number) => {
+			if (selected.current.includes(id)) {
+        selected.current.splice(selected.current.indexOf(id), 1)
+      } else {
+        selected.current.push(id)
+      }
+			setToggle(!toggle);
+		}
+
+    
+    return (
+      <div className='create-conversation'>
+        <h4>{"Select friend to add to this channel"}</h4>
+        <div className='friends-wrapper'>
+          {
+            props.friends?.map((elem: any) => {
+              if (memb.members.filter((e: any) => e.id == elem.id).length) {
+                return null;
+              }
+              return (
+                <div key={elem.id} className="friend-elem">
+                  <div className='friend-picture-name'>
+                    <div className='image-div'>
+                      <img src={`https://avatars.dicebear.com/api/adventurer/${elem.name}.svg`} />
+                    </div>
+                    <span>{elem.name}</span>
+                  </div>
+                  <Checkbox checked={selected.current.includes(elem.id)} onChange={() => toggle_id(elem.id)} />
+                </div>
+              )
+            })
+          }
+        </div>
+      </div>
+    )
+  }
 
   if (!loaded) {
     return (
@@ -64,7 +126,7 @@ const ChannelInfo = (props: Props) => {
         <div className='channel-setting-div'>
           <div className='channel-setting-header'>
             <h2>Members</h2>
-            <Button>Add members</Button>
+            <Button onClick={() => setNewMembers(true)}>Add members</Button>
           </div>
           <div className='friend-wrapper'>
           {
@@ -93,11 +155,14 @@ const ChannelInfo = (props: Props) => {
             'aria-labelledby': 'basic-button',
           }}
         >
-        <MenuItem onClick={() => {show_profile(click_id.current.toString());handleClose()}}>Profile</MenuItem>
-        {
-          click_id.current == user.id ? <MenuItem onClick={() => {navigate("/me/profile");handleClose()}}>Edit profile</MenuItem> : null
-        }
-      </Menu>
+          <MenuItem onClick={() => {show_profile(click_id.current.toString());handleClose()}}>Profile</MenuItem>
+          {
+            click_id.current == user.id ? <MenuItem onClick={() => {navigate("/me/profile");handleClose()}}>Edit profile</MenuItem> : null
+          }
+        </Menu>
+        <CreateBox visible={newMembers} submit={submit} submitable={true} cancel={() => {setNewMembers(false)}} submit_text="Add" title="Add members to this channel">
+          <AddMembers members={specific_channel.members}/>
+        </CreateBox>
     </div>
   )
 }

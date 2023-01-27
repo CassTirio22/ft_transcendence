@@ -9,3 +9,5 @@ export const mapDispatchToProps = {
 export const mapStateToProps = (state: any) => state;
 
 export const friendsStateToProps = (state: any) => ({friends: state.friends});
+
+export const messagesStateToProps = (state: any) => ({messages: state.messages});

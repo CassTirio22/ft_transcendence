@@ -70,4 +70,20 @@
             }
         }
     }
+
+    .mute-div {
+        padding: 10px;
+
+        h4 {
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid var(--divider);
+            background-color: transparent;
+            padding: 5px 10px;
+            border-radius: var(--border_radius);
+        }
+    }
 }

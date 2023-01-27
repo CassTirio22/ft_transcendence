@@ -3,7 +3,7 @@ import React, { createRef, useContext, useEffect, useRef, useState } from 'react
 import { connect } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext, PopupContext, SocketContext } from '../../..';
-import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
+import { mapDispatchToProps, mapStateToProps, messagesStateToProps } from '../../../store/dispatcher';
 import { sendChannel, sendDirect } from '../../../store/slices/messages';
 import "./style.scss"
 import no_yet from "../../../assets/images/no_friends_yet.svg"
@@ -36,7 +36,8 @@ type Message = {
 type User = {
 	id: number,
 	full_name: string,
-	image_path: string
+	image_path: string,
+	status: number
 }
 
 const ConversationOpen: React.FC<Props> = (props: Props) => {
@@ -164,6 +165,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 		return <EmptyConvOrSelect/>;
 	}
 
+	const user_status = current_conversation.members.filter((elem: any) => elem.id == user.id)[0].status;
 
 	return (
 		<div className='current-conversation'>
@@ -212,10 +214,12 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 						})
 					}
 				</div>
-				<RenderSend/>
+				{
+					user_status == undefined || user_status == 0 ? <RenderSend/> : null
+				}
 			</div>
 		</div>
 	)
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ConversationOpen);
+export default connect(messagesStateToProps, mapDispatchToProps)(ConversationOpen);

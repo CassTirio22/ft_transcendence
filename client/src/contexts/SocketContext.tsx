@@ -55,7 +55,7 @@ export function createSocketCtx() {
         }
 
         useEffect(() => {
-            if (user.token) {
+            if (user.token && !socket.current) {
                 socket.current = io(socket_url, {
                     extraHeaders: {
                       Authorization: `${user.token}`

@@ -1,8 +1,8 @@
-import { Button, Checkbox } from '@mui/material'
+import { Button, Checkbox, Divider } from '@mui/material'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { connect } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-import { AuthContext, PopupContext } from '../../..'
+import { AuthContext, PopupContext, ToastContext } from '../../..'
 import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher'
 import ImageBox from '../../main/image_box/ImageBox'
 import Loading from '../../main/loading/Loading'
@@ -11,7 +11,8 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import CreateBox from '../../main/create_box/CreateBox'
-import { CONV_LVL } from '../../../constants/constants'
+import { CONV_LVL, TOAST_LVL } from '../../../constants/constants'
+import axios from "../../../service/axios"
 
 type Props = {
   messages?: {
@@ -27,6 +28,11 @@ type AlreadyMember = {
   members: any[]
 }
 
+type Mute = {
+  id: number,
+  type: string
+}
+
 const ChannelInfo = (props: Props) => {
   let { channel_id } = useParams();
   const {user} = useContext(AuthContext);
@@ -37,13 +43,18 @@ const ChannelInfo = (props: Props) => {
   const navigate = useNavigate();
   const click_id = useRef(-1);
   const click_lvl = useRef(-1);
+  const click_status = useRef(-1);
   const selected = useRef<number[]>([]);
   const [newMembers, setNewMembers] = useState(false);
+  const [muteMember, setmuteMember] = useState("");
+  const mute_ban_time = useRef("");
+  const {set_toast} = useContext(ToastContext);
 
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>, id: number, level: number) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>, id: number, level: number, status: number) => {
     click_id.current = id;
     click_lvl.current = level;
+    click_status.current = status;
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
@@ -71,8 +82,39 @@ const ChannelInfo = (props: Props) => {
     selected.current = [];
   }
 
-  const toggle_role = () => {
+  const mute_ban = async () => {
+    if (mute_ban_time.current == "") {
+      set_toast(TOAST_LVL.WARNING, "Date needed", "You need to select a date to ban or mute an user");
+      return;
+    }
+    const result = await axios.put("/member/status", {
+      member: click_id.current,
+      channel: parseInt(channel_id ? channel_id : "-1"),
+      status: muteMember == "mute" ? click_status.current == 1 ? "regular" : "muted" : "banned",
+      time: mute_ban_time.current + ":01+01:00"
+    });
+    props.fetchSpecificChannel(parseInt(channel_id ? channel_id : "-1"));
+    setmuteMember("");
+    mute_ban_time.current = "";
+    selected.current = [];
+  }
 
+  const toggle_role = async () => {
+    const result = await axios.put("/member/level", {
+      member: click_id.current,
+      channel: parseInt(channel_id ? channel_id : "-1"),
+      level: click_lvl.current == CONV_LVL.ADMIN ? "regular" : "administrator"
+    });
+    props.fetchSpecificChannel(parseInt(channel_id ? channel_id : "-1"));
+  }
+
+  const give_ownership = async () => {
+    const result = await axios.put("/member/level", {
+      member: click_id.current,
+      channel: parseInt(channel_id ? channel_id : "-1"),
+      level: "owner"
+    });
+    props.fetchSpecificChannel(parseInt(channel_id ? channel_id : "-1"));
   }
 
   const AddMembers = (memb: AlreadyMember) => {
@@ -142,7 +184,7 @@ const ChannelInfo = (props: Props) => {
 
               </div> :
               <div>
-                
+
               </div>
             }
           </div>
@@ -164,7 +206,7 @@ const ChannelInfo = (props: Props) => {
                       <span>{elem.level == CONV_LVL.ADMIN ? "admin" : elem.level == CONV_LVL.OWNER ? "owner" : ""}</span>
                     </div>
                   </div>
-                  <MoreHorizIcon onClick={(e: any) => handleClick(e, elem.id, elem.level)} />
+                  <MoreHorizIcon onClick={(e: any) => handleClick(e, elem.id, elem.level, elem.status)} />
                 </div>
               )
             })
@@ -185,7 +227,7 @@ const ChannelInfo = (props: Props) => {
             click_id.current == user.id ? <MenuItem onClick={() => {navigate("/me/profile");handleClose()}}>Edit profile</MenuItem> : null
           }
           {
-            click_id.current != user.id && user_status == CONV_LVL.OWNER ? <MenuItem onClick={() => {handleClose()}}>Give ownership</MenuItem> : null
+            click_id.current != user.id && user_status == CONV_LVL.OWNER ? <MenuItem onClick={() => {give_ownership();handleClose()}}>Give ownership</MenuItem> : null
           }
           {
             click_id.current != user.id && click_lvl.current != CONV_LVL.OWNER && (user_status == CONV_LVL.ADMIN || user_status == CONV_LVL.OWNER) ? 
@@ -193,9 +235,26 @@ const ChannelInfo = (props: Props) => {
               {click_lvl.current == CONV_LVL.ADMIN ? "Make user" : "Make admin"}
             </MenuItem> : null
           }
+          {
+            click_id.current != user.id ? <Divider /> : null
+          }
+          {
+            click_id.current != user.id && click_lvl.current != CONV_LVL.OWNER && (user_status == CONV_LVL.ADMIN || user_status == CONV_LVL.OWNER) ? 
+            <MenuItem onClick={() => {setmuteMember("mute");handleClose()}}>{click_status.current == 1 ? "Unmute" : "Mute" }</MenuItem> : null
+          }
+          {
+            click_id.current != user.id && click_lvl.current != CONV_LVL.OWNER && (user_status == CONV_LVL.ADMIN || user_status == CONV_LVL.OWNER) ? 
+            <MenuItem onClick={() => {setmuteMember("ban");handleClose()}}>{click_status.current == 2 ? "Unban" : "Ban" }</MenuItem> : null
+          }
         </Menu>
         <CreateBox visible={newMembers} submit={submit} submitable={true} cancel={() => {setNewMembers(false)}} submit_text="Add" title="Add members to this channel">
           <AddMembers members={specific_channel.members}/>
+        </CreateBox>
+        <CreateBox visible={muteMember != ""} submit={mute_ban} submitable={true} cancel={() => {setmuteMember("")}} submit_text={muteMember == "mute" ? "Mute" : "Ban"} title={muteMember == "mute" ? "Mute member" : "Ban member"}>
+          <div className='mute-div'>
+            <h4>You can {muteMember == "mute" ? "mute" : "ban"} users only for a limited time {"(which can be realy long, don't worry)"}.</h4>
+            <input onChange={(e) => mute_ban_time.current = e.target.value} type="datetime-local" />
+          </div>
         </CreateBox>
     </div>
   )

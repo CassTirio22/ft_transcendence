@@ -16,7 +16,6 @@ function Profile() {
 	const [userName, setUserName] = useState(user.name);
 	const [password, setPassword] = useState("");
 	const [newPassword, setNewPassword] = useState("");
-	console.log(user.picture)
 
 	const change_picture = async (file_list: FileList | null) => {
 		if (file_list) {

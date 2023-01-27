@@ -181,7 +181,7 @@ const ChannelInfo = (props: Props) => {
             {
               user_status == CONV_LVL.OWNER ?
               <div>
-
+                
               </div> :
               <div>
 

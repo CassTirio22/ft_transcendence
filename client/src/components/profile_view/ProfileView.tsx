@@ -37,7 +37,7 @@ const ProfileView = (props: Props) => {
 		score: 1000,
 		gamesNumber: 0,
 		status: 0,
-		image: "tpetit2"
+		picture: ""
 	})
 	const in_friend = props.friends.filter((elem: any) => elem.id == profile.id);
 	
@@ -49,7 +49,7 @@ const ProfileView = (props: Props) => {
 		if (!resp) {
 			setVisible(false);
 		}
-		setProfile({...resp, image: resp.name});
+		setProfile({...resp});
 	}
 
 	const send_direct = (id: number) => {
@@ -117,7 +117,7 @@ const ProfileView = (props: Props) => {
 					<div className='profile'>
 						<div className='profile-top'>
 							<div className='img-container'>
-								<img src={`https://avatars.dicebear.com/api/adventurer/${profile.image}.svg`} />
+								<img src={`https://avatars.dicebear.com/api/adventurer/${profile.picture}.svg`} />
 							</div>
 							<div className='profile-top-right'>
 								<div className='profile-name-status'>

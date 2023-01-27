@@ -36,7 +36,7 @@ type Message = {
 type User = {
 	id: number,
 	full_name: string,
-	image_path: string,
+	picture: string,
 	status: number
 }
 

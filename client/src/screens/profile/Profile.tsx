@@ -10,7 +10,7 @@ import axios from "../../service/axios"
 
 
 function Profile() {
-	const {user} = useContext(AuthContext)
+	const {user, profile} = useContext(AuthContext)
 	const [file, setFile] = useState<any | null>(null);
 	const {open_confirm, set_toast} = useContext(PopupContext)
 
@@ -27,6 +27,7 @@ function Profile() {
 			const result = await axios.post("/user/uploadPicture", formData)
 			.then(e => e.data)
 			.catch(e => {console.log(e);return null})
+			profile(user.token);
 		}
 	}
 
@@ -38,6 +39,17 @@ function Profile() {
 		set_toast(TOAST_LVL.SUCCESS, "Updated", "Your password has been correctly updated");
 	}
 
+	const delete_picture = async (need_ask: boolean) => {
+		if (need_ask && user.picture) {
+			open_confirm("Delete profile picture", "You will remove your profile picture. This action is definitive. A random profile picture will be created for you", "Delete my picture", () => delete_picture(false))
+		} else if (!need_ask && user.picture) {
+			const result = await axios.delete("/user/deletePicture");
+			profile(user.token);
+		}
+	}
+
+	console.log(user.picture)
+
 	return (
 		<div id='profile-main'>
 			<h1>My profile</h1>
@@ -46,17 +58,21 @@ function Profile() {
 			<div className='update-picture-container'>
 				<h2>My profile picture</h2>
 				<div className='img-edit'>
-					<img src={"http://localhost:5000/pictures/profile_1.svg"} />
+					<img src={user.picture ? base_url + user.picture.split("ft_transcendence/server")[1] : `https://avatars.dicebear.com/api/adventurer/${user.name}.svg`} />
 					<div className="profile-picture-edit">
-						<input type="file" onChange={e => change_picture(e.target?.files)} />
-						<Button sx={{color: "red"}} variant="outlined" startIcon={<DeleteIcon />} onClick={() => open_confirm("Delete profile picture", "You will remove your profile picture. This action is definitive. A random profile picture will be created for you", "Delete my picture", () => console.log("delete"))}>Delete</Button>
+						<label htmlFor="inputTag">
+							Change profile picture
+							<input id="inputTag" type="file" onChange={e => change_picture(e.target?.files)}/>
+						</label>
+						{
+							user.picture ? <Button sx={{color: "red"}} variant="outlined" startIcon={<DeleteIcon />} onClick={() => delete_picture(true)}>Delete</Button> : null
+						}
 					</div>
 				</div>
 			</div>
 			<div className='update-container'>
 				<h2>My data</h2>
 				<TextField defaultValue={user.name} fullWidth  className='value-input' id="outlined-basic" label={"User name"} variant="outlined" />
-				<TextField defaultValue={user.email} fullWidth  className='value-input' id="outlined-basic" label={"User name"} variant="outlined" />
 			</div>
 			<div className='change-password'>
 				<h2>Change password</h2>

@@ -7,11 +7,13 @@ const GameMatching = () => {
 	const navigate = useNavigate();
 
 	useEffect(() => {
+		document.body.classList.add("full-screen");
 		const timout = setTimeout(() => {
 			navigate("/play/lfjwoijfasdjfoweijflsjf");
-		}, 1267);
+		}, 2500);
 
 		return () => {
+			document.body.classList.remove("full-screen");
 			clearTimeout(timout);
 		}
 	}, [])

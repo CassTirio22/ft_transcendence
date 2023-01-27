@@ -184,7 +184,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 							<img src={no_yet} />
 							<h2>There is no member in this channel</h2>
 							<p>Invite members in your channel to start chatting with them!</p>
-							<Button>Add members</Button>
+							<Button onClick={() => navigate("infos")}>Add members</Button>
 						</div>
 						: null
 					}

@@ -11,7 +11,7 @@ export function createCtx() {
 		last_name: "User",
 		email: "email",
 		token: "",
-		profile_picture: "https://avatars.dicebear.com/api/avataaars/your-custom-seed.png",
+		picture: "https://avatars.dicebear.com/api/avataaars/your-custom-seed.png",
 	}
 	type UpdateType = Dispatch<SetStateAction<typeof default_user>>;
 

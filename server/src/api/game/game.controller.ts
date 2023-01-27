@@ -24,12 +24,12 @@ export class GameController {
 		return this.service.startUserGame({player1Id: (<User>req.user).id, player2Id: body.id}, false);
 	}
 
-	@Post('startChannel')
-	@UseGuards(JwtAuthGuard)
-	@UseInterceptors(ClassSerializerInterceptor)
-	private startChannelGame(@Body() body: StartFriendlyGameDto, @Req() req: Request): Promise<Game | never> {
-		return this.service.startChannelGame(body, req);
-	}
+	// @Post('startChannel')
+	// @UseGuards(JwtAuthGuard)
+	// @UseInterceptors(ClassSerializerInterceptor)
+	// private startChannelGame(@Body() body: StartFriendlyGameDto, @Req() req: Request): Promise<Game | never> {
+	// 	return this.service.startChannelGame(body, req);
+	// }
 
 	@Put('update')
 	@UseInterceptors(ClassSerializerInterceptor)

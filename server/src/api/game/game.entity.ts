@@ -8,6 +8,7 @@ export enum GameType {
 }
 
 export enum GameStatus {
+	pending,
 	ongoing,
 	done,
 	interrupted
@@ -40,6 +41,9 @@ export class Game extends BaseEntity {
 	
 	@Column({ type: 'integer', default: 0 })
 	public loserScore!: number;
+
+	@Column({ type: 'integer', default: 0})
+	public elo!: number; 
 	
 	@Column({ type: 'enum', enum: GameType, default: GameType.friendly})
 	public type!: GameType;
@@ -47,6 +51,5 @@ export class Game extends BaseEntity {
 	@Column({ type: 'enum', enum: GameStatus, default: GameStatus.ongoing})
 	public status!: GameStatus;
 
-	@Column({ type: 'integer', nullable: true })
-	public channel: number; 
+	// @Column({ type:  })
 }

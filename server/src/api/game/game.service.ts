@@ -61,33 +61,33 @@ export class GameService {
 			.execute()).generatedMaps[0] as Game;
 	}
 
-	public async startChannelGame(body: StartFriendlyGameDto, req: Request): Promise<Game | never> {
-		const user: User = <User>req.user;
-		const { id }: StartFriendlyGameDto = body;
+	// public async startChannelGame(body: StartFriendlyGameDto, req: Request): Promise<Game | never> {
+	// 	const user: User = <User>req.user;
+	// 	const { id }: StartFriendlyGameDto = body;
 
-		let channel: Channel  = await this.channelService.channel(id, user.id);
-		if (!channel) {
-			throw new HttpException('Not found. Did not found channel with those criterias.', HttpStatus.NOT_FOUND);
-		}
-		else if (!channel.members[0] || channel.members[0].status != MemberStatus.regular) {
-			throw new HttpException('Unauthorized. You are no member of this channel OR you have been banned/muted.', HttpStatus.UNAUTHORIZED);
-		}
-		let game: Game = await this.gameRepository.createQueryBuilder()
-			.select()
-			.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
-			.andWhere(new Brackets( query => { query
-				.where("winner_id = :winnerId", {winnerId: user.id})
-				.orWhere("loser_id = :loserId", {loserId: user.id})
-			}))
-			.getOne();
-		if (game) {
-			throw new HttpException('Conflict. You seem to be already playing a game.', HttpStatus.CONFLICT);
-		}
-		return (await this.gameRepository.createQueryBuilder()
-			.insert()
-			.values({winner: user, type: GameType.friendly, channel: id})
-			.execute()).generatedMaps[0] as Game;
-	}
+	// 	let channel: Channel  = await this.channelService.channel(id, user.id);
+	// 	if (!channel) {
+	// 		throw new HttpException('Not found. Did not found channel with those criterias.', HttpStatus.NOT_FOUND);
+	// 	}
+	// 	else if (!channel.members[0] || channel.members[0].status != MemberStatus.regular) {
+	// 		throw new HttpException('Unauthorized. You are no member of this channel OR you have been banned/muted.', HttpStatus.UNAUTHORIZED);
+	// 	}
+	// 	let game: Game = await this.gameRepository.createQueryBuilder()
+	// 		.select()
+	// 		.where("status = :gameStatus", {gameStatus: GameStatus.ongoing} )
+	// 		.andWhere(new Brackets( query => { query
+	// 			.where("winner_id = :winnerId", {winnerId: user.id})
+	// 			.orWhere("loser_id = :loserId", {loserId: user.id})
+	// 		}))
+	// 		.getOne();
+	// 	if (game) {
+	// 		throw new HttpException('Conflict. You seem to be already playing a game.', HttpStatus.CONFLICT);
+	// 	}
+	// 	return (await this.gameRepository.createQueryBuilder()
+	// 		.insert()
+	// 		.values({winner: user, type: GameType.friendly, channel: id})
+	// 		.execute()).generatedMaps[0] as Game;
+	// }
 
 	//no checking since it will be used in socket service anyway
 	public async startCompetitiveSet(players: {id_1: number, id_2: number}[]): Promise<Game[] | never> {

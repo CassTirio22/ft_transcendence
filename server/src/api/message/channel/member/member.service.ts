@@ -80,10 +80,11 @@ export class MemberService {
 		.getOne());
 	}
 
-	public async memberBySocket(socket: string): Promise<Member | never> {
+	public async memberBySocket(socket: string, channel: number): Promise<Member | never> {
 		return (await this.memberRepository.createQueryBuilder('member')
 			.innerJoinAndSelect("user", "user", "user.socket = :socketId", {socketId: socket})
 			.select()
+			.where("member.channel_id = :channelId", {channelId: channel})
 			.getOne());
 	}
 

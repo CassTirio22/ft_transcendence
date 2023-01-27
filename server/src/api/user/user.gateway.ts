@@ -67,9 +67,9 @@ export class UserGatewayUtil {
 
 	public async emitMessage(client: Socket, message: DiscussionMessage, clients: Socket[]): Promise<boolean | never> {
 		let channelId: string = this.defineChannelId(message);
-		let member: Member = await this.memberService.memberBySocket(client.id);
+		let member: Member = await this.memberService.memberBySocket(client.id, message.channel_id);
 		let user: User = await this.userService.userBySocket(client.id);
-		if (!client.rooms.has(channelId) || member != null ||  member.status == MemberStatus.muted) {
+		if (!client.rooms.has(channelId) || (member != null &&  member.status == MemberStatus.muted) ) {
 			return false;
 		}
 		//DON'T ADD IN DB ON GATEWAY-SIDE FOR NOW

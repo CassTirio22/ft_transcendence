@@ -1,42 +1,34 @@
-import { IsBoolean, IsDefined, IsNotEmpty, IsNumber, IsString } from 'class-validator'
-import { User } from '../user/user.entity';
+import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator'
 
-export class StartCompetitiveGameDto {
-	@IsNumber()
-	public readonly player1Id: number;
-
-	@IsNumber()
-	public readonly player2Id: number;
+export class CreateGameDto {
+	@IsBoolean()
+	@IsNotEmpty()
+	public readonly friendly: boolean;
 }
-
-export class StartFriendlyGameDto {
-	@IsNumber()
-	public readonly id: number;
-}
-
 export class UpdateGameDto {
-	@IsNumber()
-	public readonly gameId: number;
+	@IsString()
+	@IsNotEmpty()
+	public readonly address: string;
 
 	@IsNumber()
+	@IsNotEmpty()
 	public readonly winnerId: number;
 
 	@IsNumber()
+	@IsNotEmpty()
 	public readonly winnerScore: number;
 
 	@IsNumber()
+	@IsNotEmpty()
 	public readonly loserScore: number;
 
 	@IsBoolean()
+	@IsNotEmpty()
 	public readonly didInterrupt: boolean;
 }
 
 export class JoinGameDto {
-	@IsNumber()
-	public readonly game: number;
-}
-
-export class DeleteGameDto {
-	@IsNumber()
-	public readonly gameId: number;
+	@IsString()
+	@IsNotEmpty()
+	public readonly address: string;
 }

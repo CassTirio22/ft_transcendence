@@ -74,7 +74,7 @@ class GameGatewayUtil {
 
 	public disconnectDuringGame(games: IGame[], position: number, client: Socket): IGame[] {
 		this.gameService.updateGame({
-			gameId: games[position].game.id,
+			address: games[position].game.address,
 			winnerId: games[position].game.winner_id,
 			winnerScore: 0,
 			loserScore: 0,

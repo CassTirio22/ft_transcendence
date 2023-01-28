@@ -47,7 +47,7 @@ export class Game extends BaseEntity {
 	@Column({ type: 'enum', enum: GameType, default: GameType.friendly})
 	public type!: GameType;
 
-	@Column({ type: 'enum', enum: GameStatus, default: GameStatus.ongoing})
+	@Column({ type: 'enum', enum: GameStatus, default: GameStatus.pending})
 	public status!: GameStatus;
 
 	@Column({ type:  'varchar', unique: true })

@@ -29,8 +29,9 @@ export class EditChannelDto {
 	@IsNotEmpty()
 	public readonly channel: number;
 
-	@IsOptional()
-	public readonly status: ChannelStatus;
+	@IsString()
+	@IsNotEmpty()
+	public readonly status: string;
 }
 
 export class DeleteChannelDto {

@@ -87,7 +87,7 @@ export class ChannelService {
 	//if we want to delete it : ""
 	public async edit(body: EditChannelDto, req: Request): Promise<number> {
 		const user: User = <User>req.user;
-		let { name, password, channel}: EditChannelDto = body;
+		let { password, status,channel}: EditChannelDto = body;
 
 		let ourChannel: Channel = await this.channel(channel, user.id);
 		if (!ourChannel) {
@@ -96,23 +96,23 @@ export class ChannelService {
 		else if (ourChannel.members.length < 1 || ourChannel.members[0].level != MemberLevel.owner) {
 			throw new HttpException('Unauthorized. You must be the owner of this channel for this action.', HttpStatus.UNAUTHORIZED);
 		}
-		name = (name != null) ? name : ourChannel.name;
-		if (password == null)
-			return (await this.update({name: name, password: ourChannel.password, channel: channel, status: ourChannel.status}, user));
-		else if (password == "")
-			return (await this.update({name:name, password: null, channel: channel, status: ChannelStatus.public}, user));
-		return (await this.update({name: name, password: password, channel: channel, status: ChannelStatus.protected}, user));
+		else if (status == "protected" && !password) {
+			throw new HttpException('Conflict. A password must be set to create a protected channel.', HttpStatus.CONFLICT);
+		} 
+		return (await this.update(body, user));
 	}
 
 	public async update(body: EditChannelDto, user: User): Promise<number> {
-		let { name, password, channel}: EditChannelDto = body;
+		let { name, password, channel, status}: EditChannelDto = body;
 		let salt: string = bcrypt.genSaltSync(user.id);
 		return (await this.channelRepository.createQueryBuilder()
 			.update()
 			.set({name: name,
 				salt: salt,
-				password:  (password ?  bcrypt.hashSync(password, salt) : null), 
-				date: () => 'NOW()'})
+				password:  (status == "protected" ?  bcrypt.hashSync(password, salt) : null), 
+				date: () => 'NOW()',
+				status: "public" ? ChannelStatus.public : (status == "protected" ? ChannelStatus.protected : ChannelStatus.private)
+			}) 
 			.where("id = :channelId", {channelId: channel})
 			.execute()).affected;
 	}

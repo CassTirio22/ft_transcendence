@@ -1,0 +1,24 @@
+@import url("https://fonts.googleapis.com/css?family=Press+Start+2P");
+
+.game-div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    .score {
+        position: absolute;
+        display: flex;
+        width: 50%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        top: 5vh;
+
+        span {
+            font-size: 4rem;
+            font-weight: bold;
+            font-family: 'Press Start 2P', Courier, monospace;
+        }
+    }
+}

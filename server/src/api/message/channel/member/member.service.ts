@@ -131,8 +131,7 @@ export class MemberService {
 		const user: User = <User>req.user;
 		const { member, level, channel }: ChangeMemberLevelDto = body;
 
-		let ourChannel: Channel = await this._checkUserChangePermission({user: member, channel: channel}, user);
-		let userMember: Member = ourChannel.members.find( (obj) => {return obj.user_id == user.id} );
+		await this._checkUserChangePermission({user: member, channel: channel, level: this._stringToLevel(level)}, user);
 		return (await this.memberRepository.createQueryBuilder('member')
 			.update()
 			.set({ level: this._stringToLevel(level) })

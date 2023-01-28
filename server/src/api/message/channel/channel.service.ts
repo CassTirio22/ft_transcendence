@@ -111,7 +111,7 @@ export class ChannelService {
 				salt: salt,
 				password:  (status == "protected" ?  bcrypt.hashSync(password, salt) : null), 
 				date: () => 'NOW()',
-				status: "public" ? ChannelStatus.public : (status == "protected" ? ChannelStatus.protected : ChannelStatus.private)
+				status: status == "public" ? ChannelStatus.public : (status == "protected" ? ChannelStatus.protected : ChannelStatus.private)
 			}) 
 			.where("id = :channelId", {channelId: channel})
 			.execute()).affected;

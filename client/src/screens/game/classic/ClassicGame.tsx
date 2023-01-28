@@ -65,12 +65,12 @@ const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, 
 	context.fillStyle = '#fff';
 	context.fillRect(ball_x - 5, ball_y - 5, 10, 10);
 	context.fill();
-	context.fillStyle = `#fff`;
+	context.fillStyle = "rgba(255, 255, 255, 0.7)";
 	context.fillRect(10, player1_y, 10, 60);
-	context.fillStyle = `#fff`;
+	context.fillStyle = "rgba(255, 255, 255, 0.7)";
 	context.fillRect(context.canvas.width - 20, player2_y, 10, 60);
 
-	context.strokeStyle = "#fff";
+	context.strokeStyle = "rgba(255, 255, 255, 0.6)";
 	
 	context.beginPath();
 	context.setLineDash([5, 15]);

@@ -136,34 +136,53 @@ const ChannelInfo = (props: Props) => {
     const [type, setType] = useState(channel_props.channel.status);
 
     const cancel = () => {
-
+      setChannelName(channel_props.channel.title);
+      setPassword("");
+      setType(channel_props.channel.status);
     }
 
-    const save_changes = () => {
-
+    const save_changes = async () => {
+      if (type == CHANNEL_LVL.PROTECTED && password.length < 6) {
+        set_toast(TOAST_LVL.WARNING, "Password needed", "Password for protected channel is needed and need to be at least 6 char long.");
+        return;
+      } else if (channelName == "") {
+        set_toast(TOAST_LVL.WARNING, "Name needed", "Channel name cannot be empty");
+        return;
+      }
+      console.log({
+        name: channelName,
+        channel: parseInt(channel_id ? channel_id : "-1"),
+        status: ["public", "protected", "private"][type],
+        password: type == CHANNEL_LVL.PROTECTED ? password : null,
+      })
+      const result = await axios.put("/channel/edit", {
+        name: channelName,
+        channel: parseInt(channel_id ? channel_id : "-1"),
+        status: ["public", "protected", "private"][type],
+        password: type == CHANNEL_LVL.PROTECTED ? password : null,
+      });
+      props.fetchMessages({user: user, channel_id: parseInt(channel_id ? channel_id : "-1"), direct_id: undefined});
     }
 
     return (
       <div className='admin-channel-update'>
         <div className='input-div'>
           <TextField fullWidth size='small' value={channelName} onChange={(e) => setChannelName(e.target.value)} label="Channel title" variant="outlined" />
-          {
-            type != CHANNEL_LVL.PRIVATE ? 
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Channel type</InputLabel>
-              <Select
-                size='small'
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={type}
-                label="Channel type"
-                onChange={(e) => setType(e.target.value)}
-              >
-                <MenuItem value={0}>Public</MenuItem>
-                <MenuItem value={1}>Protected</MenuItem>
-              </Select>
-            </FormControl> : null
-          }
+          <FormControl fullWidth>
+            <InputLabel id="demo-simple-select-label">Channel type</InputLabel>
+            <Select
+              size='small'
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={type}
+              label="Channel type"
+              onChange={(e) => setType(e.target.value)}
+            >
+              <MenuItem value={0}>Public</MenuItem>
+              <MenuItem value={1}>Protected</MenuItem>
+              <MenuItem value={2}>Private</MenuItem>
+            </Select>
+          </FormControl>
           {
             type == CHANNEL_LVL.PROTECTED ? 
             <form>

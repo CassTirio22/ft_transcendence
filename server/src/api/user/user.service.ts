@@ -11,7 +11,7 @@ import { User, UserStatus } from './user.entity';
 import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
 import { DirectService } from '../message/direct/direct.service';
-import { unlinkSync, writeFileSync, existsSync } from 'fs';
+import { unlinkSync, writeFileSync, existsSync, exists } from 'fs';
 import {extname} from 'path';
 
 @Injectable()
@@ -154,7 +154,7 @@ export class UserService {
 		if (user.picture && existsSync(user.picture)) {
 			unlinkSync(user.picture);
 		}
-		writeFileSync(filePath, picture.buffer);
+		writeFileSync(`${process.cwd()}`+filePath, picture.buffer);
 		return (await this.repository.createQueryBuilder()
 			.update()
 			.where("id = :userId", {userId: user.id})
@@ -163,7 +163,7 @@ export class UserService {
 	}
 
 	public async getPicture(user: User): Promise<string | null> {
-		return (await this.repository.createQueryBuilder()
+		return `${process.cwd()}`+(await this.repository.createQueryBuilder()
 			.select()
 			.where("id = :userId", {userId: user.id})
 			.getOne()).picture;
@@ -171,7 +171,7 @@ export class UserService {
 
 	public async deletePicture(req: Request) {
 		const user: User = <User>req.user;
-		if (user.picture) {
+		if (user.picture && existsSync(user.picture)) {
 			unlinkSync(user.picture);
 		}
 		return (await this.repository.createQueryBuilder()

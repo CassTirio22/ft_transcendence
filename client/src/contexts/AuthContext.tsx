@@ -3,6 +3,17 @@ import { createContext, useState } from 'react';
 import { isCompositeComponent } from 'react-dom/test-utils';
 import axios, { set_instance_token, unset_instance_token } from "../service/axios"
 
+const reset_user = {
+	id: 0,
+	name: "Pseudo",
+	first_name: "Anonymous",
+	last_name: "User",
+	email: "email",
+	token: "",
+	score: 0,
+	picture: "https://avatars.dicebear.com/api/avataaars/your-custom-seed.png",
+}
+
 export function createCtx() {
 	const default_user = {
 		id: 0,
@@ -53,6 +64,9 @@ export function createCtx() {
 				return null;
 			})
 			if (!token) {
+				localStorage.clear();
+				unset_instance_token();
+				setUser(reset_user);
 				return "error";
 			}
 			set_instance_token(token);
@@ -86,6 +100,9 @@ export function createCtx() {
 				return null;
 			})
 			if (!token) {
+				localStorage.clear();
+				unset_instance_token();
+				setUser(reset_user);
 				return "error";
 			}
 			setUser({...user, token: token});
@@ -110,6 +127,12 @@ export function createCtx() {
 			.catch(e => {
 				return null;
 			})
+			if (!user) {
+				localStorage.clear();
+				unset_instance_token();
+				setUser(reset_user);
+				return ""
+			}
 			setUser({...user, email: user.email, token: token});
 			return user.name;
 		}

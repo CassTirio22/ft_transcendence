@@ -66,13 +66,7 @@ function LogInForm()
 }
 
 function Login() {
-	const {isLoggedIn} = useContext(AuthContext)
-	if (isLoggedIn()) {
-		return <AlreadyLogged />
-	}
-	else {
-		return <LogInForm />
-	}
+	return <LogInForm />
 }
 
 export default Login

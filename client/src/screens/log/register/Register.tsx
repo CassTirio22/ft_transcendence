@@ -1,7 +1,7 @@
+import { Button, TextField } from '@mui/material';
 import React, { useContext, useState } from 'react'
 import { AuthContext } from '../../..';
 import logo from "../../../assets/images/test.png"
-import Button from '../../../components/button/Button';
 
 function AlreadyRegistered() {
 	return (
@@ -52,12 +52,14 @@ function RegistrationForm() {
 				<img src={logo} alt="logo" />
 				<h2>Sign up</h2>
 			</div>
-			<form className="form">
-				<input autoComplete='email' placeholder='Email' type="email" value={userMail} onChange={(e) => setUserMail(e.target.value)} />
-				<input autoComplete='new-password' placeholder='Username' type="name" value={userName} onChange={(e) => setUserName(e.target.value)} />
-				<input autoComplete='new-password' onKeyDown={handleKeyDown} placeholder='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-			</form>
-			<Button disable={!validateEntry()} title="Sign up" onPress={handleSubmit} width="300px" />
+			<div className='center-input'>
+				<form className="form" onSubmit={() => console.log("first")}>
+					<TextField size='small' fullWidth autoComplete='email' label='Email' type="email" value={userMail} onChange={(e) => setUserMail(e.target.value)} />
+					<TextField size='small' fullWidth autoComplete='username' label='Username' type="username" value={userName} onChange={(e) => setUserName(e.target.value)} />
+					<TextField size='small' fullWidth autoComplete='password' onKeyDown={handleKeyDown} label='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+				</form>
+				<Button disabled={!validateEntry()} variant="contained" onClick={handleSubmit} fullWidth >Sign in</Button>
+			</div>
 		</section>
 	)
 }

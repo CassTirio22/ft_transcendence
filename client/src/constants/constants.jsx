@@ -18,5 +18,11 @@ export const CONV_LVL = {
     USER: 2
 }
 
+export const CHANNEL_LVL = {
+    PUBLIC: 0,
+    PROTECTED: 1,
+    PRIVATE: 2
+}
+
 export const base_url = "http://localhost:5000";
 export const socket_url = "ws://localhost:5000";

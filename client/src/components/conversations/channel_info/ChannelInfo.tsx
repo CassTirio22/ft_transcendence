@@ -1,4 +1,4 @@
-import { Button, Checkbox, Divider } from '@mui/material'
+import { Button, Checkbox, Divider, TextField } from '@mui/material'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { connect } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -9,10 +9,13 @@ import Loading from '../../main/loading/Loading'
 import "./style.scss"
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import CreateBox from '../../main/create_box/CreateBox'
-import { CONV_LVL, TOAST_LVL } from '../../../constants/constants'
+import { CHANNEL_LVL, CONV_LVL, TOAST_LVL } from '../../../constants/constants'
 import axios from "../../../service/axios"
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 type Props = {
   messages?: {
@@ -31,6 +34,10 @@ type AlreadyMember = {
 type Mute = {
   id: number,
   type: string
+}
+
+type ChannelProps = {
+  channel: any,
 }
 
 const ChannelInfo = (props: Props) => {
@@ -114,7 +121,63 @@ const ChannelInfo = (props: Props) => {
       channel: parseInt(channel_id ? channel_id : "-1"),
       level: "owner"
     });
+    const result2 = await axios.put("/member/level", {
+      member: user.id,
+      channel: parseInt(channel_id ? channel_id : "-1"),
+      level: "administrator"
+    });
     props.fetchSpecificChannel(parseInt(channel_id ? channel_id : "-1"));
+  }
+
+  const ChannelUpdate = (channel_props: ChannelProps) => {
+
+    const [channelName, setChannelName] = useState(channel_props.channel.title);
+    const [password, setPassword] = useState("");
+    const [type, setType] = useState(channel_props.channel.status);
+
+    const cancel = () => {
+
+    }
+
+    const save_changes = () => {
+
+    }
+
+    return (
+      <div className='admin-channel-update'>
+        <div className='input-div'>
+          <TextField fullWidth size='small' value={channelName} onChange={(e) => setChannelName(e.target.value)} label="Channel title" variant="outlined" />
+          {
+            type != CHANNEL_LVL.PRIVATE ? 
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Channel type</InputLabel>
+              <Select
+                size='small'
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={type}
+                label="Channel type"
+                onChange={(e) => setType(e.target.value)}
+              >
+                <MenuItem value={0}>Public</MenuItem>
+                <MenuItem value={1}>Protected</MenuItem>
+              </Select>
+            </FormControl> : null
+          }
+          {
+            type == CHANNEL_LVL.PROTECTED ? 
+            <form>
+              <TextField sx={{display: "none"}} type="text" autoComplete='username' label="Outlined" variant="outlined" />
+              <TextField fullWidth size='small' value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" type="password" label="Channel password" variant="outlined" />
+            </form> : null
+          }
+        </div>
+        <div className='save-cancel'>
+          <Button onClick={cancel} variant="outlined">Cancel</Button>
+          <Button onClick={save_changes} disabled={(password == "" || type == CHANNEL_LVL.PUBLIC) && type == channel_props.channel.status && channelName == channel_props.channel.title} variant="contained">Save changes</Button>
+        </div>
+      </div>
+    )
   }
 
   const AddMembers = (memb: AlreadyMember) => {
@@ -180,11 +243,10 @@ const ChannelInfo = (props: Props) => {
           <div className='channel-setting-body'>
             {
               user_status == CONV_LVL.OWNER ?
-              <div>
-                
-              </div> :
-              <div>
-
+              <ChannelUpdate channel={specific_channel} />
+               :
+              <div className='non-admin-channel-info'>
+                <span>{specific_channel.title}</span>
               </div>
             }
           </div>
@@ -236,7 +298,7 @@ const ChannelInfo = (props: Props) => {
             </MenuItem> : null
           }
           {
-            click_id.current != user.id ? <Divider /> : null
+            click_id.current != user.id && click_status.current != CONV_LVL.OWNER ? <Divider /> : null
           }
           {
             click_id.current != user.id && click_lvl.current != CONV_LVL.OWNER && (user_status == CONV_LVL.ADMIN || user_status == CONV_LVL.OWNER) ? 

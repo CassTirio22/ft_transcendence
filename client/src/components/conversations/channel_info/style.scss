@@ -10,6 +10,7 @@
         border-bottom: 1px solid var(--divider);
         margin-top: 20px;
         padding: 10px 0;
+        padding-bottom: 20px;
 
         .channel-setting-header {
             display: flex;
@@ -17,6 +18,38 @@
             align-items: center;
             justify-content: space-between;
             width: 100%;
+        }
+
+        .channel-setting-body {
+            width: 100%;
+            .non-admin-channel-info {
+                padding-top: 20px;
+
+                span {
+                    font-size: 1.4rem;
+                }
+            }
+
+            .admin-channel-update {
+                width: 100%;
+
+                .input-div {
+                    display: flex;
+                    flex-direction: column;
+                    max-width: 300px;
+                    gap: 10px;
+                    padding: 20px 0;
+                }
+
+                .save-cancel {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: flex-end;
+                    width: 100%;
+                    gap: 10px;
+                }
+            }
         }
 
         .friend-wrapper {

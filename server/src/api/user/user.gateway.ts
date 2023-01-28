@@ -25,7 +25,6 @@ export interface ConnectionMessage {
 }
 
 interface DiscussionMessage {
-	author_id: number;
 	direct_id: number;
 	channel_id: number;
 	content: string;
@@ -77,11 +76,15 @@ export class UserGatewayUtil {
 		// 	await this.messageService.sendChannel({origin: message.channel_id, content: message.content}, user);
 		
 		const blockers: User[] = await this.blockService.getBlockerList(user);
-		const blockerSockets: Socket[] = clients;
-		blockerSockets.filter( elem => blockers.find( blocker => blocker.socket == elem.id ) != undefined );
-		blockerSockets.forEach( blocker => blocker.join('blockRoom') )
+		const blockerSockets: Socket[] = [];
+		clients.forEach( client => {
+			if (blockers.find( blocker => blocker.socket == client.id) != undefined) {
+				blockerSockets.push(client);
+			}
+		});
+		blockerSockets.forEach( blocker => {blocker.join('blockRoom'); });
 
-		client.to(channelId).emit('messages', message);
+		client.to(channelId).except('blockRoom').emit('messages', message);
 		client.emit('messages', message);
 
 		blockerSockets.forEach( blocker => blocker.leave('blockRoom'));
@@ -190,12 +193,14 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const members: {socket: string, member: Member}[] = await this.memberService.membersFromSockets(this.clients.map( (socket) => socket.id));
 			members.forEach( (member) => {
 				const client: Socket = this.clients.find( (client) => {return client.id == member.socket} );
-				const channelId = "channel" + member.member.channel_id;
-				if (member.member.status == MemberStatus.regular && !client.rooms.has(channelId)) {
-					this.joinChannel(client, channelId, this.channels[channelId]);
-				}
-				else if (member.member.status == MemberStatus.banned && client.rooms.has(channelId)) {
-					client.leave(channelId);
+				if (client != undefined) {
+					const channelId = "channel" + member.member.channel_id;
+					if (member.member.status == MemberStatus.regular && !client.rooms.has(channelId)) {
+						this.joinChannel(client, channelId, this.channels[channelId]);
+					}
+					else if (member.member.status == MemberStatus.banned && client.rooms.has(channelId)) {
+						client.leave(channelId);
+					}
 				}
 			});
 		}, 1000); //every 1 sec

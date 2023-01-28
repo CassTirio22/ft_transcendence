@@ -84,7 +84,7 @@ function Profile() {
 			<div className='update-picture-container'>
 				<h2>My profile picture</h2>
 				<div className='img-edit'>
-					<img src={user.picture ? base_url + user.picture.split("ft_transcendence/server")[1] : `https://avatars.dicebear.com/api/adventurer/${user.name}.svg`} />
+					<img src={user.picture ? base_url + user.picture : `https://avatars.dicebear.com/api/adventurer/${user.name}.svg`} />
 					<div className="profile-picture-edit">
 						<label htmlFor="inputTag">
 							Change profile picture

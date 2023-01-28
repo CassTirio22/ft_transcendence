@@ -29,7 +29,7 @@ const ImageBox = (props: Props) => {
 
     return (
         <div profile-id={props.user.id} onClick={props.onClick} className={`message-sender-image-container ${status}`}>
-            <img src={props.user.picture ? base_url + props.user.picture.split("ft_transcendence/server")[1] : `https://avatars.dicebear.com/api/adventurer/${props.user.name}.svg`} />
+            <img src={props.user.picture ? base_url + props.user.picture : `https://avatars.dicebear.com/api/adventurer/${props.user.name}.svg`} />
         </div>
     )
 }

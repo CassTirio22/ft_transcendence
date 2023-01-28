@@ -122,6 +122,7 @@ const ClassicGame = (props: GameProps) => {
 		}
 
 		window.addEventListener('resize', handleResize);
+		handleResize();
 		props.new_pos.current = get_new_pos;
 		props.set_score.current = set_score;
 

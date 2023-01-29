@@ -71,14 +71,20 @@ export class GameService {
 	public async create(body: CreateGameDto, user: User) : Promise<Game | never> {
 		let game: Game = await this.gameRepository.createQueryBuilder()
 			.select()
-			.where("status IN (:...gameStatus)", {gameStatus: [GameStatus.ongoing, GameStatus.pending]} )
+			.where(new Brackets( query => { query
+				.where("status = :gameStatus", {gameStatus: GameStatus.ongoing})
+				.orWhere(new Brackets( query => { query
+					.where("status = :gameStatus", {gameStatus: GameStatus.pending})
+					.andWhere("type = :gameType", {gameType: GameType.competitive})
+				}))
+			}))
 			.andWhere(new Brackets( query => { query
 				.where("winner_id = :winnerId", {winnerId: user.id})
 				.orWhere("loser_id = :loserId", {loserId: user.id})
 			}))
 			.getOne();
 		if (game) {
-			throw new HttpException('Conflict. You seem to be already playing a game.', HttpStatus.CONFLICT);
+			throw new HttpException('Conflict. You seem to be already playing a game or being in a matchmaking.', HttpStatus.CONFLICT);
 		}
 		game =  (await this.gameRepository.createQueryBuilder()
 			.insert()
@@ -174,7 +180,7 @@ export class GameService {
 			else if (game.status == GameStatus.ongoing) {
 				allGames.ongoing = game;
 			}
-			else if (game.status == GameStatus.pending && game.winner_id == user.id) {
+			else if (game.status == GameStatus.pending/* && game.winner_id == user.id*/) {
 				allGames.pending.push(game);
 			}
 		} )

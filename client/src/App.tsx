@@ -34,8 +34,10 @@ const App: React.FC<Props> = (props) => {
 	const [loaded, setLoaded] = useState(false);
 
 	useEffect(() => {
-		if (isLoggedIn())
-	  		props.fetchFriends().then(setLoaded(true));
+		if (isLoggedIn()) {
+			
+			props.fetchFriends().then(setLoaded(true));
+		}
 	}, [user])
 	
 

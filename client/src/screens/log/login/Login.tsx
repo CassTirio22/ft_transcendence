@@ -28,12 +28,14 @@ function LogInForm()
 
 	const handleSubmit = async () => {
 		const response = await signIn(userName, password);
-		navigate("/");
 		if (response == "error") {
 			console.log(response)
 		} else {
 			set_toast(TOAST_LVL.SUCCESS, "Successfully login", `Welcome ${response}`)
 		}
+		setTimeout(() => {
+			navigate("/");
+		}, 100);
 	}
 
 	const validateEntry = () => {

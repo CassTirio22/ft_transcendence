@@ -1,9 +1,11 @@
+import { blockedsMethods } from "./slices/blocked";
 import { friendsMethods } from "./slices/friends";
 import { messagesMethods } from "./slices/messages";
 
 export const mapDispatchToProps = {
     ...messagesMethods,
-    ...friendsMethods
+    ...friendsMethods,
+    ...blockedsMethods
 }
 
 export const mapStateToProps = (state: any) => state;

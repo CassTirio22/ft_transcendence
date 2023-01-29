@@ -30,6 +30,14 @@ function Navbar() {
 							</div>
 						</Link>
 					</li>
+					<li className={location.pathname === "/store" ? "active hov" : "hov" }>
+						<Link to='/store'>
+							<div className="navigation_elem">
+								<i className="fas fa-store"></i>
+								<p>Store</p>
+							</div>
+						</Link>
+					</li>
 					<li>
 						<div className="separator">
 							<h2 className="separator_title">Game</h2>

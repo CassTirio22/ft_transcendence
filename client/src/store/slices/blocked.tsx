@@ -37,7 +37,6 @@ const blockedsSlice = createSlice({
 	reducers: {},
 	extraReducers: builder => {
         builder.addCase(fetchBlockeds.fulfilled, (state, {payload}) => {
-            console.log(payload)
 			return payload
         })
       }

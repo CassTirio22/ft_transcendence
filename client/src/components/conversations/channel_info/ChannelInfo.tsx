@@ -149,12 +149,6 @@ const ChannelInfo = (props: Props) => {
         set_toast(TOAST_LVL.WARNING, "Name needed", "Channel name cannot be empty");
         return;
       }
-      console.log({
-        name: channelName,
-        channel: parseInt(channel_id ? channel_id : "-1"),
-        status: ["public", "protected", "private"][type],
-        password: type == CHANNEL_LVL.PROTECTED ? password : null,
-      })
       const result = await axios.put("/channel/edit", {
         name: channelName,
         channel: parseInt(channel_id ? channel_id : "-1"),

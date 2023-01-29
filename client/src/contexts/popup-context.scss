@@ -86,6 +86,7 @@
         transition: .3s;
         border-radius: var(--border_radius);
         box-shadow: var(--box_shadow);
+        border: 1px solid var(--divider);
 
         .row-toast {
             display: flex;

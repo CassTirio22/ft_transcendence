@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { connect } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
 import AddIcon from '@mui/icons-material/Add';
 import "./style.scss"
@@ -11,6 +11,7 @@ import { TOAST_LVL } from '../../../constants/constants';
 import { Button, TextField } from '@mui/material';
 import axios from "../../../service/axios"
 import LockIcon from '@mui/icons-material/Lock';
+import CachedIcon from '@mui/icons-material/Cached';
 
 
 type Props = {
@@ -53,12 +54,18 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 	const selected_channel = useRef(-1);
 	const new_channel = useRef<CreateChannel>({type: "", password: "", name: ""});
 	const {set_toast} = useContext(ToastContext);
-
+	let { channel_id, direct_id } = useParams();
 	const navigate = useNavigate();
 
 	const redirect_set_conv = (is_channel: boolean, id: number) => {
 		navigate(`/conversations/${is_channel ? "channel" : "direct"}/${id}`);
 		props.selectConversation({is_channel: is_channel, id: id});
+	}
+
+	const fetch_conv = () => {
+		props.fetchMessages({user: user, channel_id: channel_id, direct_id: direct_id}).then(() => {
+			set_toast(TOAST_LVL.SUCCESS, "Fetch successfull", `Channel and direct fetch`)
+		})
 	}
 
 	const submit = () => {
@@ -246,7 +253,10 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 
 	return (
 		<div className='conversation-list'>
-			<h3>Canaux</h3>
+			<div className='conversation-list-title'>
+				<h3>Canaux</h3>
+				<CachedIcon onClick={() => fetch_conv()} />
+			</div>
 			{
 				props.messages.channels.map((elem: Channel, id: number) => (
 					<div onClick={() => redirect_set_conv(true, elem.id)} key={id} className={`conversation-elem${props.messages.current.id == elem.id && props.messages.current.is_channel ? " active" : ""}`}>

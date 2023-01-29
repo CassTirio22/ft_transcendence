@@ -5,7 +5,13 @@
     flex-direction: column;
     gap: 80px;
 
-    .store-header { }
+    .store-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
 
     .store-part {
         display: flex;
@@ -48,6 +54,14 @@
                         display: block;
                         width: 30px;
                         height: 30px;
+
+                        &.circle {
+                            border-radius: 15px;
+                        }
+                    }
+
+                    &:hover .ball.change {
+                        animation: ball_animation_rain 2s infinite;
                     }
 
                     &:hover .pad {
@@ -70,6 +84,19 @@
                         &.dotted {
                             border: 4px dotted red;
                         }
+                    }
+
+                    @keyframes ball_animation_rain {
+                        0%   {transform: translateY(0);}
+                        14% {background-color: #ffa500;}
+                        20%   {transform: translateY(-90px);}
+                        28% {background-color: #ffff00;}
+                        40%  {transform: translateX(-90px);background-color: #008000;}
+                        60%  {transform: translateY(90px);background-color: #0000ff;}
+                        70% {background-color: #4b0082;}
+                        80% {transform: translateX(90px);}
+                        84% {background-color: #ee82ee;}
+                        100% {transform: translateX(0);}
                     }
 
                     @keyframes ball_animation {

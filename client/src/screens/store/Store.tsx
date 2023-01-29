@@ -17,7 +17,7 @@ const Store = () => {
 
 		if (item_props.type == "ball") {
 			return (
-				<div className='ball square' style={{backgroundColor: item.color}}>
+				<div className={`ball ${item.type}`} style={{backgroundColor: item.color == "rainbow" ? "#ff0000" : item.color}}>
 
 				</div>
 			)

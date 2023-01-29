@@ -83,8 +83,6 @@ export class ChannelService {
 		}));
 	}
 
-	//if we don't want to edit password: null
-	//if we want to delete it : ""
 	public async edit(body: EditChannelDto, req: Request): Promise<number> {
 		const user: User = <User>req.user;
 		let { password, status,channel}: EditChannelDto = body;

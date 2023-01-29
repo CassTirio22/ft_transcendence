@@ -22,9 +22,25 @@ const Store = () => {
 				</div>
 			)
 		}
+
+		if (item.type == "change") {
+			return (
+				<div className={`pad change ${item.color == "rainbow" ? "rainbow" : ""}`} style={{backgroundColor: item.color == "rainbow" ? "#ff0000" : "#fff"}}>
+	
+				</div>
+			)
+		}
+
+		if (item.type == "dotted") {
+			return (
+				<div className={`pad dotted ${item.color == "invisible" ? "spec" : ""}`} style={{borderColor: item.color == "invisible" ? "#fff" : item.color}}>
+	
+				</div>
+			)
+		}
 		
 		return (
-			<div className={`pad classic ${item.color == "invisible" ? "spec" : ""}`} style={{backgroundColor: item.color == "invisible" ? "#fff" : item.color}}>
+			<div className={`pad ${item.color == "invisible" ? "spec" : ""}`} style={{backgroundColor: item.color == "invisible" ? "#fff" : item.color}}>
 
 			</div>
 		)

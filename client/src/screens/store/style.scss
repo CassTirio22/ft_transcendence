@@ -58,10 +58,18 @@
                         animation: pad_animation_spec 2s infinite;
                     }
 
+                    &:hover .pad.change {
+                        animation: pad_animation_rainbow 2s infinite;
+                    }
+
                     .pad {
                         display: block;
                         width: 10px;
                         height: 50px;
+
+                        &.dotted {
+                            border: 4px dotted red;
+                        }
                     }
 
                     @keyframes ball_animation {
@@ -84,6 +92,19 @@
                         0%   {transform: translateY(0);}
                         33%   {transform: translateY(-70px);opacity: 0;}
                         66%  {transform: translateY(70px);opacity: 0;}
+                        100% {transform: translateY(0);}
+                    }
+
+                    @keyframes pad_animation_rainbow {
+                        0%  {transform: translateY(0);}
+                        14% {background-color: #ffa500;}
+                        28% {background-color: #ffff00;}
+                        33% {transform: translateY(-70px)}
+                        42% {background-color: #008000;}
+                        56% {background-color: #0000ff;}
+                        66% {transform: translateY(70px)}
+                        70% {background-color: #4b0082;}
+                        84% {background-color: #ee82ee;}
                         100% {transform: translateY(0);}
                     }
                 }

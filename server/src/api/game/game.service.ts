@@ -202,6 +202,14 @@ export class GameService {
 			.execute()).affected;
 	}
 
+	public async ongoingGame(gameId: number) : Promise <number> {
+		return (await this.gameRepository.createQueryBuilder()
+			.update()
+			.where("id = :gameId", {gameId: gameId})
+			.set({status: GameStatus.ongoing})
+			.execute()).affected;
+	}
+
 	private async _updateGame(settings: UpdateGameSettings): Promise<number> {
 		return ( await this.gameRepository.createQueryBuilder()
 		.update(Game)

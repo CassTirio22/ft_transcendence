@@ -85,10 +85,9 @@ export class BlockService {
 			.getMany());
 	}
 
-	public async deleteBlock(body: DeleteBlockDto, req: Request): Promise<number> 
+	public async deleteBlock(req: Request, id: number): Promise<number> 
 	{
 		const user: User = <User>req.user;
-		const { id }: DeleteBlockDto = body;
 
 		if (user.id == id) {
 			throw new HttpException('Conflict. You tried to unblock yourself.', HttpStatus.CONFLICT);

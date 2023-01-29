@@ -16,6 +16,10 @@ type Props = {
 	selectConversation?: any;
 	friends?: any;
 	newFriendRequest?:any;
+	blocked?: any;
+	blockUser?: any;
+	unBlockUser?: any;
+	fetchBlockeds?: any;
 };
 
 type Channel = {
@@ -78,6 +82,18 @@ const ProfileView = (props: Props) => {
 		})
 	}
 
+	const toggle_block = (is_blocked: boolean) => {
+		if (is_blocked) {
+			props.unBlockUser(profile.id).then(() => {
+				props.fetchBlockeds();
+			});
+		} else {
+			props.blockUser(profile.id).then(() => {
+				props.fetchBlockeds();
+			});
+		}
+	}
+
 	let status = props.friends.filter((elem: any) => elem.id == profile.id);
     if (status.length) {
 		if (status[0].status == 2)
@@ -92,9 +108,14 @@ const ProfileView = (props: Props) => {
     if (profile.id == user.id)
         status = "connected"
 
+	if (props.blocked.filter((elem: any) => elem.id == profile.id).length) {
+		status = "blocked"
+	}
+
 	useEffect(() => {
 		props.reference.current = (id: string) => get_profile(id)
 	}, [])
+	
 
 	if (!visible)
 		return null;
@@ -129,7 +150,7 @@ const ProfileView = (props: Props) => {
 										in_friend.length && profile.id != user.id ?
 										<div className='profile-actions'>
 											<Button onClick={() => send_direct(profile.id)} variant='contained'>Send private message</Button>
-											<Button onClick={() => navigate("/")} variant='outlined'>Block</Button>
+											<Button onClick={() => toggle_block(status=="blocked")} variant='outlined'>{status != "blocked" ? "Block" : "Unblock"}</Button>
 										</div> :
 										profile.id != user.id ?
 										<div>

@@ -20,7 +20,8 @@ import Loading from "./components/main/loading/Loading";
 export type Props = {
 	messages?: any,
 	fetchMessages?: any,
-	fetchFriends?: any
+	fetchFriends?: any,
+	fetchBlockeds?: any
 };
 
 /**
@@ -35,7 +36,7 @@ const App: React.FC<Props> = (props) => {
 
 	useEffect(() => {
 		if (isLoggedIn()) {
-			
+			props.fetchBlockeds();
 			props.fetchFriends().then(setLoaded(true));
 		}
 	}, [user])

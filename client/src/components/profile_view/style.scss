@@ -65,12 +65,16 @@
                                 background-color: var(--success);
                             }
 
-                            &.disconnected {
+                            &.blocked {
                                 background-color: var(--error);
                             }
 
-                            &.in-game {
+                            &.disconnected {
                                 background-color: var(--warning);
+                            }
+
+                            &.in-game {
+                                background-color: var(--primary);
                             }
                         }
                     }

@@ -10,6 +10,7 @@ type Props = {
     onClick?: any,
     friends?:any,
     is_you?: boolean,
+    blocked?: any
 }
 
 const ImageBox = (props: Props) => {
@@ -26,6 +27,10 @@ const ImageBox = (props: Props) => {
     }
     if (props.is_you)
         status = "connected"
+    
+    if (props.blocked.filter((elem: any) => elem.id == props.user.id).length) {
+        status = "blocked"
+    }
 
     return (
         <div profile-id={props.user.id} onClick={props.onClick} className={`message-sender-image-container ${status}`}>

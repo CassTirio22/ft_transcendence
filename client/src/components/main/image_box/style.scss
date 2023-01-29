@@ -15,12 +15,21 @@
         object-fit: cover;
     }
 
+    &.disconnected {
+        opacity: .4;
+    }
+
+    &.blocked {
+        background-color: var(--error);
+        border: 2px solid var(--error);
+    }
+
     &.connected {
         border: 2px solid var(--success);
     }
     
     &.disconnected {
-        border: 2px solid var(--error);
+        border: 2px solid var(--warning);
     }
 
     &.unknown {
@@ -28,7 +37,7 @@
     }
 
     &.in-game {
-        border: 2px solid var(--warning);
+        border: 2px solid var(--primary);
     }
 }
 

@@ -47,8 +47,8 @@ html.dark {
 	--strong_text: #fff;
 	--secondary_text: #909090;
 	--on_surface: #000;
-	--primary: #FF4C29;
-	--primary_transparent: rgba(255, 76, 41, 0.2);
+	--primary: #90caf9;
+	--primary_transparent: rgba(144, 202, 249, 0.2);
 	--error: #e23636;
 	--warning: #F7DC6F;
 	--success: #82dd55;

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Req, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Post, Req, UseGuards, UseInterceptors, Param } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { BlockDto, DeleteBlockDto } from "./block.dto";
 import { Block } from "./block.entity";
@@ -22,9 +22,9 @@ export class BlockController{
         return this.blockedService.getBlockedList(<User>user);
     }
 
-    @Delete('delete')
+    @Delete('delete/:id')
     @UseGuards(JwtAuthGuard)
-    private deleteBlock(@Body() body: DeleteBlockDto, @Req() req: Request): Promise<number> {
-        return this.blockedService.deleteBlock(body, req);
+    private deleteBlock(@Param() params, @Req() req: Request): Promise<number> {
+        return this.blockedService.deleteBlock(req, params.id);
     }
 }

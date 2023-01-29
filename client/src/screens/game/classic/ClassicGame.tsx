@@ -70,8 +70,8 @@ const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, 
 	context.fillStyle = '#000';
 	context.fillRect(0, 0, main_width, main_height);
 	draw_ball(ball_x, ball_y, tic, ball_style, context);
-	draw_pad(10, player1_y, tic, player_1_style, context);
-	draw_pad(main_width - 20, player2_y, tic, player_2_style, context);
+	draw_pad(10, player1_y, tic, player_1_style == "classic-invisible" ? "classic-write" : player_1_style, context);
+	draw_pad(main_width - 20, player2_y, tic, player_2_style == "classic-invisible" ? "classic-impossible" : player_2_style, context);
 
 	context.strokeStyle = "rgba(255, 255, 255, 0.6)";
 	
@@ -97,7 +97,7 @@ const ClassicGame = (props: GameProps) => {
 
 	const get_new_pos = (player_1_y: number, player_2_y: number, ball_x: number, ball_y: number) => {
 		const ratio = main_width / 1000;
-		draw_game(contextRef.current, player_1_y * ratio - 5, 0, player_2_y * ratio - 5, 0, ball_x * ratio, ball_y * ratio, user.store.selected_ball, user.store.selected_pad, "classic-primary");
+		draw_game(contextRef.current, player_1_y * ratio - 5, 0, player_2_y * ratio - 5, 0, ball_x * ratio, ball_y * ratio, user.store.selected_ball, user.store.selected_pad, "");
 	}
 
 	const set_score = (player_1: number, player_2: number) => {
@@ -132,7 +132,8 @@ const ClassicGame = (props: GameProps) => {
 			let canvas = canvasRef.current;
 			let context = canvas.getContext('2d');
 			contextRef.current = context;
-			//draw_game(contextRef.current, 10, 0, 10, 0, 100, 100, "round-write", "classic-primary", "classic-primary");
+			// draw_game(contextRef.current, 10, 0, 10, 0, 100, 100, "round-write", "dotted-write", "dotted-red");
+			// draw_game(contextRef.current, 10, 0, 10, 0, 100, 100, "round-write", "dotted-write", "dotted-red");
 		}
 
 		return () => window.removeEventListener('resize', handleResize);

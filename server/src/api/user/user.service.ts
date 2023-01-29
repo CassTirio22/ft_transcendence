@@ -4,9 +4,9 @@ import { BlockService } from './block/block.service';
 import { ChannelService } from './../message/channel/channel.service';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ConnectionIsNotSetError, Repository } from 'typeorm';
 import { Request } from 'express';
-import { EditUserDto } from './user.dto';
+import { EditUserDto, CustomizeUserDto } from './user.dto';
 import { User, UserStatus } from './user.entity';
 import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
@@ -178,6 +178,17 @@ export class UserService {
 			.update()
 			.where("id = :userId", {userId: user.id})
 			.set({picture: null})
+			.execute()).affected;
+	}
+
+	public async customize(body: CustomizeUserDto, user: User) : Promise<number | never> {
+		return (await this.repository.createQueryBuilder()
+			.update()
+			.where("id = :userId", {userId: user.id})
+			.set({
+				coins: body.coins,
+				custom: body.custom
+			})
 			.execute()).affected;
 	}
 

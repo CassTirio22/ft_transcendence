@@ -1,3 +1,4 @@
+import { read } from 'fs';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class EditUserDto {
@@ -12,4 +13,12 @@ export class EditUserDto {
   @IsString()
   @IsOptional()
   public readonly email: string;
+}
+
+export class CustomizeUserDto {
+	@IsNumber()
+	public readonly coins: number;
+
+	@IsNotEmpty()
+	public readonly custom: any;
 }

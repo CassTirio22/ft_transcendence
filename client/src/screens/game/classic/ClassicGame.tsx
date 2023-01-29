@@ -1,5 +1,7 @@
 import { Button } from '@mui/material'
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import { AuthContext } from '../../..';
+import { draw_ball, draw_pad } from '../draw/draw_fcts';
 import "./style.scss"
 
 function getWindowDimensions() {
@@ -36,7 +38,12 @@ const ball_wall_song = new Audio(ball_wall);
 
 let timout: any = null;
 
-const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, player2_y: number, ball_x: number, ball_y: number, ) => {
+let tic = 0;
+
+const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, player1_x: number, player2_y: number, player2_x: number, ball_x: number, ball_y: number, ball_style: string, player_1_style: string, player_2_style: string) => {
+	tic += 1;
+	if (tic > 100)
+		tic = 0;
 	if (!context)
 		return;
 	if (last_ball_x != -1) {
@@ -62,13 +69,9 @@ const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, 
 	context.clearRect(-100, -100, context.canvas.width + 100, context.canvas.height + 100);
 	context.fillStyle = '#000';
 	context.fillRect(0, 0, main_width, main_height);
-	context.fillStyle = '#fff';
-	context.fillRect(ball_x - 5, ball_y - 5, 10, 10);
-	context.fill();
-	context.fillStyle = "rgba(255, 255, 255, 0.7)";
-	context.fillRect(10, player1_y, 10, 60);
-	context.fillStyle = "rgba(255, 255, 255, 0.7)";
-	context.fillRect(context.canvas.width - 20, player2_y, 10, 60);
+	draw_ball(ball_x, ball_y, tic, ball_style, context);
+	draw_pad(10, player1_y, tic, player_1_style, context);
+	draw_pad(main_width - 20, player2_y, tic, player_2_style, context);
 
 	context.strokeStyle = "rgba(255, 255, 255, 0.6)";
 	
@@ -89,12 +92,12 @@ const ClassicGame = (props: GameProps) => {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const contextRef = useRef<CanvasRenderingContext2D | null>(null);
 	const [score, setScore] = useState([0, 0]);
-
+	const {user} = useContext(AuthContext);
 	const [reload, setReload] = useState(0);
 
 	const get_new_pos = (player_1_y: number, player_2_y: number, ball_x: number, ball_y: number) => {
 		const ratio = main_width / 1000;
-		draw_game(contextRef.current, player_1_y * ratio - 5, player_2_y * ratio - 5, ball_x * ratio, ball_y * ratio);
+		draw_game(contextRef.current, player_1_y * ratio - 5, 0, player_2_y * ratio - 5, 0, ball_x * ratio, ball_y * ratio, user.store.selected_ball, user.store.selected_pad, "classic-primary");
 	}
 
 	const set_score = (player_1: number, player_2: number) => {
@@ -129,17 +132,11 @@ const ClassicGame = (props: GameProps) => {
 			let canvas = canvasRef.current;
 			let context = canvas.getContext('2d');
 			contextRef.current = context;
-			draw_game(contextRef.current, 10, 10, 100, 100);
+			//draw_game(contextRef.current, 10, 0, 10, 0, 100, 100, "round-write", "classic-primary", "classic-primary");
 		}
 
 		return () => window.removeEventListener('resize', handleResize);
 	}, [])
-
-	useEffect(() => {
-		if (reload)
-			draw_game(contextRef.current, 10, 10, 100, 100);
-	}, [reload])
-	
 	
   	return (
 		<div className='game-div'>

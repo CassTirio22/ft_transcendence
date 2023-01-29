@@ -13,14 +13,14 @@ export const store_items: {[name: string]: {[name2: string]: any}} = {
             shape: "square",
             description: "Just a simple red square.",
             price: 10,
-            color: "var(--error)",
+            color: "#e23636",
             type: "square",
         },
         "square-primary": {
             shape: "square",
             description: "The squared transcendence.",
             price: 20,
-            color: "var(--primary)",
+            color: "#90caf9",
             type: "square",
         },
         "impossible-square": {
@@ -31,17 +31,17 @@ export const store_items: {[name: string]: {[name2: string]: any}} = {
             type: "square",
         },
         "round-write": {
-            shape: "square",
+            shape: "circle",
             description: "The classic but with border radius. Border radius is the best!",
             price: 100,
             color: "#fff",
             type: "circle",
         },
         "round-red": {
-            shape: "square",
+            shape: "circle",
             description: "A simple red circle.",
             price: 100,
-            color: "var(--error)",
+            color: "#e23636",
             type: "circle",
         },
         "change-rainbow": {
@@ -63,13 +63,13 @@ export const store_items: {[name: string]: {[name2: string]: any}} = {
         "classic-red": {
             description: "A red pad, nothing more.",
             price: 10,
-            color: "var(--error)",
+            color: "#e23636",
             type: "classic",
         },
         "classic-primary": {
             description: "The transcendence pad, a pad that will transcend you.",
             price: 20,
-            color: "var(--primary)",
+            color: "#90caf9",
             type: "classic",
         },
         "classic-impossible": {
@@ -87,7 +87,7 @@ export const store_items: {[name: string]: {[name2: string]: any}} = {
         "dotted-red": {
             description: "A red dotted pad.",
             price: 100,
-            color: "var(--error)",
+            color: "#e23636",
             type: "dotted",
         },
         "change-rainbow": {

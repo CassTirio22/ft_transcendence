@@ -107,7 +107,6 @@ const ClassicGame = (props: GameProps) => {
 			
 			timout = setTimeout(() => {
 				const {width, height} = getWindowDimensions();
-				console.log("coucou")
 				main_height = height - 4;
 				main_width = width - 4;
 				

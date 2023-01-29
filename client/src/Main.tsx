@@ -12,6 +12,7 @@ import Login from './screens/log/login/Login';
 import Register from './screens/log/register/Register';
 import Profile from './screens/profile/Profile';
 import Ranking from './screens/ranking/Ranking';
+import Store from './screens/store/Store';
 /**
  *	React Component
  *	Describe the different possible routes and UI rendered consequently.
@@ -25,6 +26,7 @@ return (
 		<Route path='/conversations/channel/:channel_id/infos' element={<ChannelInfo/>} />
 		<Route path='/conversations/direct/:direct_id' element={<Conversations/>} />
 		<Route path='/friends' element={<Friends/>} />
+		<Route path='/store' element={<Store/>} />
 		<Route path='/play' element={<GameMatching/>} />
 		<Route path='/play/:game_id' element={<Game/>} />
 		<Route path='/watch' element={<DevAreWorking/>} />

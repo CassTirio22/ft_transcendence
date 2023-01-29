@@ -10,6 +10,13 @@ import { Request } from 'express';
 import { MemberStatus } from '../message/channel/member/member.entity';
 import { generate } from 'shortid';
 
+
+export interface AllGames {
+	done: Game[],
+	pending: Game[],
+	ongoing: Game,
+}
+
 interface GameSettings {
 	winner_id: number;
 	loser_id: number;
@@ -149,6 +156,29 @@ export class GameService {
 			.andWhere("game.status = :gameStatus", {gameStatus: GameStatus.done})
 			.orderBy("game.date", 'ASC')
 			.getMany();
+	}
+
+	public async allGames(user: User): Promise< AllGames | never > {
+		const games: Game[] = await this.gameRepository.createQueryBuilder("game")
+			.innerJoinAndSelect("game.winner", "winner")
+			.innerJoinAndSelect("game.loser", "loser")
+			.select()
+			.where(":player IN (winner.id, loser.id)", {player: user.id})
+			.orderBy("game.date", 'ASC')
+			.getMany();
+		let allGames: AllGames = {done: [], pending: [], ongoing: null};
+		games.forEach( game => {
+			if (game.status == GameStatus.done) {
+				allGames.done.push(game);
+			}
+			else if (game.status == GameStatus.ongoing) {
+				allGames.ongoing = game;
+			}
+			else if (game.status == GameStatus.pending && game.winner_id == user.id) {
+				allGames.pending.push(game);
+			}
+		} )
+		return allGames;
 	}
 
 	public async pendingGames(): Promise<Game[] | never> {

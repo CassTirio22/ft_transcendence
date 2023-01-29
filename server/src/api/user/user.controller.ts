@@ -1,7 +1,7 @@
 import { ClassSerializerInterceptor, Controller, Req, UseGuards, UseInterceptors, Get, Put, Body, Inject, Param, Post, UploadedFile, Res, Delete } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from '@/api/user/auth/auth.guard';
-import { EditUserDto } from './user.dto';
+import { EditUserDto, CustomizeUserDto } from './user.dto';
 import { User } from './user.entity';
 import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
@@ -19,7 +19,14 @@ export class UserController {
 	@UseInterceptors(ClassSerializerInterceptor)
 	private edit(@Body() body: EditUserDto, @Req() req: Request): Promise<string | never> {
 		return this.service.edit(body, req);
-		}
+	}
+
+	@Put('customize')
+	@UseGuards(JwtAuthGuard)
+	@UseInterceptors(ClassSerializerInterceptor)
+	private customize(@Body() body: CustomizeUserDto, @Req() req: Request): Promise<number | never> {
+		return this,this.service.customize(body, <User>req.user);
+	}
 
 	@Get('profile')
 	@UseGuards(JwtAuthGuard)

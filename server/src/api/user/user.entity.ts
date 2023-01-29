@@ -7,7 +7,7 @@ import { Exclude } from 'class-transformer';
 import { Game } from '../game/game.entity';
 import { Direct } from '../message/direct/direct.entity';
 import { Channel } from '../message/channel/channel.entity';
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, ManyToMany } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, ManyToMany, ColumnTypeUndefinedError } from 'typeorm';
 
 
 export enum UserStatus {
@@ -68,6 +68,12 @@ export class User extends BaseEntity {
 
 	@Column({type: 'varchar', nullable: true})
 	public picture: string;
+
+	@Column({type: 'int', default: 0})
+	public coins: number;
+
+	@Column({type: 'jsonb', nullable: true})
+	public custom: any;
 
 	@OneToMany(type => Game, game => game.winner)
 	won: Game[];

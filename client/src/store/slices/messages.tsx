@@ -68,7 +68,7 @@ export const sendDirect = createAsyncThunk(
 	"messages/sendDirect",
 	async (new_message: NewMessage) => {
 		const response = await axios.post("/message/sendDirect", new_message);
-		return response.data;
+		return "3";
 	}
 )
 
@@ -276,11 +276,15 @@ const messagesSlice = createSlice({
 
 		builder.addCase(sendChannel.fulfilled , (state, {payload}) => {})
 
-		builder.addCase(sendChannel.rejected , (state, {payload}) => {})
+		builder.addCase(sendChannel.rejected , (state, action) => {
+			console.log(action.error.code)
+		})
 
 		builder.addCase(sendDirect.fulfilled , (state, {payload}) => {})
 
-		builder.addCase(sendDirect.rejected , (state, {payload}) => {})
+		builder.addCase(sendDirect.rejected , (state, action) => {
+			
+		})
       }
 })
 

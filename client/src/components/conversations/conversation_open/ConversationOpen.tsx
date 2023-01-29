@@ -2,13 +2,14 @@ import { Button, Menu, MenuItem, TextareaAutosize } from '@mui/material';
 import React, { createRef, useContext, useEffect, useRef, useState } from 'react'
 import { connect } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AuthContext, PopupContext, SocketContext } from '../../..';
+import { AuthContext, PopupContext, SocketContext, ToastContext } from '../../..';
 import { mapDispatchToProps, mapStateToProps, messagesStateToProps } from '../../../store/dispatcher';
 import { sendChannel, sendDirect } from '../../../store/slices/messages';
 import "./style.scss"
 import no_yet from "../../../assets/images/no_friends_yet.svg"
 import ImageBox from '../../main/image_box/ImageBox';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import { TOAST_LVL } from '../../../constants/constants';
 
 type Props = {
 	messages?: any;
@@ -93,12 +94,27 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 		const [message, setMessage] = useState("");
 		const last_key = useRef("");
 		const need_add = useRef(true);
+		const {set_toast} = useContext(ToastContext);
 
 		const send = () => {
 			if (channel_id) {
-				props.sendChannel({origin: parseInt(channel_id), content: message})
+				props.sendChannel({origin: parseInt(channel_id), content: message}).then((e: any) => {
+					if (e.error?.message?.includes("401")) {
+						props.fetchMessages({user: user, channel_id: null, direct_id: null});
+						setTimeout(() => {
+							set_toast(TOAST_LVL.ERROR, "Unauthorize", "You cannot send message to this channel. You have probably been kiked or banned.")
+						}, 100);
+					}
+				})
 			} else if (direct_id) {
-				props.sendDirect({origin: parseInt(direct_id), content: message})
+				props.sendDirect({origin: parseInt(direct_id), content: message}).then((e: any) => {
+					if (e.error?.message?.includes("401")) {
+						props.fetchMessages({user: user, channel_id: null, direct_id: null});
+						setTimeout(() => {
+							set_toast(TOAST_LVL.ERROR, "Unauthorize", "You cannot send message to this user. He has probably blocked you.")
+						}, 100);
+					}
+				})
 			}
 			send_message(direct_id ? parseInt(direct_id) : null, channel_id ? parseInt(channel_id) : null, message);
 			setMessage("");

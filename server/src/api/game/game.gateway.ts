@@ -9,14 +9,15 @@ import {
 	OnGatewayConnection, 
 	OnGatewayDisconnect, 
 	OnGatewayInit, 
+	SubscribeMessage, 
 	WebSocketGateway,
 } from "@nestjs/websockets";
 import { Socket } from "socket.io";
 
 interface IGame {
 	game: Game;
-	player1: Socket;
-	player2: Socket;
+	player1: User;
+	player2: User;
 }
 
 //essentially will be a huge set of methods with some emissions from every side
@@ -27,11 +28,12 @@ class Pong {
 
 }
 
-@WebSocketGateway()
+@WebSocketGateway( { path: '/game' } )
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	private channels: Map< string, IGame >;
-	private playing: Map< string, boolean >;
-	//must be a list of ongoing games
+	private playing: Map< number, boolean >;
+	private clients: Map<string, number>;
+	private ongoing: IGame[];
 
 	constructor(
 		@Inject(AuthHelper)
@@ -42,16 +44,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private gameService: GameService,
 		) {
 			this.channels = new Map<string, IGame>();
-			this.playing = new Map<string, boolean>;
+			this.playing = new Map<number, boolean>;
+			this.clients = new Map<string, number>;
+			this.ongoing = [];
 		}
 
 
+	
 	async afterInit(): Promise<any | never> {
 		//loop all 10secs
 		//check if disconnected
-		setInterval(() => {
-
-		}, 1000);
+		// setInterval(() => {}, 1000);
 	}
 
     async handleConnection(client: Socket, args: any): Promise<any | never> {
@@ -60,38 +63,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const token: string = <string>client.handshake.headers.authorization;
 			const user: User = await this.authHelper.getUser(token);
 
-			//we get all related games with the user
-			let games: AllGames = await this.gameService.allGames(user);
+			//we add it to the list of connected clients
+			this.playing.set(user.id, false);
+			this.clients.set(client.id, user.id);
 
-			//we set all pending match for this user
-			games.pending.forEach( game => {
-				if (!this.channels.has(game.address)) {
-					this.channels.set(game.address, {game: game, player1: null, player2: null});
-				}
-				this.channels[game.address].player1 = (game.winner_id == user.id) ? client : this.channels[game.address].player1;
-				this.channels[game.address].player2 = (game.loser_id == user.id) ? client : this.channels[game.address].player2;
-				client.join(game.address);
-			});
-
-			//we check if a game can start with user right now
-			if (games.ongoing) {
-				client.join(games.ongoing.address);
-				// client.emit(); //GO TO YOUR ONGOING GAME MATE YOU'RE LOSING BECAUSE OF YOUR CONNECTION
-			}
-			//if competitive is full let's start an ongoing game
-			else if (games.pending.find(game => game.type == GameType.competitive && game.winner != null && game.loser != null) != undefined) { 
-				//GO TO NEW ONGOING GAME IF ALL CONNECTED AND WAITING
-			}
-			//if no waiting competitive and friendly is full let's start an ongoing game
-			else if (
-				games.pending.find(game => game.type == GameType.competitive) == undefined && 
-				games.pending.find(game => game.winner != null && game.loser != null) != undefined
-			){
-				//GO TO NEW ONGOING GAME IF ALL CONNECTED AND WAITING
-			}
-			else {
-				//add to a waiter list and notify when ok -> actually maybe do nothing since already joined to rooms
-			}
+			this._updatePlayer(client, user);
 		}
 		catch (error) {
 			client.emit('error', {message: 'Connection unauthorized.'});
@@ -101,9 +77,30 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     async handleDisconnect(client: Socket): Promise<any> {
 		client.rooms.forEach( room => { client.leave(room) } );
+		this.playing.delete(this.clients[client.id]);
+		this.clients.delete(client.id);
 	}
 
-	async _startGame(game: IGame): Promise<boolean> {
+	@SubscribeMessage("watch")
+	handleWatch(client: Socket, data: string) {
+		if (this.channels.has(data)) {
+			client.join(data);
+		}
+	}
+
+	@SubscribeMessage("leave")
+	handleLeave(client: Socket, data: string) {
+		if (this.channels.has(data)) {
+			client.leave(data);
+		}
+	}
+
+	@SubscribeMessage("update")
+	handleUpdate(client: Socket) {
+		this._updatePlayer(client, this.clients[client.id]);
+	}
+
+	async _startGame(game: IGame, client: Socket): Promise<boolean> {
 		//we check if everyone is connected and not playing
 		if (
 			!this.playing.has(game.player1.id) || 
@@ -118,10 +115,68 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.playing[game.player1.id] = true;
 		this.playing[game.player2.id] = true;
 
-		//game is ongoing in DB
-		// await this.gameService.updateGame()
+		//telling to anyone joined to this game that it will start
+		client.to(game.game.address).emit('start', game.game.address);
+		client.emit('start', game.game.address);
 
-		//
+		//game is ongoing in DB
+		await this.gameService.ongoingGame(game.game.id);
+		//adding the game to the ongoing games in socket
+		this.ongoing.push(game);
+		return true;
+	}
+
+	async _recoverGame(game: IGame, player: User) {
+		//they are automatically officially playing
+		this.playing[player.id] = true;
+	}
+
+	async _endGame(game: IGame) {
+		this.gameService.updateGame( {
+			address: game.game.address,
+			winnerId: game.game.winner.id,
+			winnerScore: game.game.winnerScore,
+			loserScore: game.game.loserScore,
+			didInterrupt: false,
+		});
+		this.channels.delete(game.game.address);
+		this.ongoing.splice( this.ongoing.indexOf(game));
+
+		this.playing[game.player1.id] = false;
+		this.playing[game.player2.id] = false;
+	}
+
+	async _updatePlayer(client: Socket, user: User) {
+		//we get all related games with the user
+		let games: AllGames = await this.gameService.allGames(user);
+
+		//we set all pending match for this user
+		games.pending.forEach( game => {
+			if (!this.channels.has(game.address)) {
+				this.channels.set(game.address, {game: game, player1: null, player2: null});
+			}
+			this.channels[game.address].player1 = (game.winner_id == user.id) ? client : this.channels[game.address].player1;
+			this.channels[game.address].player2 = (game.loser_id == user.id) ? client : this.channels[game.address].player2;
+			client.join(game.address);
+		});
+		const pending: Game = games.pending.find(game => game.type == GameType.competitive && game.winner != null && game.loser != null);
+
+		//we check if a game can start with user right now
+		if (games.ongoing) {
+			client.join(games.ongoing.address);
+			this._recoverGame(this.ongoing.find( game => game.game.id == games.ongoing.id), user);
+		}
+		//if competitive is full let's start a pending game
+		else if (pending != undefined) {
+			this._startGame(this.channels[pending.address], client);
+		}
+		//if no waiting competitive and friendly is full let's start a pending game
+		else if (
+			games.pending.find(game => game.type == GameType.competitive) == undefined && 
+			games.pending.find(game => game.winner != null && game.loser != null) != undefined
+		) {
+			this._startGame(this.channels[games.pending.find(game => game.winner != null && game.loser != null).address], client);
+		}
 	}
 
 }

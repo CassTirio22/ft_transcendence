@@ -10,7 +10,7 @@ import axios from "../../service/axios"
 
 
 function Profile() {
-	const {user, profile} = useContext(AuthContext)
+	const {user, profile} = useContext(AuthContext);
 	const [file, setFile] = useState<any | null>(null);
 	const {open_confirm, set_toast} = useContext(PopupContext)
 	const [userName, setUserName] = useState(user.name);

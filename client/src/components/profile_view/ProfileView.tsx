@@ -43,6 +43,7 @@ const ProfileView = (props: Props) => {
 		status: 0,
 		picture: ""
 	})
+
 	const in_friend = props.friends.filter((elem: any) => elem.id == profile.id);
 	
 	const get_profile = async (id: string) => {

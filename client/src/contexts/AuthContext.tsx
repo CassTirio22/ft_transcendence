@@ -11,7 +11,15 @@ const reset_user = {
 	email: "email",
 	token: "",
 	score: 0,
+	custom: "",
+	coins: 0,
 	picture: "https://avatars.dicebear.com/api/avataaars/your-custom-seed.png",
+	store: {
+		balls: [""],
+		pads: [""],
+		selected_ball: "",
+		selected_pad: "",
+	}
 }
 
 export function createCtx() {
@@ -23,7 +31,15 @@ export function createCtx() {
 		email: "email",
 		token: "",
 		score: 0,
+		custom: "",
+		coins: 0,
 		picture: "https://avatars.dicebear.com/api/avataaars/your-custom-seed.png",
+		store: {
+			balls: [""],
+			pads: [""],
+			selected_ball: "",
+			selected_pad: "",
+		}
 	}
 	type UpdateType = Dispatch<SetStateAction<typeof default_user>>;
 
@@ -133,7 +149,13 @@ export function createCtx() {
 				setUser(reset_user);
 				return ""
 			}
-			setUser({...user, email: user.email, token: token});
+			const custom = user.custom == null || user.custom == "{}" ? {
+				balls: [""],
+				pads: [""],
+				selected_ball: "",
+				selected_pad: "",
+			} : JSON.parse(user.custom);
+			setUser({...user, email: user.email, token: token, store: custom});
 			return user.name;
 		}
 

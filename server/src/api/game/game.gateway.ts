@@ -36,10 +36,26 @@ interface Inputs {
 	down: boolean;
 }
 
+interface Update {
+	player_1: Coordonates;
+	player_2: Coordonates;
+	ball: Coordonates;
+}
+
+interface Score {
+	player_1: number;
+	player_2: number;
+}
+
 //essentially will be a huge set of methods with some emissions from every side
 	//players just have to send their position to server and receive => the other position, the ball position 
 //find a solution to manage the game's framerate (thought to use setInterval but doesn't seem perfect)
 class Pong {
+	public address: string;
+
+	public player_1: number;
+	public player_2: number;
+
 	public pos_1: Coordonates;
 	public pos_2: Coordonates;
 	public size_1: Coordonates;
@@ -62,7 +78,7 @@ class Pong {
 	public cooldown: number;
 	public framecount: number;
 
-	constructor(framerate: number, cooldown: number) {
+	constructor(framerate: number, cooldown: number, address: string, player1: number, player2: number) {
 		this.speed = 1 ;
 		this.direction = {x: 1, y: 0};
 		this.size_1 = {x: 10, y: 50};
@@ -80,22 +96,67 @@ class Pong {
 		this.cooldown = cooldown;
 		this.input_1 = null;
 		this.input_2 = null;
+		this.address = address;
+		this.player_1 = player1;
+		this.player_2 = player2;
 	}
 
-	update(): any {
+	//I need the id of the 2 users, i need the address of the game
+	//true == continue
+	update(playing: Map< number, {client: Socket, isPlaying: boolean} >): boolean {
 		//cooldown before starting the game
-		if (!this._check_cooldown()) {
-			return ;
+
+		if (this.score_1 > 2 || this.score_2 > 2) {
+			playing.get(this.player_1).client.to(this.address).emit("end", "");
+			playing.get(this.player_1).client.emit("end", "");
+			return false;
 		}
 
+		this._update_player_position();
+		if (!this._check_cooldown()) {
+			return true;
+		}
+		this._update_ball_position();
 
+
+		const updt: Update = this._create_update_struct();
+		if (playing.has(this.player_1)) {
+			playing.get(this.player_1).client.to(this.address).emit("update", updt);
+			playing.get(this.player_1).client.emit("update", updt);
+		}
+		else if (playing.has(this.player_2)) {
+			playing.get(this.player_2).client.to(this.address).emit("update", updt);
+			playing.get(this.player_2).client.emit("update", updt);
+		}
+		return true;
 	}
 
 
 
 	/* PRIVATE METHODS */
 
-	_
+	_update_player_position() {
+		if (this.input_1.up && !this.input_1.down) {
+			this.pos_1.y += 1;
+		}
+		else if (this.input_1.down && !this.input_1.up) {
+			this.pos_1.y -= 1;
+		}
+		if (this.input_2.up && !this.input_2.down) {
+			this.pos_2.y += 1;
+		}
+		else if (this.input_2.down && !this.input_2.up) {
+			this.pos_2.y -= 1;
+		}
+	}
+
+	_create_update_struct() : Update {
+		return {
+			player_1: this.pos_1,
+			player_2: this.pos_2,
+			ball: this.ball
+		};
+	}
 
 	_update_ball_position() {
 		this._ball_acceleration();
@@ -114,7 +175,13 @@ class Pong {
 	}
 
 	_check_limits(ball: Coordonates): boolean {
-		if (ball.x >= 1000 || ball.x <= 0) {
+		if (ball.x >= 1000 ) {
+			this.score_1++;
+
+			return true;
+		}
+		else if ( ball.x <= 0 ) {
+			this.score_2++;
 			return true;
 		}
 		return false;
@@ -193,7 +260,7 @@ class Pong {
 @WebSocketGateway({namespace: "game"})
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	private channels: Map< string, IGame >;
-	private playing: Map< number, boolean >;
+	private playing: Map< number, {client: Socket, isPlaying: boolean} >;
 	private clients: Map<string, number>;
 	private ongoing: IGame[];
 
@@ -206,7 +273,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private gameService: GameService,
 	) {
 		this.channels = new Map<string, IGame>();
-		this.playing = new Map<number, boolean>;
+		this.playing = new Map<number, {client: Socket, isPlaying: boolean}>;
 		this.clients = new Map<string, number>;
 		this.ongoing = [];
 	}
@@ -218,7 +285,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//check if disconnected
 		setInterval(() => {
 			this.ongoing.forEach( game => {
-				game.pong.update();
+				if (game.pong.update(this.playing)) {
+					this._endGame(game);
+				}
 			})
 		}, 17);
 	}
@@ -230,7 +299,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const user: User = await this.authHelper.getUser(token);
 
 			//we add it to the list of connected clients
-			this.playing.set(user.id, false);
+			this.playing.set(user.id, {client: client, isPlaying: false});
 			this.clients.set(client.id, user.id);
 
 			this._updatePlayer(client, user);
@@ -293,8 +362,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 
 		//they are now officially playing
-		this.playing.set(game.player1.id, true);
-		this.playing.set(game.player2.id, true);
+		this.playing.set(game.player1.id, {client: client, isPlaying: true});
+		this.playing.set(game.player2.id, {client: client, isPlaying: true});
 
 		//telling to anyone joined to this game that it will start
 		client.to(game.game.address).emit('start', game.game.address);
@@ -307,9 +376,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		return true;
 	}
 
-	async _recoverGame(game: IGame, player: User) {
+	async _recoverGame(game: IGame, player: User, client: Socket) {
 		//they are automatically officially playing
-		this.playing.set(player.id, true);
+		this.playing.set(player.id, {client: client, isPlaying: true});
 	}
 
 	async _endGame(game: IGame) {
@@ -323,8 +392,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.channels.delete(game.game.address);
 		this.ongoing.splice( this.ongoing.indexOf(game));
 
-		this.playing.set(game.player1.id, false);
-		this.playing.set(game.player2.id, false);
+		this.playing.set(game.player1.id, {client: this.playing.get(game.player1.id).client, isPlaying: false});
+		this.playing.set(game.player2.id, {client: this.playing.get(game.player2.id).client, isPlaying: false});
 	}
 
 	async _updatePlayer(client: Socket, user: User) {
@@ -339,7 +408,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 					game: game, 
 					player1: await this.userService.userById(game.winner_id), 
 					player2: await this.userService.userById(game.loser_id),
-					pong: new Pong(60, 3)
+					pong: new Pong(60, 3, game.address,game.winner_id, game.loser_id)
 				});
 			}
 			client.join(game.address);
@@ -349,7 +418,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//we check if a game can start with user right now
 		if (games.ongoing && games.ongoing != undefined) {
 			client.join(games.ongoing.address);
-			this._recoverGame(this.ongoing.find( game => game.game.id == games.ongoing.id), user);
+			this._recoverGame(this.ongoing.find( game => game.game.id == games.ongoing.id), user, client);
 		}
 		//if competitive is full let's start a pending game
 		else if (pending != undefined && pending) {

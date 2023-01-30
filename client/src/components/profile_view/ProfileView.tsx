@@ -66,6 +66,7 @@ const ProfileView = (props: Props) => {
 		if (!exist.length) {
 			props.createDirect(id).then((e: any) => {
 				props.fetchMessages({user: user, channel_id: undefined, direct_id: e.payload});
+				navigate(`/conversations${exist.length == 0 ? "" : `/direct/${e.payload}`}`);
 			});
 		} else {
 			props.selectConversation({is_channel: false, id: exist[0].id});

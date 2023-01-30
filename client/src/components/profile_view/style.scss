@@ -97,6 +97,9 @@
                 border-radius: var(--border_radius);
                 box-shadow: var(--box_shadow);
                 margin-right: 20px;
+                overflow: hidden;
+                width: 84px;
+                height: 84px;
     
                 img {
                     width: 84px;

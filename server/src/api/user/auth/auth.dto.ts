@@ -48,3 +48,16 @@ export class IntraRegisterDto {
 	public readonly picture: string;
 
 }
+
+export class TwoFaDto {
+	@IsBoolean()
+	public readonly activate: boolean;
+	
+	@IsString()
+	@IsOptional()
+	public readonly phone: string;
+
+	@IsString()
+	@IsOptional()
+	public readonly code: string;
+}

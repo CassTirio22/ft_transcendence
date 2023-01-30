@@ -7,6 +7,7 @@ import { Button, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { base_url, TOAST_LVL } from '../../constants/constants';
 import axios from "../../service/axios"
+import { useNavigate } from 'react-router-dom';
 
 
 function Profile() {
@@ -16,6 +17,7 @@ function Profile() {
 	const [userName, setUserName] = useState(user.name);
 	const [password, setPassword] = useState("");
 	const [newPassword, setNewPassword] = useState("");
+	const navigate = useNavigate();
 
 	const change_picture = async (file_list: FileList | null) => {
 		if (file_list) {
@@ -99,6 +101,10 @@ function Profile() {
 			<div className='update-container'>
 				<h2>My data</h2>
 				<TextField value={userName} onChange={(e) => setUserName(e.target.value)} fullWidth  className='value-input' label={"User name"} variant="outlined" />
+			</div>
+			<div className='update-container'>
+				<h2>2fa</h2>
+				<Button onClick={() => navigate("/me/profile/2fa-activation")} variant="outlined">{user.phone ? "Deactivate 2fa" : "Activate 2fa"}</Button>
 			</div>
 			<div className='change-password'>
 				<h2>Change password</h2>

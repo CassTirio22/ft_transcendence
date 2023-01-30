@@ -20,7 +20,8 @@ const reset_user = {
 		pads: [""],
 		selected_ball: "",
 		selected_pad: "",
-	}
+	},
+	phone: ""
 }
 
 export function createCtx() {
@@ -40,7 +41,8 @@ export function createCtx() {
 			pads: [""],
 			selected_ball: "",
 			selected_pad: "",
-		}
+		},
+		phone: ""
 	}
 	type UpdateType = Dispatch<SetStateAction<typeof default_user>>;
 
@@ -135,6 +137,7 @@ export function createCtx() {
 		}
 
 		const profile = async (token: string) => {
+			localStorage.clear();
 			set_instance_token(token);
 			localStorage.setItem("token", token);
 			const user = await axios.get("user/profile")

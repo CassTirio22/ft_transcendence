@@ -11,6 +11,7 @@ import Home from './screens/home/Home';
 import Login from './screens/log/login/Login';
 import Register from './screens/log/register/Register';
 import Oauth from './screens/oauth/Oauth';
+import DoubleAuth from './screens/profile/2fa/DoubleAuth';
 import Profile from './screens/profile/Profile';
 import Ranking from './screens/ranking/Ranking';
 import Store from './screens/store/Store';
@@ -33,6 +34,7 @@ return (
 		<Route path='/watch' element={<DevAreWorking/>} />
 		<Route path='/ranking' element={<Ranking/>} />
 		<Route path='/me/profile' element={<Profile/>} />
+		<Route path='/me/profile/2fa-activation' element={<DoubleAuth/>} />
 		<Route path='*' element={<Loading/>} />
 	</Routes>
 );

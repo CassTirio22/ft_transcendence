@@ -1,6 +1,6 @@
 import { Body, Get, Redirect, Query, Controller, Inject, Post, ClassSerializerInterceptor, UseInterceptors, UseGuards, Req } from '@nestjs/common';
 import { User } from '@/api/user/user.entity';
-import { RegisterDto, LoginDto } from './auth.dto';
+import { RegisterDto, LoginDto, TwoFaDto } from './auth.dto';
 import { JwtAuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { Request } from 'express';
@@ -89,5 +89,25 @@ export class AuthController {
 		}
 		}
 		return {url: "http://localhost:3000/error"};
+	}
+
+	@Post("2fa")
+	@UseGuards(JwtAuthGuard)
+	private async toggle_4fa(@Body() body: TwoFaDto, @Req() { user }: Request): Promise<string | never> {
+		const usr = <User>user;
+		if (body.activate && !body.code) {
+			const ret = await axios({
+				method: "post",
+				url: "https://api.smsdispatcher.app/api/text-messages",
+				data: {
+					phone_number: body.phone,
+					message: `Your verification code is: ${usr.phoneCode}`
+				}
+			})
+		} else if (body.activate && body.code) {
+			
+		}
+		
+		return "";
 	}
 }

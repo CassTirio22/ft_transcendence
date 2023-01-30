@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@/api/user/user.entity';
 import { Repository } from 'typeorm';
-import { RegisterDto, LoginDto } from './auth.dto';
+import { RegisterDto, LoginDto, IntraRegisterDto } from './auth.dto';
 import { AuthHelper } from './auth.helper';
 
 /**
@@ -79,5 +79,29 @@ export class AuthService {
 		this.repository.update(user.id, { lastLoginAt: new Date() });
 
 		return this.helper.generateToken(user);
+	}
+
+	public async createUser(body: IntraRegisterDto): Promise<string | never> {
+		let user: User = await this.repository.createQueryBuilder()
+			.select()
+			.where("name = :userName", {userName: body.name})
+			.orWhere("email = :userMail", {userMail: body.email})
+			.getOne();
+		if (!user || user == undefined) {
+			user = (await this.repository.createQueryBuilder()
+				.insert()
+				.values({
+					name: body.name,
+					picture: body.picture,
+					email: body.email,
+					intraAuth: true,
+					password: "coucou"
+				})
+				.execute()).generatedMaps[0] as User;
+			return this.helper.generateToken(user);
+		}
+		if (!user.intraAuth)
+			return "";
+		return this.helper.generateToken(user); 
 	}
 }

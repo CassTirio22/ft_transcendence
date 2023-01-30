@@ -1,9 +1,11 @@
-import { Body, Controller, Inject, Post, ClassSerializerInterceptor, UseInterceptors, UseGuards, Req } from '@nestjs/common';
+import { Body, Get, Redirect, Query, Controller, Inject, Post, ClassSerializerInterceptor, UseInterceptors, UseGuards, Req } from '@nestjs/common';
 import { User } from '@/api/user/user.entity';
 import { RegisterDto, LoginDto } from './auth.dto';
 import { JwtAuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { Request } from 'express';
+import axios from 'axios';
+import { UserService } from '../user.service';
 
 /**
  * A Controller class for authentification.
@@ -48,4 +50,46 @@ export class AuthController {
 	private refresh(@Req() { user }: Request): Promise<string | never> {
 		return this.service.refresh(<User>user);
 	}
+
+	// @Get("oauth")
+	// @Redirect('http://localhost:3000', 302)
+	// async auth(@Query() query) {
+	// 	console.log(query, query.code);
+	// 	const ret = await axios({
+	// 	method: "post",
+	// 	url: "https://api.intra.42.fr/oauth/token",
+	// 	data: {
+	// 		grant_type: "authorization_code",
+	// 		client_id: "u-s4t2ud-1eaad37c69601826513dcbd2aad3181a977d8eeedfa631117021f93c40e84db0",
+	// 		client_secret: "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",
+	// 		code: query.code,
+	// 		redirect_uri: "http://localhost:5000/auth/oauth",
+	// 		state: "coucou"
+	// 	}
+	// 	})
+	// 	.then(e => e.data)
+	// 	.catch(e => {console.log(e);return null})
+	// 	if (ret) {
+	// 	const user = await axios({
+	// 		method: "get",
+	// 		url: "https://api.intra.42.fr/v2/me",
+	// 		headers: {
+	// 		"Authorization": `Bearer ${ret.access_token}`
+	// 		}
+	// 	}).then(e => e.data)
+	// 	.catch(e => {console.log(e);return null})
+	// 	if (user) {
+	// 		const body = {
+	// 			name: user.login,
+	// 			email: user.email,
+	// 			picture: user.image.link
+	// 		}
+	// 		const token = await this.service.createUser(body);
+	// 		if (token == "")
+	// 			return {url: `http://localhost:3000/#/login`};
+	// 		return {url: `http://localhost:3000/#/oauth?token=${token}`};
+	// 	}
+	// 	}
+	// 	return {url: "http://localhost:3000/error"};
+	// }
 }

@@ -52,7 +52,8 @@ export class UserService {
 			.set( {
 				name: (body.name ? body.name : user.name), 
 				password: (body.password ? this.authHelper.encodePassword(body.password) : user.password),
-				email: (body.email ? body.email : user.email)
+				email: (body.email ? body.email : user.email),
+				picture: (body.picture ? body.picture : user.picture)
 			} )
 			.where("id = :userId", {userId: user.id})
 			.returning('*')

@@ -1,5 +1,6 @@
 import { Trim } from 'class-sanitizer';
-import { IsBoolean, IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsOptional, IsString, IsUrl, MinLength } from 'class-validator';
+import { Url } from 'url';
 
 /**
  * Data Transfer Object for User registration.
@@ -33,4 +34,17 @@ export class LoginDto {
 
 	@IsString()
 	public readonly password: string;
+}
+
+export class IntraRegisterDto {
+	@Trim()
+	@IsEmail()
+	public readonly email: string;
+
+	@IsString()
+	public readonly name: string;
+
+	@IsString()
+	public readonly picture: string;
+
 }

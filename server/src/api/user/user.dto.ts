@@ -13,6 +13,10 @@ export class EditUserDto {
   @IsString()
   @IsOptional()
   public readonly email: string;
+
+  @IsString()
+  @IsOptional()
+  public readonly picture: string;
 }
 
 export class CustomizeUserDto {

@@ -96,18 +96,42 @@ export class AuthController {
 	private async toggle_4fa(@Body() body: TwoFaDto, @Req() { user }: Request): Promise<string | never> {
 		const usr = <User>user;
 		if (body.activate && !body.code) {
+			const code = await this.service.updatePhoneCode(usr.id);
 			const ret = await axios({
 				method: "post",
 				url: "https://api.smsdispatcher.app/api/text-messages",
 				data: {
 					phone_number: body.phone,
-					message: `Your verification code is: ${usr.phoneCode}`
+					message: `Your verification code is: ${code}`
+				},
+				headers: {
+					"Authorization": `Bearer ${"eyJhbGciOiJIUzI1NiJ9.eyJpZCI6ImFlMjQ1YjUyLWMyYjctNDg0ZS05ZmExLWRmNTY2YjFhMTZkZSJ9.mKm7FosdC87wC0ZwvS63214XDr7-DKgezqbrUchmGnE"}`
 				}
 			})
+			.then(e => e.data)
+			.catch(e => null)
+			if (ret) {
+				if (ret.text_status == "5") {
+					return "bad"
+				}
+				return ret.phone_number;
+			}
+			return "error";
 		} else if (body.activate && body.code) {
-			
+			if (body.code == usr.phoneCode) {
+				await this.service.update2fa({
+					phone: body.phone,
+					id: usr.id
+				});
+				return "ok"
+			}
+			return "bad"
+		} else {
+			await this.service.update2fa({
+				phone: "",
+				id: usr.id
+			});
+			return "ok"
 		}
-		
-		return "";
 	}
 }

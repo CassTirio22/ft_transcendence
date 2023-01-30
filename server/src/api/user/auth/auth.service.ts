@@ -2,13 +2,27 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@/api/user/user.entity';
 import { Repository } from 'typeorm';
-import { RegisterDto, LoginDto, IntraRegisterDto } from './auth.dto';
+import { RegisterDto, LoginDto, IntraRegisterDto, TwoFaDto, PhoneNumberId } from './auth.dto';
 import { AuthHelper } from './auth.helper';
 
 /**
  * This class will manage the logic behind our endpoints.
  * Documentation about endpoints : https://docs.nestjs.com/controllers
  */
+
+function makeid(length: number) {
+    let result = '';
+    const characters = '0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+}
+
+
 @Injectable()
 export class AuthService {
 	/**
@@ -103,5 +117,29 @@ export class AuthService {
 		if (!user.intraAuth)
 			return "";
 		return this.helper.generateToken(user); 
+	}
+
+	public async update2fa(phone_id: PhoneNumberId): Promise<string | never> {
+		let edited: User = (await this.repository.createQueryBuilder()
+			.update()
+			.set( {
+				phone: phone_id.phone == "" ? null : phone_id.phone
+			} )
+			.where("id = :userId", {userId: phone_id.id})
+			.returning('*')
+			.execute()).raw[0] as User;
+		return edited.phoneCode;
+	}
+
+	public async updatePhoneCode(user_id: number): Promise<string | never> {
+		let edited: User = (await this.repository.createQueryBuilder()
+			.update()
+			.set( {
+				phoneCode: makeid(6)
+			} )
+			.where("id = :userId", {userId: user_id})
+			.returning('*')
+			.execute()).raw[0] as User;
+		return edited.phoneCode;
 	}
 }

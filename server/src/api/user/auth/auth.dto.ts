@@ -1,5 +1,5 @@
 import { Trim } from 'class-sanitizer';
-import { IsBoolean, IsEmail, IsOptional, IsString, IsUrl, MinLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsOptional, IsString, IsUrl, MinLength, IsNumber } from 'class-validator';
 import { Url } from 'url';
 
 /**
@@ -60,4 +60,12 @@ export class TwoFaDto {
 	@IsString()
 	@IsOptional()
 	public readonly code: string;
+}
+
+export class PhoneNumberId {
+	@IsNumber()
+	public readonly id: number;
+	
+	@IsString()
+	public readonly phone: string;
 }

@@ -72,6 +72,16 @@ function Profile() {
 		}
 	}
 
+	const deactivate_2fa = async () => {
+		const ret = await axios.post("/auth/2fa", {
+            activate: false,
+            phone: ""
+        })
+        .then(e => e.data)
+        .catch(e => null)
+		profile(user.token);
+	}
+
 	const cancel = () => {
 		setUserName(user.name);
 		setPassword("");
@@ -104,7 +114,10 @@ function Profile() {
 			</div>
 			<div className='update-container'>
 				<h2>2fa</h2>
-				<Button onClick={() => navigate("/me/profile/2fa-activation")} variant="outlined">{user.phone ? "Deactivate 2fa" : "Activate 2fa"}</Button>
+				{
+					user.phone ? <p>Phone in use: <span>{user.phone}</span></p> : null
+				}
+				<Button onClick={() => user.phone ? deactivate_2fa() : navigate("/me/profile/2fa-activation")} variant="outlined">{user.phone ? "Deactivate 2fa" : "Activate 2fa"}</Button>
 			</div>
 			<div className='change-password'>
 				<h2>Change password</h2>

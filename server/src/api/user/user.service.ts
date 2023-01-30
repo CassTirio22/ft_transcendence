@@ -29,6 +29,13 @@ export class UserService {
 		private authHelper: AuthHelper
 	){}	
 
+	public async findByName(name: string): Promise<User | never> {
+		return await this.repository.createQueryBuilder()
+			.select()
+			.where("name = :userName", {userName: name})
+			.getOne();
+	}
+
 	public async edit(body: EditUserDto, req: Request): Promise<string | never> {
 		const user: User = <User>req.user;
 

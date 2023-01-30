@@ -84,6 +84,10 @@ class Pong {
 
 	/* PRIVATE METHODS */
 
+	_ball_acceleration() {
+		this.speed *= 0.0001;
+	}
+
 	_check_borders(ball: Coordonates, size: Coordonates): boolean {
 		if (ball.y + (size.y / 2) >= 1000 || ball.y - (size.y / 2) <= 0) {
 			return true;
@@ -96,6 +100,13 @@ class Pong {
 			return true;
 		}
 		return false;
+	}
+
+	_bounce_border() {
+		this.direction = {
+			x: this.direction.x,
+			y: -this.direction.y
+		};
 	}
 
 	//left = top left, right = down right
@@ -120,6 +131,16 @@ class Pong {
     	else if (player.down_right.y > ball.top_left.y || ball.down_right.y > player.top_left.y)
         	return false;
     return true;
+	}
+
+	_reset_ball(): any {
+		this.framecount = 0;
+		this.speed = 1;
+		let x: number = Math.random() * 2 - 1;
+		if (x === 0) {
+  			x = Math.random() < 0.5 ? -1 : 1;
+		}
+		this.direction = {x: x, y: 0};
 	}
 
 	_check_cooldown(): boolean {

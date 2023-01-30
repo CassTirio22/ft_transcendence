@@ -78,6 +78,13 @@ export class UserService {
 			.getOne());
 	}
 
+	public async userById(userId: number): Promise<User | never> {
+		return (await this.repository.createQueryBuilder()
+			.select()
+			.where("id = :userId", {userId: userId})
+			.getOne());
+	}
+
 	public async ladder(): Promise<User[] | never> {
 		return (await this.repository.createQueryBuilder('user')
 			.select()

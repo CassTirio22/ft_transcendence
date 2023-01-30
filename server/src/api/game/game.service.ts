@@ -11,7 +11,7 @@ import { MemberStatus } from '../message/channel/member/member.entity';
 import { generate } from 'shortid';
 
 
-export interface AllGames {
+export interface IGames {
 	done: Game[],
 	pending: Game[],
 	ongoing: Game,
@@ -164,7 +164,7 @@ export class GameService {
 			.getMany();
 	}
 
-	public async allGames(user: User): Promise< AllGames | never > {
+	public async allGames(user: User): Promise< IGames | never > {
 		const games: Game[] = await this.gameRepository.createQueryBuilder("game")
 			.innerJoinAndSelect("game.winner", "winner")
 			.innerJoinAndSelect("game.loser", "loser")
@@ -172,19 +172,19 @@ export class GameService {
 			.where(":player IN (winner.id, loser.id)", {player: user.id})
 			.orderBy("game.date", 'ASC')
 			.getMany();
-		let allGames: AllGames = {done: [], pending: [], ongoing: null};
+		let all: IGames = {done: [], pending: [], ongoing: null};
 		games.forEach( game => {
 			if (game.status == GameStatus.done) {
-				allGames.done.push(game);
+				all.done.push(game);
 			}
 			else if (game.status == GameStatus.ongoing) {
-				allGames.ongoing = game;
+				all.ongoing = game;
 			}
 			else if (game.status == GameStatus.pending/* && game.winner_id == user.id*/) {
-				allGames.pending.push(game);
+				all.pending.push(game);
 			}
 		} )
-		return allGames;
+		return all;
 	}
 
 	public async pendingGames(): Promise<Game[] | never> {

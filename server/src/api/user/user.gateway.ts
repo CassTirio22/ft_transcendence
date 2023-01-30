@@ -181,13 +181,13 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		const users: User[] = await this.userService.ladder();
 		setInterval(async () => {
 			//managing disconnection part
-			this.clients.forEach((async (client) => {
+			for (let index = 0; index < this.clients.length; index++) {
+				const client: Socket = this.clients[index];
 				if (client.disconnected) {
 					this.clients = await this.util.userDisconnection(this.clients, users.find( (obj) => (obj.socket == client.id) ), client);
 					client.rooms.forEach( room => { client.leave(room);} )
 				}
-			}));
-
+			};
 			//managing evolution of member status over time
 			await this.memberService.updateStatus();
 			const members: {socket: string, member: Member}[] = await this.memberService.membersFromSockets(this.clients.map( (socket) => socket.id));

@@ -1,6 +1,6 @@
 import { JoinGameDto, CreateGameDto } from './game.dto';
 import { JwtAuthGuard } from './../user/auth/auth.guard';
-import { GameService, AllGames } from './game.service';
+import { GameService, IGames } from './game.service';
 import { Game } from './game.entity'
 import { User } from '../user/user.entity'
 import { Request } from 'express';
@@ -41,7 +41,7 @@ export class GameController {
 	
 	@Get('all')
 	@UseGuards(JwtAuthGuard)
-	private allGames(@Req() { user }: Request): Promise< AllGames | never > {
+	private allGames(@Req() { user }: Request): Promise< IGames | never > {
 		return this.service.allGames(<User>user);
 	}
 }

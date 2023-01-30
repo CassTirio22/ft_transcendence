@@ -16,6 +16,7 @@ import { Socket } from "socket.io";
 
 interface IGame {
 	game: Game;
+	pong: Pong;
 	player1: User;
 	player2: User;
 }
@@ -30,28 +31,36 @@ interface Corners {
 	down_right: Coordonates;
 }
 
+interface Inputs {
+	up: boolean;
+	down: boolean;
+}
+
 //essentially will be a huge set of methods with some emissions from every side
 	//players just have to send their position to server and receive => the other position, the ball position 
 //find a solution to manage the game's framerate (thought to use setInterval but doesn't seem perfect)
 class Pong {
-	private pos_1: Coordonates;
-	private pos_2: Coordonates;
-	private size_1: Coordonates;
-	private size_2: Coordonates;
-	private old_1: Coordonates;
-	private old_2: Coordonates;
-	private ball: Coordonates;
-	private old_ball: Coordonates;
-	private ball_size: Coordonates;
-	private direction: Coordonates;
-	private speed: number;
+	public pos_1: Coordonates;
+	public pos_2: Coordonates;
+	public size_1: Coordonates;
+	public size_2: Coordonates;
+	public old_1: Coordonates;
+	public old_2: Coordonates;
+	public ball: Coordonates;
+	public old_ball: Coordonates;
+	public ball_size: Coordonates;
+	public direction: Coordonates;
+	public speed: number;
 
-	private score_1: number;
-	private score_2: number;
+	public input_1: Inputs;
+	public input_2: Inputs;
 
-	private framerate: number;
-	private cooldown: number;
-	private framecount: number;
+	public score_1: number;
+	public score_2: number;
+
+	public framerate: number;
+	public cooldown: number;
+	public framecount: number;
 
 	constructor(framerate: number, cooldown: number) {
 		this.speed = 1 ;
@@ -69,6 +78,8 @@ class Pong {
 		this.score_2 = 0;
 		this.framerate = framerate;
 		this.cooldown = cooldown;
+		this.input_1 = null;
+		this.input_2 = null;
 	}
 
 	update(): any {
@@ -83,6 +94,13 @@ class Pong {
 
 
 	/* PRIVATE METHODS */
+
+	_
+
+	_update_ball_position() {
+		this._ball_acceleration();
+		this._sum_coordonates(this.ball, this.direction);
+	}
 
 	_ball_acceleration() {
 		this.speed *= 0.0001;
@@ -107,6 +125,13 @@ class Pong {
 			x: this.direction.x,
 			y: -this.direction.y
 		};
+	}
+
+	_bounce_player() {
+		this.direction = {
+			x: -this.direction.x,
+			y: -this.direction.y
+		}
 	}
 
 	//left = top left, right = down right
@@ -155,7 +180,15 @@ class Pong {
 		return this.framecount / this.framerate;
 	}
 
+	_sum_coordonates(A: Coordonates, B: Coordonates): Coordonates {
+		return {
+			x: A.x + B.x,
+			y: A.y + B.y
+		}
+	}
 }
+
+
 
 @WebSocketGateway({namespace: "game"})
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -183,7 +216,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	async afterInit(): Promise<any | never> {
 		//loop all 10secs
 		//check if disconnected
-		// setInterval(() => {}, 1000);
+		setInterval(() => {
+			this.ongoing.forEach( game => {
+				game.pong.update();
+			})
+		}, 17);
 	}
 
     async handleConnection(client: Socket, args: any): Promise<any | never> {
@@ -228,6 +265,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	async handleUpdate(client: Socket) {
 		const user: User = await this.userService.userById(this.clients.get(client.id))
 		this._updatePlayer(client, user);
+	}
+
+	@SubscribeMessage("input")
+	async handleInput(client: Socket, data: Inputs) {
+		if (this.clients.has(client.id) && this.playing.get(this.clients.get(client.id))) {
+			for (let index = 0; index < this.ongoing.length; index++) {
+				if (this.ongoing[index].player1.id == this.clients.get(client.id)) {
+					this.ongoing[index].pong.input_1 = data;
+				}
+				else if (this.ongoing[index].player2.id == this.clients.get(client.id)) {
+					this.ongoing[index].pong.input_2 = data;
+				}
+			}
+		}
 	}
 
 	async _startGame(game: IGame, client: Socket): Promise<boolean> {
@@ -287,7 +338,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				this.channels.set(game.address, {
 					game: game, 
 					player1: await this.userService.userById(game.winner_id), 
-					player2: await this.userService.userById(game.loser_id)
+					player2: await this.userService.userById(game.loser_id),
+					pong: new Pong(60, 3)
 				});
 			}
 			client.join(game.address);

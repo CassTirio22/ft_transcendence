@@ -78,6 +78,12 @@ export class User extends BaseEntity {
 	@Column({type: 'boolean', default: false})
 	public intraAuth: boolean;
 
+	@Column({type: 'varchar', default: null})
+	public phone: string;
+
+	@Column({type: 'varchar', default: null})
+	public phoneCode: string;
+
 	@OneToMany(type => Game, game => game.winner)
 	won: Game[];
 

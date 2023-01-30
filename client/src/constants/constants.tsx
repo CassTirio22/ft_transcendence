@@ -26,3 +26,4 @@ export const CHANNEL_LVL = {
 
 export const base_url = "http://localhost:5000";
 export const socket_url = "ws://localhost:5000";
+export const intra_url = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-1eaad37c69601826513dcbd2aad3181a977d8eeedfa631117021f93c40e84db0&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fauth%2Foauth&response_type=code&scope=public";

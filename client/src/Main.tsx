@@ -10,6 +10,7 @@ import GameMatching from './screens/game_matching/GameMatching';
 import Home from './screens/home/Home';
 import Login from './screens/log/login/Login';
 import Register from './screens/log/register/Register';
+import Oauth from './screens/oauth/Oauth';
 import Profile from './screens/profile/Profile';
 import Ranking from './screens/ranking/Ranking';
 import Store from './screens/store/Store';

@@ -139,7 +139,7 @@ const ProfileView = (props: Props) => {
 					<div className='profile'>
 						<div className='profile-top'>
 							<div className='img-container'>
-							<img src={profile.picture ? base_url + profile.picture : `https://avatars.dicebear.com/api/adventurer/${profile.name}.svg`} />
+							<img src={profile.picture ? profile.picture : `https://avatars.dicebear.com/api/adventurer/${profile.name}.svg`} />
 							</div>
 							<div className='profile-top-right'>
 								<div className='profile-name-status'>

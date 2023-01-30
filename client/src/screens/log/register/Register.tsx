@@ -2,6 +2,7 @@ import { Button, TextField } from '@mui/material';
 import React, { useContext, useState } from 'react'
 import { AuthContext } from '../../..';
 import logo from "../../../assets/images/test.png"
+import { intra_url } from '../../../constants/constants';
 
 function AlreadyRegistered() {
 	return (
@@ -58,6 +59,7 @@ function RegistrationForm() {
 					<TextField size='small' fullWidth autoComplete='username' label='Username' type="username" value={userName} onChange={(e) => setUserName(e.target.value)} />
 					<TextField size='small' fullWidth autoComplete='password' onKeyDown={handleKeyDown} label='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 				</form>
+				<Button variant='outlined' href={intra_url}>Register with intra</Button>
 				<Button disabled={!validateEntry()} variant="contained" onClick={handleSubmit} fullWidth >Sign in</Button>
 			</div>
 		</section>

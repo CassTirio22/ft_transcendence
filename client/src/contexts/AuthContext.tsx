@@ -1,6 +1,7 @@
 import React, { Dispatch, PropsWithChildren, SetStateAction, useEffect }  from 'react'
 import { createContext, useState } from 'react';
 import { isCompositeComponent } from 'react-dom/test-utils';
+import { base_url } from '../constants/constants';
 import axios, { set_instance_token, unset_instance_token } from "../service/axios"
 
 const reset_user = {
@@ -155,7 +156,7 @@ export function createCtx() {
 				selected_ball: "",
 				selected_pad: "",
 			} : JSON.parse(user.custom);
-			setUser({...user, email: user.email, token: token, store: custom});
+			setUser({...user, email: user.email, token: token, store: custom, picture: !user.picture ?  null : user.picture.startsWith("https") ?  user.picture : base_url + user.picture});
 			return user.name;
 		}
 

@@ -20,11 +20,119 @@ interface IGame {
 	player2: User;
 }
 
+interface Coordonates {
+	x: number;
+	y: number;
+}
+
+interface Corners {
+	top_left: Coordonates;
+	down_right: Coordonates;
+}
+
 //essentially will be a huge set of methods with some emissions from every side
 	//players just have to send their position to server and receive => the other position, the ball position 
 //find a solution to manage the game's framerate (thought to use setInterval but doesn't seem perfect)
 class Pong {
-	constructor() {}
+	private pos_1: Coordonates;
+	private pos_2: Coordonates;
+	private size_1: Coordonates;
+	private size_2: Coordonates;
+	private old_1: Coordonates;
+	private old_2: Coordonates;
+	private ball: Coordonates;
+	private old_ball: Coordonates;
+	private ball_size: Coordonates;
+	private direction: Coordonates;
+	private speed: number;
+
+	private score_1: number;
+	private score_2: number;
+
+	private framerate: number;
+	private cooldown: number;
+	private framecount: number;
+
+	constructor(framerate: number, cooldown: number) {
+		this.speed = 1 ;
+		this.direction = {x: 1, y: 0};
+		this.size_1 = {x: 10, y: 50};
+		this.size_2 = {x: 10, y: 50};
+		this.pos_1 = {x: 100, y: 500};
+		this.pos_2 = {x: 900, y: 500};
+		this.old_1 = {x: 100, y: 500};
+		this.old_2 = {x: 900, y: 500};
+		this.ball_size = {x: 10, y: 10};
+		this.ball = {x: 500, y: 500};
+		this.old_ball = {x: 500, y: 500};
+		this.score_1 = 0;
+		this.score_2 = 0;
+		this.framerate = framerate;
+		this.cooldown = cooldown;
+	}
+
+	update(): any {
+		//cooldown before starting the game
+		if (!this._check_cooldown()) {
+			return ;
+		}
+
+
+	}
+
+
+
+	/* PRIVATE METHODS */
+
+	_check_borders(ball: Coordonates, size: Coordonates): boolean {
+		if (ball.y + (size.y / 2) >= 1000 || ball.y - (size.y / 2) <= 0) {
+			return true;
+		}
+		return false;
+	}
+
+	_check_limits(ball: Coordonates): boolean {
+		if (ball.x >= 1000 || ball.x <= 0) {
+			return true;
+		}
+		return false;
+	}
+
+	//left = top left, right = down right
+	_get_corners(pos: Coordonates, size: Coordonates): Corners {
+		return (
+			{top_left: {
+				x: pos.x - (size.x / 2),
+				y: pos.y - (size.y / 2)
+			},
+			down_right: {
+				x: pos.x + (size.x / 2),
+				y: pos.y + (size.y / 2)
+			}
+		});
+	}
+
+	_check_rectangle_intersection(player: Corners, ball: Corners): boolean {
+    	// If one rectangle is on left side of other
+		if (player.top_left.x > ball.down_right.x || ball.top_left.x > player.down_right.x)
+        	return false;
+   		// If one rectangle is above other
+    	else if (player.down_right.y > ball.top_left.y || ball.down_right.y > player.top_left.y)
+        	return false;
+    return true;
+	}
+
+	_check_cooldown(): boolean {
+		if (this._seconds_by_frames() < this.cooldown) {
+			this.framecount++;
+			return false;
+		}
+		return true;
+	}
+
+	_seconds_by_frames(): number {
+		return this.framecount / this.framerate;
+	}
 
 }
 

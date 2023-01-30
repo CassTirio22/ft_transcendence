@@ -29,7 +29,7 @@ export class AuthService {
 	 * @returns Returns a the new user or an exception.
 	 */
 	public async register(body: RegisterDto): Promise<User | never> {
-		const { name, email, password }: RegisterDto = body;
+		const { name, email, password, intraAuth }: RegisterDto = body;
 		let user: User = await this.repository.findOne({ where: [{ email }, { name }] });
 
 		if (user) {
@@ -41,6 +41,7 @@ export class AuthService {
 		user.name = name;
 		user.email = email;
 		user.password = this.helper.encodePassword(password);
+		user.intraAuth = intraAuth;
 
 		return this.repository.save(user);
 	}

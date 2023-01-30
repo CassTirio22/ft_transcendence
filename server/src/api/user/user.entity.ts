@@ -75,6 +75,9 @@ export class User extends BaseEntity {
 	@Column({type: 'jsonb', nullable: true})
 	public custom: any;
 
+	@Column({type: 'boolean', default: false})
+	public intraAuth: boolean;
+
 	@OneToMany(type => Game, game => game.winner)
 	won: Game[];
 

@@ -1,5 +1,5 @@
 import { Trim } from 'class-sanitizer';
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 
 /**
  * Data Transfer Object for User registration.
@@ -16,6 +16,10 @@ export class RegisterDto {
 
 	@IsString()
 	public readonly name: string;
+
+	@IsBoolean()
+	@IsOptional()
+	public readonly intraAuth: boolean;
 }
 
 /**

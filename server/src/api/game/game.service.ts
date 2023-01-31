@@ -69,12 +69,12 @@ export class GameService {
 
 
 	public async create(body: CreateGameDto, user: User) : Promise<Game | never> {
-		let game: Game = await this.gameRepository.createQueryBuilder()
+		let game: Game =  await this.gameRepository.createQueryBuilder()
 			.select()
 			.where(new Brackets( query => { query
-				.where("status = :gameStatus", {gameStatus: GameStatus.ongoing})
+				.where("status = :gameOngoing", {gameOngoing: GameStatus.ongoing})
 				.orWhere(new Brackets( query => { query
-					.where("status = :gameStatus", {gameStatus: GameStatus.pending})
+					.where("status = :gamePending", {gamePending: GameStatus.pending})
 					.andWhere("type = :gameType", {gameType: GameType.competitive})
 				}))
 			}))
@@ -84,7 +84,7 @@ export class GameService {
 			}))
 			.getOne();
 		if (game) {
-			throw new HttpException('Conflict. You seem to be already playing a game or being in a matchmaking.', HttpStatus.CONFLICT);
+			return game;
 		}
 		game =  (await this.gameRepository.createQueryBuilder()
 			.insert()

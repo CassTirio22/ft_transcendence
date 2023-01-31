@@ -88,7 +88,7 @@ class Pong {
 		this.pos_2 = {x: 900, y: 500};
 		this.old_1 = {x: 100, y: 500};
 		this.old_2 = {x: 900, y: 500};
-		this.ball_size = {x: 10, y: 10};
+		this.ball_size = {x: 14, y: 14};
 		this.ball = {x: 500, y: 500};
 		this.old_ball = {x: 500, y: 500};
 		this.score_1 = 0;

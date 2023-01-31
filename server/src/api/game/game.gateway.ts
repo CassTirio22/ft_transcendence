@@ -108,8 +108,14 @@ class Pong {
 		//cooldown before starting the game
 
 		if (this.score_1 > 2 || this.score_2 > 2) {
-			playing.get(this.player_1).client.to(this.address).emit("end", "");
-			playing.get(this.player_1).client.emit("end", "");
+			if (playing.has(this.player_1)) {
+				playing.get(this.player_1).client.to(this.address).emit("end", "");
+				playing.get(this.player_1).client.emit("end", "");
+			}
+			else if (playing.has(this.player_2)) {
+				playing.get(this.player_2).client.to(this.address).emit("end", "");
+				playing.get(this.player_2).client.emit("end", "");
+			}
 			return false;
 		}
 

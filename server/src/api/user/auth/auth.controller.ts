@@ -1,6 +1,6 @@
 import { Body, Get, Redirect, Query, Controller, Inject, Post, ClassSerializerInterceptor, UseInterceptors, UseGuards, Req } from '@nestjs/common';
 import { User } from '@/api/user/user.entity';
-import { RegisterDto, LoginDto, TwoFaDto } from './auth.dto';
+import { RegisterDto, LoginDto, TwoFaDto, LoginTwoFaOauthDto } from './auth.dto';
 import { JwtAuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { Request } from 'express';
@@ -38,6 +38,11 @@ export class AuthController {
 	@Post('login')
 	private login(@Body() body: LoginDto): Promise<string | never> {
 		return this.service.login(body);
+	}
+
+	@Post('login-2fa-oauth')
+	private login_2fa_oauth(@Body() body: LoginTwoFaOauthDto): Promise<string | never> {
+		return this.service.login_2fa_oauth(body);
 	}
 
 	/**
@@ -83,9 +88,12 @@ export class AuthController {
 				picture: user.image.link
 			}
 			const token = await this.service.createUser(body);
-			if (token == "")
+			if (token[0] == "")
 				return {url: `http://localhost:3000/#/login`};
-			return {url: `http://localhost:3000/#/oauth?token=${token}`};
+			if (!token[1]) {
+				return {url: `http://localhost:3000/#/oauth-2fa?token=${token[0]}`};
+			}
+			return {url: `http://localhost:3000/#/oauth?token=${token[0]}`};
 		}
 		}
 		return {url: "http://localhost:3000/error"};

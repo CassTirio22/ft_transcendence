@@ -84,6 +84,9 @@ export class User extends BaseEntity {
 	@Column({type: 'varchar', default: null})
 	public phoneCode: string;
 
+	@Column({type: 'varchar', default: null})
+	public twoFaOauthRandom: string;
+
 	@OneToMany(type => Game, game => game.winner)
 	won: Game[];
 

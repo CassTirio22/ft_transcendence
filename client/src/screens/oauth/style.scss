@@ -1,0 +1,16 @@
+
+
+#oauth-2fa {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+
+    .center-div {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+}

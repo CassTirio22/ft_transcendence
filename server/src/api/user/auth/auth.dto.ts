@@ -40,6 +40,15 @@ export class LoginDto {
 	public readonly code: string;
 }
 
+export class LoginTwoFaOauthDto {
+
+	@IsString()
+	public readonly token: string;
+
+	@IsString()
+	public readonly code: string;
+}
+
 export class IntraRegisterDto {
 	@Trim()
 	@IsEmail()

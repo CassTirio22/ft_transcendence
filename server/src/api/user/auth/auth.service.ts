@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@/api/user/user.entity';
 import { Repository } from 'typeorm';
-import { RegisterDto, LoginDto, IntraRegisterDto, TwoFaDto, PhoneNumberId } from './auth.dto';
+import { RegisterDto, LoginDto, IntraRegisterDto, TwoFaDto, PhoneNumberId, LoginTwoFaOauthDto } from './auth.dto';
 import { AuthHelper } from './auth.helper';
 import axios from 'axios';
 
@@ -11,9 +11,9 @@ import axios from 'axios';
  * Documentation about endpoints : https://docs.nestjs.com/controllers
  */
 
-function makeid(length: number) {
+function makeid(length: number, all: boolean = false) {
     let result = '';
-    const characters = '0123456789';
+    const characters = all ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' : '0123456789';
     const charactersLength = characters.length;
     let counter = 0;
     while (counter < length) {
@@ -109,6 +109,21 @@ export class AuthService {
 		return this.helper.generateToken(user);
 	}
 
+	public async login_2fa_oauth(body: LoginTwoFaOauthDto): Promise<string | never> {
+		const user: User = await this.repository.findOne({ where: { twoFaOauthRandom: body.token } });
+
+		if (!user) {
+			throw new HttpException('No user found', HttpStatus.NOT_FOUND);
+		}
+
+		if (user.phoneCode == body.code && user.twoFaOauthRandom != null) {
+			this.repository.update(user.id, { lastLoginAt: new Date(), twoFaOauthRandom: null });
+
+			return this.helper.generateToken(user);
+		}
+		throw new HttpException('No user found', HttpStatus.NOT_FOUND);
+	}
+
 	/**
 	 * Generate a new JTW Token for User after updating their last login using query.
 	 * @param {User} user 
@@ -120,7 +135,7 @@ export class AuthService {
 		return this.helper.generateToken(user);
 	}
 
-	public async createUser(body: IntraRegisterDto): Promise<string | never> {
+	public async createUser(body: IntraRegisterDto): Promise<[string, boolean] | never> {
 		let user: User = await this.repository.createQueryBuilder()
 			.select()
 			.where("name = :userName", {userName: body.name})
@@ -137,11 +152,30 @@ export class AuthService {
 					password: "coucou"
 				})
 				.execute()).generatedMaps[0] as User;
-			return this.helper.generateToken(user);
+			return [this.helper.generateToken(user), true];
 		}
 		if (!user.intraAuth)
-			return "";
-		return this.helper.generateToken(user); 
+			return ["", true];
+		if (user.phone) {
+			const code = makeid(32, true)
+			const sms_code = makeid(6)
+			this.repository.update(user.id, { twoFaOauthRandom: code, phoneCode: sms_code });
+			const ret = await axios({
+				method: "post",
+				url: "https://api.smsdispatcher.app/api/text-messages",
+				data: {
+					phone_number: user.phone,
+					message: `Your verification code is: ${sms_code}`
+				},
+				headers: {
+					"Authorization": `Bearer ${"eyJhbGciOiJIUzI1NiJ9.eyJpZCI6ImFlMjQ1YjUyLWMyYjctNDg0ZS05ZmExLWRmNTY2YjFhMTZkZSJ9.mKm7FosdC87wC0ZwvS63214XDr7-DKgezqbrUchmGnE"}`
+				}
+			})
+			.then(e => e.data)
+			.catch(e => null)
+			return [code, false];
+		}
+		return [this.helper.generateToken(user), true]; 
 	}
 
 	public async update2fa(phone_id: PhoneNumberId): Promise<string | never> {

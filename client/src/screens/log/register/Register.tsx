@@ -60,7 +60,7 @@ function RegistrationForm() {
 					<TextField size='small' fullWidth autoComplete='password' onKeyDown={handleKeyDown} label='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 				</form>
 				<Button variant='outlined' href={intra_url}>Register with intra</Button>
-				<Button disabled={!validateEntry()} variant="contained" onClick={handleSubmit} fullWidth >Sign in</Button>
+				<Button disabled={!validateEntry()} variant="contained" onClick={handleSubmit} fullWidth >Sign up</Button>
 			</div>
 		</section>
 	)

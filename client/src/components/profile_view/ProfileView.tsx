@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { friendsStateToProps, mapDispatchToProps, mapStateToProps } from '../../store/dispatcher';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext, ToastContext } from '../..';
-import { base_url, TOAST_LVL } from '../../constants/constants';
+import { base_url, generate_url, TOAST_LVL } from '../../constants/constants';
 
 type Props = {
 	reference: any;
@@ -139,7 +139,7 @@ const ProfileView = (props: Props) => {
 					<div className='profile'>
 						<div className='profile-top'>
 							<div className='img-container'>
-							<img src={profile.picture ? profile.picture : `https://avatars.dicebear.com/api/adventurer/${profile.name}.svg`} />
+							<img src={generate_url(profile)} />
 							</div>
 							<div className='profile-top-right'>
 								<div className='profile-name-status'>

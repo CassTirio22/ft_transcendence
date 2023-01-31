@@ -7,7 +7,7 @@ import { PopupContext, ToastContext } from '../..';
 import axios from "../../service/axios"
 import { Button } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { TOAST_LVL } from '../../constants/constants';
+import { generate_url, TOAST_LVL } from '../../constants/constants';
 import ImageBox from '../../components/main/image_box/ImageBox';
 
 type Props = {
@@ -192,7 +192,7 @@ const Friends = (props: Props) => {
                     return (
                       <div className='friend-request-div' key={id}>
                         <div className='friend-picture-name'>
-                          <div className='image-div'><img src={`https://avatars.dicebear.com/api/adventurer/${elem.name}.svg`} /></div>
+                          <div className='image-div'><img src={generate_url(elem)} /></div>
                           <span>{elem.name}</span>
                         </div>
                         <Button onClick={() => send_request(elem.id, elem.name)} variant='outlined'>Send request</Button>

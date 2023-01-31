@@ -1,7 +1,7 @@
 
 import React from 'react'
 import { connect } from 'react-redux'
-import { base_url } from '../../../constants/constants'
+import { base_url, generate_url } from '../../../constants/constants'
 import { friendsStateToProps, mapStateToProps } from '../../../store/dispatcher'
 import "./style.scss"
 
@@ -34,7 +34,7 @@ const ImageBox = (props: Props) => {
 
     return (
         <div profile-id={props.user.id} onClick={props.onClick} className={`message-sender-image-container ${status}`}>
-            <img src={props.user.picture ? props.user.picture : `https://avatars.dicebear.com/api/adventurer/${props.user.name}.svg`} />
+            <img src={generate_url(props.user)} />
         </div>
     )
 }

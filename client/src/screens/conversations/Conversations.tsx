@@ -4,11 +4,10 @@ import { useParams } from 'react-router-dom';
 import { AuthContext, PopupContext } from '../..';
 import ConversationList from '../../components/conversations/conversation_list/ConversationList'
 import ConversationOpen from '../../components/conversations/conversation_open/ConversationOpen'
-import { mapDispatchToProps, mapStateToProps } from '../../store/dispatcher';
+import { friendsStateToProps, mapDispatchToProps, mapStateToProps } from '../../store/dispatcher';
 import "./style.scss"
 
 type Props = {
-	messages?: any;
 	fetchMessages?: any;
 	friends?: any;
 	selectConversation?: any;
@@ -36,4 +35,4 @@ const Conversations: React.FC<Props> = (props: Props) => {
 	)
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Conversations)
+export default connect(friendsStateToProps, mapDispatchToProps)(Conversations)

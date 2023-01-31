@@ -10,7 +10,7 @@ import "./style.scss"
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Menu from '@mui/material/Menu';
 import CreateBox from '../../main/create_box/CreateBox'
-import { CHANNEL_LVL, CONV_LVL, TOAST_LVL } from '../../../constants/constants'
+import { CHANNEL_LVL, CONV_LVL, generate_url, TOAST_LVL } from '../../../constants/constants'
 import axios from "../../../service/axios"
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -220,7 +220,7 @@ const ChannelInfo = (props: Props) => {
                 <div key={elem.id} className="friend-elem">
                   <div className='friend-picture-name'>
                     <div className='image-div'>
-                      <img src={`https://avatars.dicebear.com/api/adventurer/${elem.name}.svg`} />
+                      <img src={generate_url(elem)} />
                     </div>
                     <span>{elem.name}</span>
                   </div>

@@ -80,10 +80,10 @@ class Pong {
 	public framecount: number;
 
 	constructor(framerate: number, cooldown: number, address: string, player1: number, player2: number) {
-		this.speed = 5;
+		this.speed = 8;
 		this.direction = {x: 1, y: 0};
-		this.size_1 = {x: 10, y: 50};
-		this.size_2 = {x: 10, y: 50};
+		this.size_1 = {x: 14, y: 90};
+		this.size_2 = {x: 14, y: 90};
 		this.pos_1 = {x: 100, y: 500};
 		this.pos_2 = {x: 900, y: 500};
 		this.old_1 = {x: 100, y: 500};
@@ -107,7 +107,9 @@ class Pong {
 	update(playing: Map< number, {client: Socket, isPlaying: boolean} >): boolean {
 		//cooldown before starting the game
 
-		if (this.score_1 > 2 || this.score_2 > 2) {
+		if ( (this.score_1 > 11  && this.score_1 - this.score_2 > 1) || 
+			(this.score_2 > 11 && this.score_1 - this.score_1 > 1)
+		){
 			if (playing.has(this.player_1)) {
 				playing.get(this.player_1).client.to(this.address).emit("end", "");
 				playing.get(this.player_1).client.emit("end", "");
@@ -190,9 +192,6 @@ class Pong {
 	}
 
 	_update_ball_position() {
-		this._ball_acceleration();
-		const tmp: Coordonates = {x: this.direction.x * this.speed, y: this.direction.y * this.speed};
-		this.ball = this._sum_coordonates(this.ball, tmp);
 		const bouncing_player: Coordonates = this._check_players();
 		if (bouncing_player) {
 			this._bounce_player(bouncing_player);
@@ -200,10 +199,13 @@ class Pong {
 		else if (this._check_borders()) {
 			this._bounce_border();
 		}
+		this._ball_acceleration();
+		const tmp: Coordonates = {x: this.direction.x * this.speed, y: this.direction.y * this.speed};
+		this.ball = this._sum_coordonates(this.ball, tmp);
 	}
 
 	_ball_acceleration() {
-		this.speed += this.speed * 0.0001;
+		this.speed += this.speed * 0.001;
 	}
 
 	_check_borders(): boolean {
@@ -284,7 +286,7 @@ class Pong {
 
 	_reset_ball(): any {
 		this.framecount = 0;
-		this.speed = 5;
+		this.speed = 8;
 		this.ball = {x: 500, y: 500};
 		let x: number = (Math.random() * 1000 % 2) ? 1 : -1;
 		this.direction = {x: x, y: 0};

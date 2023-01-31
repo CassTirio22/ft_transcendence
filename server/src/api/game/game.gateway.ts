@@ -80,7 +80,7 @@ class Pong {
 	public framecount: number;
 
 	constructor(framerate: number, cooldown: number, address: string, player1: number, player2: number) {
-		this.speed = 1;
+		this.speed = 5;
 		this.direction = {x: 1, y: 0};
 		this.size_1 = {x: 10, y: 50};
 		this.size_2 = {x: 10, y: 50};
@@ -123,6 +123,8 @@ class Pong {
 		// if (!this._check_cooldown()) {
 		// 	return true;
 		// }
+
+
 		this._update_ball_position();
 		if (playing.has(this.player_1)) {
 			this._check_limits(playing.get(this.player_1).client);
@@ -189,10 +191,12 @@ class Pong {
 
 	_update_ball_position() {
 		this._ball_acceleration();
-		console.log("SPEED : " +this.speed);
-		console.log("DIRECTION : " +this.direction.x + "  "+this.direction.y);
 		const tmp: Coordonates = {x: this.direction.x * this.speed, y: this.direction.y * this.speed};
 		this.ball = this._sum_coordonates(this.ball, tmp);
+		if (this._check_players()) {
+			console.log("INTERSECTION");
+			this._bounce_player();
+		}
 	}
 
 	_ball_acceleration() {
@@ -252,6 +256,19 @@ class Pong {
 		});
 	}
 
+	_check_players() {
+		const corner_1: Corners = this._get_corners(this.pos_1, this.size_1);
+		const corner_2: Corners = this._get_corners(this.pos_2, this.size_2);
+		const ball_corner: Corners = this._get_corners(this.ball, this.ball_size);
+		if ( 
+			this._check_rectangle_intersection(corner_1, ball_corner) ||
+			this._check_rectangle_intersection(corner_2, ball_corner)
+		) {
+			return true;
+		}
+		return false;
+	}
+
 	_check_rectangle_intersection(player: Corners, ball: Corners): boolean {
     	// If one rectangle is on left side of other
 		if (player.top_left.x > ball.down_right.x || ball.top_left.x > player.down_right.x)
@@ -264,7 +281,7 @@ class Pong {
 
 	_reset_ball(): any {
 		this.framecount = 0;
-		this.speed = 1;
+		this.speed = 5;
 		this.ball = {x: 500, y: 500};
 		let x: number = (Math.random() * 1000 % 2) ? 1 : -1;
 		this.direction = {x: x, y: 0};
@@ -444,21 +461,18 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		//we check if a game can start with user right now
 		if (games.ongoing && games.ongoing != undefined) {
-			console.log("1");
 
 			client.join(games.ongoing.address);
 			this._recoverGame(this.ongoing.find( game => game.game.id == games.ongoing.id), user, client);
 		}
 		//if competitive is full let's start a pending game
 		else if (pending && pending != undefined) {
-			console.log("2");
 
 			client.emit("join", {address: pending.address});
 			this._startGame(this.channels.get(pending.address), client, user);
 		}
 		//if no waiting competitive we want to play a friendly
 		else if (address && joinable && joinable != undefined) {
-			console.log("3");
 
 			//no 2nd player => join the game
 			if (joinable.loser == null) {
@@ -473,7 +487,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			}
 		}
 		else {
-			console.log("4");
 			this._disconnnect_player(user.id);
 		}
 	}

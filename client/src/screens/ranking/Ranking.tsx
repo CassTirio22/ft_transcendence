@@ -44,13 +44,13 @@ const Ranking = () => {
         <tbody>
           {
             ranking.map((elem: any, id: number) => {
-              if (elem.score > last_score) {
+              if (elem.score != last_score) {
                 position += 1;
                 last_score = elem.score;
               }
               return (
                 <tr key={id}>
-                  <td><div className='ranking'>{position} {position < 3 ? <StarsIcon className={"abc"[position - 1]} /> : null}</div></td>
+                  <td><div className='ranking'>{position} {position <= 3 ? <StarsIcon className={"abc"[position - 1]} /> : null}</div></td>
                   <td>
                       <div className='friend-picture-name'>
                         <ImageBox onClick={() => show_profile(elem.id)} user={elem} is_you={user.id == elem.id} />

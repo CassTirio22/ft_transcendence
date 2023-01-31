@@ -36,7 +36,7 @@ export const removeFriendRequest = createAsyncThunk(
 
 type friend = {
     id: number,
-    full_name: string,
+    name: string,
     picture: string,
 	status: number
 }

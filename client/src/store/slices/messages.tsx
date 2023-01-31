@@ -182,15 +182,13 @@ const messagesSlice = createSlice({
 						members: [
 							{
 								id: conv.user1.id,
-								full_name: conv.user1.name,
 								picture: conv.user1.picture,
 								name: conv.user1.name
 							},
 							{
 								id: conv.user2.id,
-								full_name: conv.user2.name,
 								picture: conv.user2.picture,
-								name: conv.user1.name
+								name: conv.user2.name
 							},
 						]
 					}
@@ -206,7 +204,6 @@ const messagesSlice = createSlice({
 					direct_elem.members = conv.members.map((user: any) => {
 						return {
 							id: user.user_id,
-							full_name: user.user.name,
 							picture: user.user.picture,
 							name: user.user.name,
 							level: user.level,
@@ -255,7 +252,6 @@ const messagesSlice = createSlice({
 			const members = payload.members.map((user: any) => {
 				return {
 					id: user.user_id,
-					full_name: user.user.name,
 					picture: user.user.picture,
 					name: user.user.name,
 					level: user.level,

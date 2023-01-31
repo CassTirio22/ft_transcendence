@@ -162,7 +162,7 @@ export function createCtx() {
 				selected_ball: "",
 				selected_pad: "",
 			} : JSON.parse(user.custom);
-			setUser({...user, email: user.email, token: token, store: custom, picture: !user.picture ?  null : user.picture.startsWith("https") ?  user.picture : base_url + user.picture});
+			setUser({...user, email: user.email, token: token, store: custom, picture: !user.picture ?  null : user.picture.startsWith("http") ?  user.picture : base_url + user.picture});
 			return user.name;
 		}
 

@@ -37,7 +37,7 @@ type Message = {
 
 type User = {
 	id: number,
-	full_name: string,
+	name: string,
 	picture: string,
 	status: number
 }
@@ -87,7 +87,9 @@ const RenderSend = (props: Props) => {
 		}
 	}
 
-	if (props.status == 0)
+	console.log(props.status)
+
+	if (props.status != 0)
 		return null;
 
 	return (
@@ -217,7 +219,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 					{
 						[...current_conversation.messages].map((message: Message, id: number) => {
 							const sender: User = current_conversation.members.filter((mem: User) => mem.id == message.author_id)[0];
-
+							console.log(sender)
 							if (!sender)
 								return null
 							const created_at = new Date(message.date);
@@ -226,7 +228,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 									<ImageBox is_you={user.id == sender.id} user={sender} onClick={() =>show_profile(sender.id.toString())} />
 									<div className='message-content'>
 										<div className='message-header'>
-											<span className='message-sender-name'>{sender.full_name}{sender.id == user.id ? " ( you )" : ""}</span>
+											<span className='message-sender-name'>{sender.name}{sender.id == user.id ? " ( you )" : ""}</span>
 											<span>{created_at.toDateString()}</span>
 										</div>
 										<div className='message-body'>

@@ -51,6 +51,7 @@ interface Score {
 	//players just have to send their position to server and receive => the other position, the ball position 
 //find a solution to manage the game's framerate (thought to use setInterval but doesn't seem perfect)
 class Pong {
+	private player_speed: number = 17;
 	public address: string;
 
 	public player_1: number;
@@ -136,17 +137,33 @@ class Pong {
 	/* PRIVATE METHODS */
 
 	_update_player_position() {
-		if (this.input_1.up && !this.input_1.down) {
-			this.pos_1.y += 1;
+		if (
+			this.input_1.down && 
+			!this.input_1.up && 
+			this.pos_1.y + (this.size_1.y * 0.5) < 1000
+		) {
+			this.pos_1.y += this.player_speed;
 		}
-		else if (this.input_1.down && !this.input_1.up) {
-			this.pos_1.y -= 1;
+		else if (
+			this.input_1.up &&
+			!this.input_1.down &&
+			this.pos_1.y - (this.size_1.y * 0.5) > 0
+		) {
+			this.pos_1.y -= this.player_speed;
 		}
-		if (this.input_2.up && !this.input_2.down) {
-			this.pos_2.y += 1;
+		if (
+			this.input_2.down &&
+			!this.input_2.up &&
+			this.pos_2.y + (this.size_2.y * 0.5) < 1000
+		) {
+			this.pos_2.y += this.player_speed;
 		}
-		else if (this.input_2.down && !this.input_2.up) {
-			this.pos_2.y -= 1;
+		else if (
+			this.input_2.up &&
+			!this.input_2.down &&
+			this.pos_2.y - (this.size_2.y * 0.5) > 0
+		) {
+			this.pos_2.y -= this.player_speed;
 		}
 	}
 

@@ -249,8 +249,11 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage("game")
-	async handleGame(client: Socket, data: { isPlaying: boolean} ) {
+	async handleGame(client: Socket, data: { isPlaying: boolean} ): Promise<any> {
 		const user: User = await this.userService.userBySocket(client.id);
+		if (!user) {
+			return ;
+		}
 		const val: boolean = data.isPlaying;
 		let message: GameMessage = { user_id: user.id, status: val };
 		let ret: number = (val == true) ? (await this.userService.socketInGame(client.id)) : (await this.userService.socketOutGame(client.id));

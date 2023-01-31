@@ -78,8 +78,8 @@ export const draw_pad = (pad_x: number, pad_y: number, tic: number, key: string,
     if (ball.type == "dotted") {
         context.setLineDash([6]);
         context.strokeStyle = ball.color;
-        context.strokeRect(pad_x, pad_y, 10, 60);
+        context.strokeRect(pad_x - 5, pad_y - 30, 10, 60);
     } else {
-        context.fillRect(pad_x, pad_y, 10, 60);
+        context.fillRect(pad_x - 5, pad_y - 30, 10, 60);
     }
 }

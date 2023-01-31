@@ -44,4 +44,10 @@ export class GameController {
 	private allGames(@Req() { user }: Request): Promise< IGames | never > {
 		return this.service.allGames(<User>user);
 	}
+
+	@Get('current')
+	@UseGuards(JwtAuthGuard)
+	private getCurrent(@Req() { user }: Request): Promise<Game | never> {
+		return this.service.currentGame(<User>user);
+	}
 }

@@ -182,7 +182,7 @@ class Pong {
 	}
 
 	_update_ball_position() {
-		// this._ball_acceleration();
+		this._ball_acceleration();
 		console.log("SPEED : " +this.speed);
 		console.log("DIRECTION : " +this.direction.x + "  "+this.direction.y);
 		const tmp: Coordonates = {x: this.direction.x * this.speed, y: this.direction.y * this.speed};
@@ -260,10 +260,7 @@ class Pong {
 		this.framecount = 0;
 		this.speed = 1;
 		this.ball = {x: 500, y: 500};
-		let x: number = Math.random() * 2 - 1;
-		if (x === 0) {
-  			x = Math.random() < 0.5 ? -1 : 1;
-		}
+		let x: number = (Math.random() * 1000 % 2) ? 1 : -1;
 		this.direction = {x: x, y: 0};
 	}
 

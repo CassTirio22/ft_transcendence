@@ -164,6 +164,16 @@ export class GameService {
 			.getMany();
 	}
 
+	public async currentGame(user: User): Promise<Game | never> {
+		return await this.gameRepository.createQueryBuilder("game")
+			.innerJoinAndSelect("game.winner", "winner")
+			.innerJoinAndSelect("game.loser", "loser")
+			.select()
+			.where("game.status = :gameStatus", {gameStatus: GameStatus.ongoing})
+			.andWhere(":userId IN (winner.id, loser.id)", {userId: user.id})
+			.getOne();
+	}
+
 	public async allGames(user: User): Promise< IGames | never > {
 		const games: Game[] = await this.gameRepository.createQueryBuilder("game")
 			.innerJoinAndSelect("game.winner", "winner")

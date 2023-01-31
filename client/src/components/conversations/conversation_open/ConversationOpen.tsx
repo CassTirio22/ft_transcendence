@@ -9,7 +9,7 @@ import "./style.scss"
 import no_yet from "../../../assets/images/no_friends_yet.svg"
 import ImageBox from '../../main/image_box/ImageBox';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { TOAST_LVL } from '../../../constants/constants';
+import { CONV_LVL, TOAST_LVL } from '../../../constants/constants';
 
 type Props = {
 	messages?: any;
@@ -18,7 +18,8 @@ type Props = {
 	fetchSpecificChannel?: any,
 	fetchSpecificDirect?: any,
 	sendDirect?: any,
-	sendChannel?: any
+	sendChannel?: any,
+	status?: any
 };
 
 type Channel = {
@@ -41,14 +42,83 @@ type User = {
 	status: number
 }
 
+const RenderSend = (props: Props) => {
+	const [message, setMessage] = useState("");
+	const last_key = useRef("");
+	const need_add = useRef(true);
+	const {set_toast} = useContext(ToastContext);
+	const {send_message} = useContext(SocketContext);
+	const {user} = useContext(AuthContext);
+	let { channel_id, direct_id } = useParams();
+
+	const send = () => {
+		if (channel_id) {
+			props.sendChannel({origin: parseInt(channel_id), content: message}).then((e: any) => {
+				if (e.error?.message?.includes("401")) {
+					props.fetchMessages({user: user, channel_id: null, direct_id: null});
+					setTimeout(() => {
+						set_toast(TOAST_LVL.ERROR, "Unauthorize", "You cannot send message to this channel. You have probably been kiked or banned.")
+					}, 100);
+				}
+			})
+		} else if (direct_id) {
+			props.sendDirect({origin: parseInt(direct_id), content: message}).then((e: any) => {
+				if (e.error?.message?.includes("401")) {
+					props.fetchMessages({user: user, channel_id: null, direct_id: null});
+					setTimeout(() => {
+						set_toast(TOAST_LVL.ERROR, "Unauthorize", "You cannot send message to this user. He has probably blocked you.")
+					}, 100);
+				}
+			})
+		}
+		send_message(direct_id ? parseInt(direct_id) : null, channel_id ? parseInt(channel_id) : null, message);
+		setMessage("");
+		setTimeout(() => {
+			document.getElementById("message-input")?.focus();
+		}, 100);
+	}
+
+	const set_message_shift = (key: string, e: any) => {
+		if (key == "Enter" && last_key.current != "Shift") {
+			e.preventDefault();
+			send();
+		} else {
+			last_key.current = key;
+		}
+	}
+
+	if (props.status == 0)
+		return null;
+
+	return (
+		<div className='conversation-footer'>
+			<div className='new-message'>
+				<TextareaAutosize
+					id={"message-input"}
+					autoFocus
+					className='text-area-new'
+					placeholder='Send a message'
+					value={message}
+					onChange={(e) => setMessage(e.target.value)}
+					onKeyDown={(e) => set_message_shift(e.key, e)}
+					maxRows={5}
+				/>
+				<div className='send-message'>
+					<Button disabled={message == ""} onClick={() => send()} variant='outlined'>Send</Button>
+				</div>
+			</div>
+		</div>
+	)
+}
+
 const ConversationOpen: React.FC<Props> = (props: Props) => {
 	const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement|null>(null);
 	const open = Boolean(anchorEl);
 	const {user} = useContext(AuthContext);
-	const {send_message} = useContext(SocketContext);
+	
 	const {show_profile} = useContext(PopupContext);
 	const scroll_view = createRef<HTMLDivElement>();
-	let { channel_id, direct_id } = useParams();
+	
 	let navigate = useNavigate();
 
 	useEffect(() => {
@@ -89,69 +159,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 		if (scroll_view.current)
 			scroll_view.current.scrollTo(0, scroll_view.current.scrollHeight);
 	}, [scroll_view])
-
-	const RenderSend = () => {
-		const [message, setMessage] = useState("");
-		const last_key = useRef("");
-		const need_add = useRef(true);
-		const {set_toast} = useContext(ToastContext);
-
-		const send = () => {
-			if (channel_id) {
-				props.sendChannel({origin: parseInt(channel_id), content: message}).then((e: any) => {
-					if (e.error?.message?.includes("401")) {
-						props.fetchMessages({user: user, channel_id: null, direct_id: null});
-						setTimeout(() => {
-							set_toast(TOAST_LVL.ERROR, "Unauthorize", "You cannot send message to this channel. You have probably been kiked or banned.")
-						}, 100);
-					}
-				})
-			} else if (direct_id) {
-				props.sendDirect({origin: parseInt(direct_id), content: message}).then((e: any) => {
-					if (e.error?.message?.includes("401")) {
-						props.fetchMessages({user: user, channel_id: null, direct_id: null});
-						setTimeout(() => {
-							set_toast(TOAST_LVL.ERROR, "Unauthorize", "You cannot send message to this user. He has probably blocked you.")
-						}, 100);
-					}
-				})
-			}
-			send_message(direct_id ? parseInt(direct_id) : null, channel_id ? parseInt(channel_id) : null, message);
-			setMessage("");
-			setTimeout(() => {
-				document.getElementById("message-input")?.focus();
-			}, 100);
-		}
-
-		const set_message_shift = (key: string, e: any) => {
-			if (key == "Enter" && last_key.current != "Shift") {
-				e.preventDefault();
-				send();
-			} else {
-				last_key.current = key;
-			}
-		}
-
-		return (
-			<div className='conversation-footer'>
-				<div className='new-message'>
-					<TextareaAutosize
-						id={"message-input"}
-						autoFocus
-						className='text-area-new'
-						placeholder='Send a message'
-						value={message}
-						onChange={(e) => setMessage(e.target.value)}
-						onKeyDown={(e) => set_message_shift(e.key, e)}
-						maxRows={5}
-					/>
-					<div className='send-message'>
-						<Button disabled={message == ""} onClick={() => send()} variant='outlined'>Send</Button>
-					</div>
-				</div>
-			</div>
-		)
-	}
+	
 
 	const EmptyConvOrSelect = () => {
 		return (
@@ -230,9 +238,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 						})
 					}
 				</div>
-				{
-					user_status == undefined || user_status == 0 ? <RenderSend/> : null
-				}
+				<RenderSend status={user_status} sendDirect={props.sendDirect} sendChannel={props.sendChannel} fetchSpecificDirect={props.fetchSpecificDirect} />
 			</div>
 		</div>
 	)

@@ -89,9 +89,7 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 				<AddIcon />
 				<span>Add direct</span>
 			</div>
-			<CreateBox visible={newConversation != ""} submit={submit.current} submitable={true} cancel={() => setNewConversation("")} submit_text="Next" title={newConversation == "direct" ? "New direct conversation" : "New channel"}>
-				<CreateChannelOrDirect cancel={cancel} submit={submit} setNewConversation={setNewConversation} newConversation={newConversation} />
-			</CreateBox>
+			<CreateChannelOrDirect setNewConversation={setNewConversation} newConversation={newConversation} />
 		</div>
 	)
 }

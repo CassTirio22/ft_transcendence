@@ -8,6 +8,7 @@ import { generate_url, TOAST_LVL } from '../../../../constants/constants';
 import { Button, TextField } from '@mui/material';
 import axios from "../../../../service/axios"
 import LockIcon from '@mui/icons-material/Lock';
+import CreateBox from '../../../main/create_box/CreateBox';
 
 type CreateChannel = {
 	type: String,
@@ -109,116 +110,123 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 	}
 
 	useEffect(() => {
-		props.submit.current = submit;
 		get_other_channels();
 	}, [])
 
+	const CreateChannelInner = () => {
 
-	const toggle_id = (id: number) => {
-		if (props.newConversation == "direct") {
-			if (selected.current.length && selected.current[0] == id)
-				selected.current = []
-			else {
-				selected.current = [id];
-			}
-		} else {
-			if (selected.current.includes(id)) {
-				selected.current.splice(selected.current.indexOf(id), 1)
+		const toggle_id = (id: number) => {
+			if (props.newConversation == "direct") {
+				if (selected.current.length && selected.current[0] == id)
+					selected.current = []
+				else {
+					selected.current = [id];
+				}
 			} else {
-				selected.current.push(id)
+				if (selected.current.includes(id)) {
+					selected.current.splice(selected.current.indexOf(id), 1)
+				} else {
+					selected.current.push(id)
+				}
 			}
+			setToggle(!toggle);
 		}
-		setToggle(!toggle);
-	}
 
-	if (props.newConversation == "direct") {
-		return (
-			<div className='create-conversation'>
-				<h4>{"Select friend to talk in private"}</h4>
-				<div className='friends-wrapper'>
-					{
-						props.friends.map((elem: any) => {
-							return (
-								<div key={elem.id} className="friend-elem">
-									<div className='friend-picture-name'>
-										<div className='image-div'>
-											<img src={generate_url(elem)} />
+		if (props.newConversation == "direct") {
+			return (
+				<div className='create-conversation'>
+					<h4>{"Select friend to talk in private"}</h4>
+					<div className='friends-wrapper'>
+						{
+							props.friends.map((elem: any) => {
+								return (
+									<div key={elem.id} className="friend-elem">
+										<div className='friend-picture-name'>
+											<div className='image-div'>
+												<img src={generate_url(elem)} />
+											</div>
+											<span>{elem.name}</span>
 										</div>
-										<span>{elem.name}</span>
+										<Checkbox checked={selected.current.includes(elem.id)} onChange={() => toggle_id(elem.id)} />
 									</div>
-									<Checkbox checked={selected.current.includes(elem.id)} onChange={() => toggle_id(elem.id)} />
-								</div>
-							)
-						})
+								)
+							})
+						}
+					</div>
+				</div>
+			)
+		}
+
+		if (currentStep == 0) {
+			return (
+				<div className='new-create-channel'>
+					<Button onClick={() => setCurrentStep(1)} fullWidth variant='outlined'>Create a new channel</Button>
+					<Button onClick={() => setCurrentStep(10)} fullWidth variant='outlined'>Join an existing channel</Button>
+				</div>
+			)
+		} else if (currentStep == 1) {
+
+			const select_channel = (type: String) => {
+				new_channel.current.type = type;
+				setToggle(toggle => !toggle);
+			}
+
+			return (
+				<div className='new-create-channel'>
+					<h4>What kind of channel would you like to create?</h4>
+					<Button onClick={() => {select_channel("public");setCurrentStep(2)}} fullWidth variant={new_channel.current.type == "public" ? "contained" : 'outlined'}>Public channel</Button>
+					<Button onClick={() => {select_channel("protected");setCurrentStep(2)}} fullWidth variant={new_channel.current.type == "protected" ? "contained" : 'outlined'}>Protected channel</Button>
+					<Button onClick={() => {select_channel("private");setCurrentStep(2)}} fullWidth variant={new_channel.current.type == "private" ? "contained" : 'outlined'}>Private channel</Button>
+				</div>
+			)
+		} else if (currentStep == 2) {
+			return (
+				<div className='new-create-channel'>
+					<h4>{new_channel.current.type !== "protected" ? "Setup a name for your channel" : "Setup a name and a password for your protected channel"}</h4>
+					<form style={{width: "100%"}}>
+						<TextField fullWidth onChange={(e) => {new_channel.current.name = e.target.value}} autoComplete='username' id="outlined" label="Name" variant="outlined" />
+						{
+							new_channel.current.type !== "protected" ? null:
+							<TextField fullWidth onChange={(e) => {new_channel.current.password = e.target.value}} autoComplete='new-password' id="outlined-basic" label="Password" type="password" variant="outlined" />
+						}
+					</form>
+				</div>
+			)
+		} else if (currentStep == 10) {
+
+			return (
+				<div className='new-create-channel'>
+					{
+						otherChannels.map((elem: any, id: number) => (
+							<div className={`channel-elem ${elem.id == selected_channel.current ? "selected" : ""}`} onClick={() => {selected_channel.current = elem.id;setToggle(toggle => !toggle);if(elem.status == 1)setCurrentStep(11)}} key={id}>
+								<span>{elem.name}</span>
+								{
+									elem.status ? <LockIcon/> : null
+								}
+							</div>
+						))
 					}
 				</div>
-			</div>
-		)
-	}
-
-	if (currentStep == 0) {
-		return (
-			<div className='new-create-channel'>
-				<Button onClick={() => setCurrentStep(1)} fullWidth variant='outlined'>Create a new channel</Button>
-				<Button onClick={() => setCurrentStep(10)} fullWidth variant='outlined'>Join an existing channel</Button>
-			</div>
-		)
-	} else if (currentStep == 1) {
-
-		const select_channel = (type: String) => {
-			new_channel.current.type = type;
-			setToggle(toggle => !toggle);
-		}
-
-		return (
-			<div className='new-create-channel'>
-				<h4>What kind of channel would you like to create?</h4>
-				<Button onClick={() => {select_channel("public");setCurrentStep(2)}} fullWidth variant={new_channel.current.type == "public" ? "contained" : 'outlined'}>Public channel</Button>
-				<Button onClick={() => {select_channel("protected");setCurrentStep(2)}} fullWidth variant={new_channel.current.type == "protected" ? "contained" : 'outlined'}>Protected channel</Button>
-				<Button onClick={() => {select_channel("private");setCurrentStep(2)}} fullWidth variant={new_channel.current.type == "private" ? "contained" : 'outlined'}>Private channel</Button>
-			</div>
-		)
-	} else if (currentStep == 2) {
-		return (
-			<div className='new-create-channel'>
-				<h4>{new_channel.current.type !== "protected" ? "Setup a name for your channel" : "Setup a name and a password for your protected channel"}</h4>
-				<form style={{width: "100%"}}>
-					<TextField fullWidth onChange={(e) => {new_channel.current.name = e.target.value}} autoComplete='username' id="outlined" label="Name" variant="outlined" />
-					{
-						new_channel.current.type !== "protected" ? null:
+			);
+		} else if (currentStep == 11) {
+			return (
+				<div className='new-create-channel'>
+					<h4>Enter the channel password</h4>
+					<form style={{width: "100%"}}>
+						<TextField fullWidth onChange={(e) => {new_channel.current.name = e.target.value}} autoComplete='username' id="outlined" label="Name" variant="outlined" sx={{display: "none"}} />
 						<TextField fullWidth onChange={(e) => {new_channel.current.password = e.target.value}} autoComplete='new-password' id="outlined-basic" label="Password" type="password" variant="outlined" />
-					}
-				</form>
-			</div>
-		)
-	} else if (currentStep == 10) {
-
-		return (
-			<div className='new-create-channel'>
-				{
-					otherChannels.map((elem: any, id: number) => (
-						<div className={`channel-elem ${elem.id == selected_channel.current ? "selected" : ""}`} onClick={() => {selected_channel.current = elem.id;setToggle(toggle => !toggle);if(elem.status == 1)setCurrentStep(11)}} key={id}>
-							<span>{elem.name}</span>
-							{
-								elem.status ? <LockIcon/> : null
-							}
-						</div>
-					))
-				}
-			</div>
-		);
-	} else if (currentStep == 11) {
-		return (
-			<div className='new-create-channel'>
-				<h4>Enter the channel password</h4>
-				<form style={{width: "100%"}}>
-					<TextField fullWidth onChange={(e) => {new_channel.current.name = e.target.value}} autoComplete='username' id="outlined" label="Name" variant="outlined" sx={{display: "none"}} />
-					<TextField fullWidth onChange={(e) => {new_channel.current.password = e.target.value}} autoComplete='new-password' id="outlined-basic" label="Password" type="password" variant="outlined" />
-				</form>
-			</div>
-		)
+					</form>
+				</div>
+			)
+		}
+		return null;
 	}
-	return null;
+
+	return (
+		<CreateBox visible={props.newConversation != ""} submit={submit} submitable={true} cancel={() => {new_channel.current={type: "", password: "", name: ""};props.setNewConversation("")}} submit_text="Next" title={props.newConversation == "direct" ? "New direct conversation" : "New channel"}>
+			<CreateChannelInner/>
+		</CreateBox>
+	)
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(CreateChannelOrDirect)

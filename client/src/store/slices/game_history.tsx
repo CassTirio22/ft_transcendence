@@ -27,7 +27,6 @@ const gameHistorySlice = createSlice({
 	reducers: {},
 	extraReducers: builder => {
         builder.addCase(fetchGameHistory.fulfilled, (state, {payload}) => {
-            console.log(payload)
 			return payload;
         })
     }

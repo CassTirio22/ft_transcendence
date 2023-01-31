@@ -1,6 +1,6 @@
 import { Button } from '@mui/material'
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import { AuthContext, SocketContext } from '../..'
 import { socket_url } from '../../constants/constants'
@@ -45,6 +45,8 @@ const Game = (props: Props) => {
 	const isup = useRef(false);
 	const isdown = useRef(false);
 	const [started, setStarted] = useState(false);
+	const [gameStatus, setgameStatus] = useState("");
+	const {game_id} = useParams();
 
 	const socket = useRef<any | null>(null);
 
@@ -85,10 +87,8 @@ const Game = (props: Props) => {
 			}, "input")
 		}
 	}
-
-	const check_end = () => {
-		console.log(props.game_history)
-	}
+	
+	console.log("reload")
 
 	useEffect(() => {
 		document.body.classList.add("full-screen");
@@ -101,7 +101,7 @@ const Game = (props: Props) => {
 		window.addEventListener("popstate", () => {navigate("/")})
 
 		if (user.token && !socket.current) {
-			socket.current = io(socket_url + "/game", {
+			socket.current = io(socket_url + `/game?address=${game_id}`, {
 				extraHeaders: {
 				  Authorization: `${user.token}`
 				}
@@ -112,12 +112,18 @@ const Game = (props: Props) => {
 			});
 
 			socket.current.on('disconnect', () => {
-				check_end();
+				console.log("disconnect")
+				setgameStatus("stop");
+			});
+
+			socket.current.on('end', () => {
+				console.log("end")
+				setgameStatus("stop");
 			});
 
 			socket.current.on('start', () => {
 				console.log("start")
-				setStarted(true);
+				setgameStatus("started");
 			});
 
 			socket.current.on('error', () => {
@@ -132,17 +138,22 @@ const Game = (props: Props) => {
 				console.log("watch")
 			});
 
+			socket.current.on('watch', () => {
+				console.log("watch")
+			});
+
 			socket.current.on('score', (e: Score) => {
 				set_score.current(e.player_1, e.player_2);
 			});
 
 			socket.current.on('update', (e: Update) => {
+				console.log("update")
+				setgameStatus("started");
 				new_pos.current(e.player_1.x, e.player_1.y, e.player_2.x, e.player_2.y, e.ball.x, e.ball.y);
 			});
 		}
 		if (!props.game) {
 			props.fetchCurrentGame().then((e: any) => {
-				console.log(e)
 				if (e.payload)
 					set_score.current(e.payload.winnerScore, e.payload.loserScore);
 			});
@@ -155,11 +166,14 @@ const Game = (props: Props) => {
 			in_game(false);
 			if (socket.current) {
 				socket.current.close()
+				socket.current = null;
 			}
 		}
 	}, [])
 
-	if (!started && props.game?.status != 1) {
+	console.log(props.game)
+
+	if (gameStatus == "" && props.game?.status != 1) {
 		return (
 			<div id="game-matching">
 				<div className='center'>
@@ -184,6 +198,14 @@ const Game = (props: Props) => {
 						</div>
 					</div>
 				</div>
+			</div>
+		)
+	}
+
+	if (gameStatus == "stop") {
+		return (
+			<div>
+				stop
 			</div>
 		)
 	}

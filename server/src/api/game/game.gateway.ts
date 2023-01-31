@@ -94,8 +94,8 @@ class Pong {
 		this.score_2 = 0;
 		this.framerate = framerate;
 		this.cooldown = cooldown;
-		this.input_1 = null;
-		this.input_2 = null;
+		this.input_1 = {up: false, down: false};
+		this.input_2 = {up: false, down: false};
 		this.address = address;
 		this.player_1 = player1;
 		this.player_2 = player2;
@@ -273,28 +273,26 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private gameService: GameService,
 	) {
 		this.channels = new Map<string, IGame>();
-		this.playing = new Map<number, {client: Socket, isPlaying: boolean}>;
-		this.clients = new Map<string, number>;
+		this.playing = new Map<number, {client: Socket, isPlaying: boolean}>();
+		this.clients = new Map<string, number>();
 		this.ongoing = [];
 	}
-
-
 	
 	async afterInit(): Promise<any | never> {
 		//loop all 10secs
 		//check if disconnected
 		setInterval(() => {
 			this.ongoing.forEach( game => {
-				if (game.pong.update(this.playing)) {
+				if (!game.pong.update(this.playing)) {
 					this._endGame(game);
 				}
 			})
 		}, 17);
 	}
 
-    async handleConnection(client: Socket, args: any): Promise<any | never> {
+    async handleConnection(client: Socket, args: {address: string}): Promise<any | never> {
 		try {
-			//manage auth
+			// manage auth
 			const token: string = <string>client.handshake.headers.authorization;
 			const user: User = await this.authHelper.getUser(token);
 
@@ -302,7 +300,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.playing.set(user.id, {client: client, isPlaying: false});
 			this.clients.set(client.id, user.id);
 
-			this._updatePlayer(client, user);
+			await this._updatePlayer(client, user, args != undefined ? args.address : null);
 		}
 		catch (error) {
 			client.emit('error', {message: 'Connection unauthorized.'});
@@ -312,28 +310,18 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     async handleDisconnect(client: Socket): Promise<any> {
 		client.rooms.forEach( room => { client.leave(room) } );
-		this.playing.delete(this.clients.get(client.id));
-		this.clients.delete(client.id);
-	}
-
-	@SubscribeMessage("watch")
-	handleWatch(client: Socket, data: string) {
-		if (this.channels.has(data)) {
-			client.join(data);
+		if (this.clients.get(client.id) != undefined) {
+			this.playing.delete(this.clients.get(client.id));
 		}
-	}
-
-	@SubscribeMessage("leave")
-	handleLeave(client: Socket, data: string) {
-		if (this.channels.has(data)) {
-			client.leave(data);
+		if (this.clients.get(client.id) != undefined) {
+			this.clients.delete(client.id);
 		}
 	}
 
 	@SubscribeMessage("update")
-	async handleUpdate(client: Socket) {
+	async handleUpdate(client: Socket, args: {address: string}) {
 		const user: User = await this.userService.userById(this.clients.get(client.id))
-		this._updatePlayer(client, user);
+		this._updatePlayer(client, user, args.address);
 	}
 
 	@SubscribeMessage("input")
@@ -350,13 +338,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 	}
 
-	async _startGame(game: IGame, client: Socket): Promise<boolean> {
+	async _startGame(game: IGame, client: Socket, user: User): Promise<boolean> {
 		//we check if everyone is connected and not playing
+		this.playing.set(user.id, {client: client, isPlaying: false});
 		if (
 			!this.playing.has(game.player1.id) || 
 			!this.playing.has(game.player2.id) ||
-			this.playing.get(game.player1.id) ||
-			this.playing.get(game.player2.id)
+			this.playing.get(game.player1.id).isPlaying ||
+			this.playing.get(game.player2.id).isPlaying
 		) {
 			return false;
 		}
@@ -392,11 +381,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.channels.delete(game.game.address);
 		this.ongoing.splice( this.ongoing.indexOf(game));
 
-		this.playing.set(game.player1.id, {client: this.playing.get(game.player1.id).client, isPlaying: false});
-		this.playing.set(game.player2.id, {client: this.playing.get(game.player2.id).client, isPlaying: false});
+		this._disconnnect_player(game.player1.id);
+		this._disconnnect_player(game.player2.id);
 	}
 
-	async _updatePlayer(client: Socket, user: User) {
+	async _updatePlayer(client: Socket, user: User, address: string) {
 		//we get all related games with the user
 		let games: IGames = await this.gameService.allGames(user);
 
@@ -405,7 +394,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			const game: Game = games.pending[index];
 			if (!this.channels.has(game.address)) {
 				this.channels.set(game.address, {
-					game: game, 
+					game: game,
 					player1: await this.userService.userById(game.winner_id), 
 					player2: await this.userService.userById(game.loser_id),
 					pong: new Pong(60, 3, game.address,game.winner_id, game.loser_id)
@@ -414,6 +403,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			client.join(game.address);
 		}
 		const pending: Game = games.pending.find(game => game.type == GameType.competitive && game.winner != null && game.loser != null);
+		const joinable: Game = games.pending.find(game => game.address = address);
 
 		//we check if a game can start with user right now
 		if (games.ongoing && games.ongoing != undefined) {
@@ -421,16 +411,37 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this._recoverGame(this.ongoing.find( game => game.game.id == games.ongoing.id), user, client);
 		}
 		//if competitive is full let's start a pending game
-		else if (pending != undefined && pending) {
-			this._startGame(this.channels.get(pending.address), client);
+		else if (pending && pending != undefined) {
+			client.emit("join", {address: pending.address});
+			this._startGame(this.channels.get(pending.address), client, user);
 		}
-		//if no waiting competitive and friendly is full let's start a pending game
-		else if (
-			games.pending.find(game => game.type == GameType.competitive) == undefined && 
-			games.pending.find(game => game.winner != null && game.loser != null) != undefined
-		) {
-			this._startGame(this.channels.get(games.pending.find(game => game.winner != null && game.loser != null).address), client);
+		//if no waiting competitive we want to play a friendly
+		else if (address && joinable && joinable != undefined) {
+			//no 2nd player => join the game
+			if (joinable.loser == null) {
+				await this.gameService.joinGame({address: joinable.address}, user);
+				client.emit("join", {address: joinable.address});
+				this._startGame(this.channels.get(games.pending.find(game => game.winner != null && game.loser != null).address), client, user);
+			}
+			//else watch the game
+			else {
+				client.join(joinable.address);
+				client.emit("watch", {address: joinable.address});
+			}
 		}
+		else {
+			this._disconnnect_player(user.id);
+		}
+	}
+
+	_disconnnect_player(user: number): any {
+		if (this.playing.get(user) == undefined)
+			return ;
+		const client: Socket = this.playing.get(user).client;
+		client.rooms.forEach( room => { client.leave(room) } );
+		this.playing.delete(this.clients.get(client.id));
+		this.clients.delete(client.id);
+		client.disconnect();
 	}
 
 }

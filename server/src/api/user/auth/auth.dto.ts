@@ -34,6 +34,10 @@ export class LoginDto {
 
 	@IsString()
 	public readonly password: string;
+
+	@IsString()
+	@IsOptional()
+	public readonly code: string;
 }
 
 export class IntraRegisterDto {

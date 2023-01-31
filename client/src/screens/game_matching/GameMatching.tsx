@@ -9,7 +9,7 @@ const GameMatching = () => {
 	useEffect(() => {
 		document.body.classList.add("full-screen");
 		const timout = setTimeout(() => {
-			navigate("/play/lfjwoijfasdjfoweijflsjf");
+			navigate("/play/ZtW-jWJqp");
 		}, 2500);
 
 		return () => {

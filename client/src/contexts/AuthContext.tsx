@@ -50,7 +50,7 @@ export function createCtx() {
 
 	const register = async(email: string, password: string, name: string) => "null";
 	const rename = async(name: string) => "null";
-	const signIn = async (email: string, password: string) => "null";
+	const signIn = async (email: string, password: string, twoFa: string | null) => "null";
 	const signOut = async () => "null";
 	const profile = async (token: string) => "null";
 	const isLoggedIn = () => false;
@@ -106,11 +106,12 @@ export function createCtx() {
 			return "";
 		}
 
-		const signIn = async (email: string, password: string) => {
+		const signIn = async (email: string, password: string, twoFa: string | null) => {
 			unset_instance_token();
 			const token = await axios.post("auth/login", {
 				email: email,
 				password: password,
+				code: twoFa
 			})
 			.then(response => {
 				return response.data;
@@ -123,10 +124,12 @@ export function createCtx() {
 				unset_instance_token();
 				setUser(reset_user);
 				return "error";
+			} else if (token.length < 16) {
+				return token;
 			}
 			setUser({...user, token: token});
 			const name = await profile(token);
-			return name;
+			return `aaaaaaaaaaaaaaaaaaaa${name}`;
 		}
 
 		const signOut = async () => {

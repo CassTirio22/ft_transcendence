@@ -27,7 +27,7 @@ function RegistrationForm() {
 			alert("error");
 		}
 		else {
-			const login_response = await signIn(userMail, password);
+			const login_response = await signIn(userMail, password, null);
 			if (login_response === "error") {
 				alert("error");
 			}

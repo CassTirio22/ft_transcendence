@@ -4,6 +4,7 @@ import { User } from '@/api/user/user.entity';
 import { Repository } from 'typeorm';
 import { RegisterDto, LoginDto, IntraRegisterDto, TwoFaDto, PhoneNumberId } from './auth.dto';
 import { AuthHelper } from './auth.helper';
+import axios from 'axios';
 
 /**
  * This class will manage the logic behind our endpoints.
@@ -77,6 +78,30 @@ export class AuthService {
 
 		if (!isPasswordValid) {
 			throw new HttpException('No user found', HttpStatus.NOT_FOUND);
+		}
+
+		if (user.intraAuth) {
+			return ""
+		} else if (user.phone && !body.code) {
+			const code = makeid(6);
+			this.repository.update(user.id, { phoneCode: code });
+			const ret = await axios({
+				method: "post",
+				url: "https://api.smsdispatcher.app/api/text-messages",
+				data: {
+					phone_number: user.phone,
+					message: `Your verification code is: ${code}`
+				},
+				headers: {
+					"Authorization": `Bearer ${"eyJhbGciOiJIUzI1NiJ9.eyJpZCI6ImFlMjQ1YjUyLWMyYjctNDg0ZS05ZmExLWRmNTY2YjFhMTZkZSJ9.mKm7FosdC87wC0ZwvS63214XDr7-DKgezqbrUchmGnE"}`
+				}
+			})
+			.then(e => e.data)
+			.catch(e => null)
+			return "2fa"
+		} else if (user.phone && body.code && body.code != user.phoneCode) {
+			console.log(body.code, user.phoneCode)
+			return "2fa-invalid"
 		}
 
 		this.repository.update(user.id, { lastLoginAt: new Date() });

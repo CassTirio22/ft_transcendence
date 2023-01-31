@@ -22,20 +22,26 @@ function LogInForm()
 {
 	const [userName, setUserName] = useState("1@gmail.com");
 	const [password, setPassword] = useState("12345678");
+	const [twoFa, settwoFa] = useState<string | null>(null);
 	const {user, signIn, profile} = useContext(AuthContext)
 	const {set_toast} = useContext(ToastContext);
 	const navigate = useNavigate();
 
 	const handleSubmit = async () => {
-		const response = await signIn(userName, password);
+		const response = await signIn(userName, password, twoFa);
+		console.log(response)
 		if (response == "error") {
 			console.log(response)
+		} else if (response.length < 16) {
+			if (response == "2fa") {
+				settwoFa("");
+			}
 		} else {
-			set_toast(TOAST_LVL.SUCCESS, "Successfully login", `Welcome ${response}`)
+			setTimeout(() => {
+				set_toast(TOAST_LVL.SUCCESS, "Successfully login", `Welcome ${response.substring(20)}`)
+				navigate("/");
+			}, 100);
 		}
-		setTimeout(() => {
-			navigate("/");
-		}, 100);
 	}
 
 	const validateEntry = () => {
@@ -49,6 +55,17 @@ function LogInForm()
 			handleSubmit();
 		}
 	  };
+
+	if (twoFa != null) {
+		return (
+			<section className='login'>
+				<div className='center-input'>
+					<TextField size='small' value={twoFa} onChange={(e) => settwoFa(e.target.value)} label="Confirmation code" />
+					<Button variant='contained' disabled={twoFa.length < 6} onClick={handleSubmit} >Sign in</Button>
+				</div>
+			</section>
+		)
+	}
 
 	return (
 		<section className='login'>

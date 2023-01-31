@@ -1,7 +1,9 @@
 import { Button } from '@mui/material'
 import React, { useContext, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SocketContext } from '../..'
+import { io } from 'socket.io-client'
+import { AuthContext, SocketContext } from '../..'
+import { socket_url } from '../../constants/constants'
 import ClassicGame from './classic/ClassicGame'
 import "./style.scss"
 
@@ -131,11 +133,29 @@ const Game = () => {
 	const {in_game} = useContext(SocketContext);
 	const new_pos = useRef((player_1_y: number, player_2_y: number, ball_x: number, ball_y: number) => {});
 	const set_score = useRef((player_1: number, player_2: number) => {});
+	const {user} = useContext(AuthContext);
+
+	const socket = useRef<any | null>(null);
 
 	useEffect(() => {
 		document.body.classList.add("full-screen");
 		in_game(true);
-		
+
+		if (user.token && !socket.current) {
+			socket.current = io(socket_url + "/game", {
+				extraHeaders: {
+				  Authorization: `${user.token}`
+				}
+			});
+
+			socket.current.on('connect', () => {
+				console.log("connected")
+			});
+
+			socket.current.on('disconnect', () => {
+				console.log("disconnected")
+			});
+		}
 		const inter = setInterval(() => {
 			loop(new_pos, set_score)
 		}, interval)

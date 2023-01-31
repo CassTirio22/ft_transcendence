@@ -97,10 +97,14 @@
                 border-radius: var(--border_radius);
                 box-shadow: var(--box_shadow);
                 margin-right: 20px;
+                width: 84px;
+                height: 84px;
+                overflow: hidden;
     
                 img {
                     width: 84px;
                     height: 84px;
+                    object-fit: cover;
                 }
             }
         }

@@ -40,3 +40,5 @@ lerna-debug.log*
 
 # Pictures
 */uploads/pictures/*
+
+/uploads/pictures/profile*

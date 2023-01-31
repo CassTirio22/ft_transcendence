@@ -5,7 +5,7 @@ import "./profile.scss"
 import { debug } from 'console';
 import { Button, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { base_url, TOAST_LVL } from '../../constants/constants';
+import { base_url, generate_url, TOAST_LVL } from '../../constants/constants';
 import axios from "../../service/axios"
 import { useNavigate } from 'react-router-dom';
 
@@ -96,7 +96,7 @@ function Profile() {
 			<div className='update-picture-container'>
 				<h2>My profile picture</h2>
 				<div className='img-edit'>
-					<img src={user.picture ? user.picture : `https://avatars.dicebear.com/api/adventurer/${user.name}.svg`} />
+					<img src={generate_url(user)} />
 					<div className="profile-picture-edit">
 						<label htmlFor="inputTag">
 							Change profile picture

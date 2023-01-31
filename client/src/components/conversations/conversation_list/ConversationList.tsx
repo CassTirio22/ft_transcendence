@@ -7,7 +7,7 @@ import "./style.scss"
 import CreateBox from '../../main/create_box/CreateBox';
 import Checkbox from '@mui/material/Checkbox';
 import { AuthContext, PopupContext, ToastContext } from '../../..';
-import { TOAST_LVL } from '../../../constants/constants';
+import { generate_url, TOAST_LVL } from '../../../constants/constants';
 import { Button, TextField } from '@mui/material';
 import axios from "../../../service/axios"
 import LockIcon from '@mui/icons-material/Lock';
@@ -171,7 +171,7 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 									<div key={elem.id} className="friend-elem">
 										<div className='friend-picture-name'>
 											<div className='image-div'>
-												<img src={`https://avatars.dicebear.com/api/adventurer/${elem.name}.svg`} />
+												<img src={generate_url(elem)} />
 											</div>
 											<span>{elem.name}</span>
 										</div>

@@ -35,7 +35,7 @@ async function bootstrap() {
 	});
 
 	await app.listen(port, () => {
-		console.log('[WEB]', `http://localhost:${port}`);
+		console.log('[WEB]', `http://0.0.0.0:${port}`);
 	});
 }
 

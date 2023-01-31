@@ -21,7 +21,8 @@ export type Props = {
 	messages?: any,
 	fetchMessages?: any,
 	fetchFriends?: any,
-	fetchBlockeds?: any
+	fetchBlockeds?: any,
+	fetchGameHistory?: any
 };
 
 /**
@@ -37,6 +38,7 @@ const App: React.FC<Props> = (props) => {
 	useEffect(() => {
 		if (isLoggedIn()) {
 			props.fetchBlockeds();
+			props.fetchGameHistory();
 			props.fetchFriends().then(setLoaded(true));
 		}
 	}, [user])

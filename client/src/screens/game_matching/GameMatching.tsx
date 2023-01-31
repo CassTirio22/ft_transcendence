@@ -1,24 +1,37 @@
 import React, { useEffect } from 'react'
+import { connect } from 'react-redux';
 import { useNavigate } from 'react-router-dom'
+import { gameStateToProps, mapDispatchToProps } from '../../store/dispatcher';
 import "./style.scss"
 
-const GameMatching = () => {
+type Props = {
+	game?: any,
+	gameMaking?: any,
+}
+
+const GameMatching = (props: Props) => {
 
 	const navigate = useNavigate();
-
+	
 	useEffect(() => {
 		document.body.classList.add("full-screen");
-		const timout = setTimeout(() => {
-			navigate("/play/ZtW-jWJqp");
-		}, 2500);
-
+		const out = setTimeout(() => {
+			props.gameMaking();
+		}, 100);
 		return () => {
 			document.body.classList.remove("full-screen");
-			clearTimeout(timout);
+			clearTimeout(out);
 		}
 	}, [])
+
+	useEffect(() => {
+		if (props.game) {
+			navigate(`/play/${props.game.address}`)
+		}
+	}, [props.game])
 	
-  return (
+	
+  	return (
 		<div id="game-matching">
 			<div className='center'>
 				<h1>You will be match with someone soon</h1>
@@ -43,7 +56,7 @@ const GameMatching = () => {
 				</div>
 			</div>
 		</div>
-  )
+  	)
 }
 
-export default GameMatching
+export default connect(gameStateToProps, mapDispatchToProps)(GameMatching);

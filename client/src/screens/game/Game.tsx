@@ -128,18 +128,76 @@ const loop = (new_pos: any, set_score: any) => {
 	new_pos.current(player_y, computer_y, ball_x, ball_y);
 }
 
+type Update = {
+	player_1: {
+		x: number,
+		y: number
+	},
+	player_2: {
+		x: number,
+		y: number
+	},
+	ball: {
+		x: number,
+		y: number
+	}
+}
+
 const Game = () => {
 	const navigate = useNavigate();
 	const {in_game} = useContext(SocketContext);
-	const new_pos = useRef((player_1_y: number, player_2_y: number, ball_x: number, ball_y: number) => {});
+	const new_pos = useRef((player_1_x: number, player_1_y: number, player_2_x: number, player_2_y: number, ball_x: number, ball_y: number) => {});
 	const set_score = useRef((player_1: number, player_2: number) => {});
 	const {user} = useContext(AuthContext);
+	const isup = useRef(false);
+	const isdown = useRef(false);
 
 	const socket = useRef<any | null>(null);
+
+	const send_socket = (message: any, type: string) => {
+		if (socket.current) {
+			socket.current.emit(type, message);
+		}
+	}
+
+	const key_down_handler = (e: any) => {
+		if (e.key == "ArrowDown") {
+			isdown.current = true;
+			send_socket({
+				up: isup.current,
+				down: isdown.current,
+			}, "input")
+		} else if (e.key == "ArrowUp") {
+			isup.current = true;
+			send_socket({
+				up: isup.current,
+				down: isdown.current,
+			}, "input")
+		}
+	}
+
+	const key_up_handler = (e: any) => {
+		if (e.key == "ArrowDown") {
+			isdown.current = false;
+			send_socket({
+				up: isup.current,
+				down: isdown.current,
+			}, "input")
+		} else if (e.key == "ArrowUp") {
+			isup.current = false;
+			send_socket({
+				up: isup.current,
+				down: isdown.current,
+			}, "input")
+		}
+	}
 
 	useEffect(() => {
 		document.body.classList.add("full-screen");
 		in_game(true);
+
+		const key_down_inter = window.addEventListener("keydown", key_down_handler);
+		const key_up_inter = window.addEventListener("keyup", key_up_handler);
 
 		if (user.token && !socket.current) {
 			socket.current = io(socket_url + "/game", {
@@ -155,14 +213,32 @@ const Game = () => {
 			socket.current.on('disconnect', () => {
 				console.log("disconnected")
 			});
+
+			socket.current.on('start', () => {
+				console.log("start")
+			});
+
+			socket.current.on('error', () => {
+				console.log("error")
+			});
+
+			socket.current.on('join', () => {
+				console.log("join")
+			});
+
+			socket.current.on('watch', () => {
+				console.log("watch")
+			});
+
+			socket.current.on('update', (e: Update) => {
+				new_pos.current(e.player_1.x, e.player_1.y, e.player_2.x, e.player_2.y, e.ball.x, e.ball.y);
+			});
 		}
-		const inter = setInterval(() => {
-			loop(new_pos, set_score)
-		}, interval)
 		return () => {
 			document.body.classList.remove("full-screen");
+			window.removeEventListener("keydown", key_down_handler);
+			window.removeEventListener("keyup", key_up_handler);
 			in_game(false);
-			clearInterval(inter)
 		}
 	}, [])
 	

@@ -95,9 +95,9 @@ const ClassicGame = (props: GameProps) => {
 	const {user} = useContext(AuthContext);
 	const [reload, setReload] = useState(0);
 
-	const get_new_pos = (player_1_y: number, player_2_y: number, ball_x: number, ball_y: number) => {
+	const get_new_pos = (player_1_x: number, player_1_y: number, player_2_x: number, player_2_y: number, ball_x: number, ball_y: number) => {
 		const ratio = main_width / 1000;
-		draw_game(contextRef.current, player_1_y * ratio - 5, 0, player_2_y * ratio - 5, 0, ball_x * ratio, ball_y * ratio, user.store.selected_ball, user.store.selected_pad, "");
+		draw_game(contextRef.current, player_1_y * ratio, player_1_x * ratio, player_2_y * ratio, player_2_x * ratio, ball_x * ratio, ball_y * ratio, user.store.selected_ball, user.store.selected_pad, "");
 	}
 
 	const set_score = (player_1: number, player_2: number) => {

@@ -397,13 +397,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 					game: game,
 					player1: await this.userService.userById(game.winner_id), 
 					player2: await this.userService.userById(game.loser_id),
-					pong: new Pong(60, 3, game.address,game.winner_id, game.loser_id)
+					pong: new Pong(1, 3, game.address,game.winner_id, game.loser_id)
 				});
 			}
 			client.join(game.address);
 		}
 		const pending: Game = games.pending.find(game => game.type == GameType.competitive && game.winner != null && game.loser != null);
-		const joinable: Game = games.pending.find(game => game.address = address);
+		const joinable: Game = games.pending.find(game => game.address == address);
 
 		//we check if a game can start with user right now
 		if (games.ongoing && games.ongoing != undefined) {
@@ -413,6 +413,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//if competitive is full let's start a pending game
 		else if (pending && pending != undefined) {
 			client.emit("join", {address: pending.address});
+			console.log(pending)
 			this._startGame(this.channels.get(pending.address), client, user);
 		}
 		//if no waiting competitive we want to play a friendly

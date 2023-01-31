@@ -40,7 +40,7 @@ let timout: any = null;
 
 let tic = 0;
 
-const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, player1_x: number, player2_y: number, player2_x: number, ball_x: number, ball_y: number, ball_style: string, player_1_style: string, player_2_style: string) => {
+const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, player1_x: number, player2_y: number, player2_x: number, ball_x: number, ball_y: number, ball_style: string, player_1_style: string, player_2_style: string, ratio: number) => {
 	tic += 1;
 	if (tic > 100)
 		tic = 0;
@@ -69,9 +69,9 @@ const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, 
 	context.clearRect(-100, -100, context.canvas.width + 100, context.canvas.height + 100);
 	context.fillStyle = '#000';
 	context.fillRect(0, 0, main_width, main_height);
-	draw_ball(ball_x, ball_y, tic, ball_style, context);
-	draw_pad(player1_x, player1_y, tic, player_1_style == "classic-invisible" ? "classic-write" : player_1_style, context);
-	draw_pad(player2_x, player2_y, tic, player_2_style == "classic-invisible" ? "classic-impossible" : player_2_style, context);
+	draw_ball(ball_x, ball_y, tic, ball_style, context, ratio);
+	draw_pad(player1_x, player1_y, tic, player_1_style == "classic-invisible" ? "classic-write" : player_1_style, context, ratio);
+	draw_pad(player2_x, player2_y, tic, player_2_style == "classic-invisible" ? "classic-impossible" : player_2_style, context, ratio);
 
 	context.strokeStyle = "rgba(255, 255, 255, 0.6)";
 	
@@ -97,7 +97,7 @@ const ClassicGame = (props: GameProps) => {
 
 	const get_new_pos = (player_1_x: number, player_1_y: number, player_2_x: number, player_2_y: number, ball_x: number, ball_y: number) => {
 		const ratio = main_width / 1000;
-		draw_game(contextRef.current, player_1_y * ratio, player_1_x * ratio, player_2_y * ratio, player_2_x * ratio, ball_x * ratio, ball_y * ratio, user.store.selected_ball, user.store.selected_pad, "");
+		draw_game(contextRef.current, player_1_y * ratio, player_1_x * ratio, player_2_y * ratio, player_2_x * ratio, ball_x * ratio, ball_y * ratio, user.store.selected_ball, user.store.selected_pad, "", ratio);
 	}
 
 	const set_score = (player_1: number, player_2: number) => {

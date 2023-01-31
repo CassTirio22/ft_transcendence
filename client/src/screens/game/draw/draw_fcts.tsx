@@ -9,7 +9,7 @@ function drawCircle(x: number, y: number, radius: number, context: CanvasRenderi
     context.stroke();
 }
 
-export const draw_ball = (ball_x: number, ball_y: number, tic: number, key: string, context: CanvasRenderingContext2D | null) => {
+export const draw_ball = (ball_x: number, ball_y: number, tic: number, key: string, context: CanvasRenderingContext2D | null, ratio: number) => {
     if (!context) {
         return;
     }
@@ -40,12 +40,12 @@ export const draw_ball = (ball_x: number, ball_y: number, tic: number, key: stri
     context.fillStyle = ball.color;
     context.strokeStyle = ball.color;
     if (ball.shape == "square")
-	    context.fillRect(ball_x - 5, ball_y - 5, 10, 10);
+	    context.fillRect(ball_x - 5, ball_y - 5, 14 * ratio, 14 * ratio);
     else
-        drawCircle(ball_x, ball_y, 5, context);
+        drawCircle(ball_x, ball_y, 7 * ratio, context);
 }
 
-export const draw_pad = (pad_x: number, pad_y: number, tic: number, key: string, context: CanvasRenderingContext2D | null) => {
+export const draw_pad = (pad_x: number, pad_y: number, tic: number, key: string, context: CanvasRenderingContext2D | null, ratio: number) => {
     if (!context) {
         return;
     }
@@ -78,8 +78,8 @@ export const draw_pad = (pad_x: number, pad_y: number, tic: number, key: string,
     if (ball.type == "dotted") {
         context.setLineDash([6]);
         context.strokeStyle = ball.color;
-        context.strokeRect(pad_x - 7, pad_y - 45, 15, 91);
+        context.strokeRect(pad_x - 7 * ratio, pad_y - 45 * ratio, 15 * ratio, 91 * ratio);
     } else {
-        context.fillRect(pad_x - 7, pad_y - 45, 15, 91);
+        context.fillRect(pad_x - 7 * ratio, pad_y - 45 * ratio, 15 * ratio, 91 * ratio);
     }
 }

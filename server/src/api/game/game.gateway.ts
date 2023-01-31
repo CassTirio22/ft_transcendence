@@ -182,7 +182,9 @@ class Pong {
 	}
 
 	_update_ball_position() {
-		this._ball_acceleration();
+		// this._ball_acceleration();
+		console.log("SPEED : " +this.speed);
+		console.log("DIRECTION : " +this.direction.x + "  "+this.direction.y);
 		const tmp: Coordonates = {x: this.direction.x * this.speed, y: this.direction.y * this.speed};
 		this.ball = this._sum_coordonates(this.ball, tmp);
 	}
@@ -432,7 +434,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			}
 			client.join(game.address);
 		}
-		const pending: Game = games.pending.find(game => game.type == GameType.competitive && game.winner != null && game.loser != null);
+		const pending: Game = games.pending.find(game => game.type == GameType.competitive && game.winner_id == user.id);
 		const joinable: Game = games.pending.find(game => game.address == address);
 
 		//we check if a game can start with user right now
@@ -443,7 +445,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//if competitive is full let's start a pending game
 		else if (pending && pending != undefined) {
 			client.emit("join", {address: pending.address});
-			console.log(pending)
 			this._startGame(this.channels.get(pending.address), client, user);
 		}
 		//if no waiting competitive we want to play a friendly

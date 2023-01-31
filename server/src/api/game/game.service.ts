@@ -167,7 +167,7 @@ export class GameService {
 	public async allGames(user: User): Promise< IGames | never > {
 		const games: Game[] = await this.gameRepository.createQueryBuilder("game")
 			.innerJoinAndSelect("game.winner", "winner")
-			.innerJoinAndSelect("game.loser", "loser")
+			.leftJoinAndSelect("game.loser", "loser")
 			.select()
 			.where(":player IN (winner.id, loser.id)", {player: user.id})
 			.orderBy("game.date", 'ASC')

@@ -374,6 +374,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//we check if everyone is connected and not playing
 		this.playing.set(user.id, {client: client, isPlaying: false});
 		if (
+			!game.player2 ||
 			!this.playing.has(game.player1.id) || 
 			!this.playing.has(game.player2.id) ||
 			this.playing.get(game.player1.id).isPlaying ||
@@ -424,31 +425,38 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//we set all pending match for this user
 		for (let index = 0; index < games.pending.length; index++) {
 			const game: Game = games.pending[index];
-			if (!this.channels.has(game.address)) {
-				this.channels.set(game.address, {
-					game: game,
-					player1: await this.userService.userById(game.winner_id), 
-					player2: await this.userService.userById(game.loser_id),
-					pong: new Pong(1, 3, game.address,game.winner_id, game.loser_id)
-				});
-			}
+			this.channels.set(game.address, {
+				game: game,
+				player1: await this.userService.userById(game.winner_id), 
+				player2: await this.userService.userById(game.loser_id),
+				pong: new Pong(1, 3, game.address,game.winner_id, game.loser_id)
+			});
 			client.join(game.address);
 		}
-		const pending: Game = games.pending.find(game => game.type == GameType.competitive && game.winner_id == user.id);
+		const pending: Game = games.pending.find(
+			game => game.type == GameType.competitive &&
+			( game.winner_id == user.id || game.loser_id == user.id)
+		);
 		const joinable: Game = games.pending.find(game => game.address == address);
 
 		//we check if a game can start with user right now
 		if (games.ongoing && games.ongoing != undefined) {
+			console.log("1");
+
 			client.join(games.ongoing.address);
 			this._recoverGame(this.ongoing.find( game => game.game.id == games.ongoing.id), user, client);
 		}
 		//if competitive is full let's start a pending game
 		else if (pending && pending != undefined) {
+			console.log("2");
+
 			client.emit("join", {address: pending.address});
 			this._startGame(this.channels.get(pending.address), client, user);
 		}
 		//if no waiting competitive we want to play a friendly
 		else if (address && joinable && joinable != undefined) {
+			console.log("3");
+
 			//no 2nd player => join the game
 			if (joinable.loser == null) {
 				await this.gameService.joinGame({address: joinable.address}, user);
@@ -462,6 +470,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			}
 		}
 		else {
+			console.log("4");
 			this._disconnnect_player(user.id);
 		}
 	}

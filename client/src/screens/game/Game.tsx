@@ -143,6 +143,11 @@ type Update = {
 	}
 }
 
+type Score = {
+	player_1: number,
+	player_2: number
+}
+
 const Game = () => {
 	const navigate = useNavigate();
 	const {in_game} = useContext(SocketContext);
@@ -228,6 +233,10 @@ const Game = () => {
 
 			socket.current.on('watch', () => {
 				console.log("watch")
+			});
+
+			socket.current.on('score', (e: Score) => {
+				set_score.current(e.player_1, e.player_2);
 			});
 
 			socket.current.on('update', (e: Update) => {

@@ -80,7 +80,7 @@ class Pong {
 	public framecount: number;
 
 	constructor(framerate: number, cooldown: number, address: string, player1: number, player2: number) {
-		this.speed = 1 ;
+		this.speed = 1;
 		this.direction = {x: 1, y: 0};
 		this.size_1 = {x: 10, y: 50};
 		this.size_2 = {x: 10, y: 50};
@@ -114,10 +114,16 @@ class Pong {
 		}
 
 		this._update_player_position();
-		if (!this._check_cooldown()) {
-			return true;
-		}
+		// if (!this._check_cooldown()) {
+		// 	return true;
+		// }
 		this._update_ball_position();
+		if (playing.has(this.player_1)) {
+			this._check_limits(playing.get(this.player_1).client);
+		}
+		else if (playing.has(this.player_2)) {
+			this._check_limits(playing.get(this.player_2).client);
+		}
 
 
 		const updt: Update = this._create_update_struct();
@@ -177,11 +183,12 @@ class Pong {
 
 	_update_ball_position() {
 		this._ball_acceleration();
-		this._sum_coordonates(this.ball, this.direction);
+		const tmp: Coordonates = {x: this.direction.x * this.speed, y: this.direction.y * this.speed};
+		this.ball = this._sum_coordonates(this.ball, tmp);
 	}
 
 	_ball_acceleration() {
-		this.speed *= 0.0001;
+		this.speed += this.speed * 0.0001;
 	}
 
 	_check_borders(ball: Coordonates, size: Coordonates): boolean {
@@ -191,14 +198,19 @@ class Pong {
 		return false;
 	}
 
-	_check_limits(ball: Coordonates): boolean {
-		if (ball.x >= 1000 ) {
+	_check_limits(client: Socket): boolean {
+		if (this.ball.x >= 1000 ) {
 			this.score_1++;
-
+			this._reset_ball();
+			client.to(this.address).emit("score", {player_1: this.score_1, player_2: this.score_2});
+			client.emit("score", {player_1: this.score_1, player_2: this.score_2});
 			return true;
 		}
-		else if ( ball.x <= 0 ) {
+		else if (this.ball.x <= 0 ) {
 			this.score_2++;
+			this._reset_ball();
+			client.to(this.address).emit("score", {player_1: this.score_1, player_2: this.score_2});
+			client.emit("score", {player_1: this.score_1, player_2: this.score_2});
 			return true;
 		}
 		return false;
@@ -245,6 +257,7 @@ class Pong {
 	_reset_ball(): any {
 		this.framecount = 0;
 		this.speed = 1;
+		this.ball = {x: 500, y: 500};
 		let x: number = Math.random() * 2 - 1;
 		if (x === 0) {
   			x = Math.random() < 0.5 ? -1 : 1;

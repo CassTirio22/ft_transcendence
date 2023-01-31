@@ -84,6 +84,11 @@ export function createSocketCtx() {
                     props.changeFriendStatus(e);
                 });
             }
+            return () => {
+                if (socket.current) {
+                    socket.current.close()
+                }
+            }
         }, [user])
 
 		return (

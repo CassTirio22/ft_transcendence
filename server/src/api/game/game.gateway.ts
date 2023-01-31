@@ -193,9 +193,12 @@ class Pong {
 		this._ball_acceleration();
 		const tmp: Coordonates = {x: this.direction.x * this.speed, y: this.direction.y * this.speed};
 		this.ball = this._sum_coordonates(this.ball, tmp);
-		if (this._check_players()) {
-			console.log("INTERSECTION");
-			this._bounce_player();
+		const bouncing_player: Coordonates = this._check_players();
+		if (bouncing_player) {
+			this._bounce_player(bouncing_player);
+		}
+		else if (this._check_borders()) {
+			this._bounce_border();
 		}
 	}
 
@@ -203,8 +206,8 @@ class Pong {
 		this.speed += this.speed * 0.0001;
 	}
 
-	_check_borders(ball: Coordonates, size: Coordonates): boolean {
-		if (ball.y + (size.y / 2) >= 1000 || ball.y - (size.y / 2) <= 0) {
+	_check_borders(): boolean {
+		if (this.ball.y + (this.ball_size.y / 2) >= 1000 || this.ball.y - (this.ball_size.y / 2) <= 0) {
 			return true;
 		}
 		return false;
@@ -235,11 +238,11 @@ class Pong {
 		};
 	}
 
-	_bounce_player() {
-		this.direction = {
-			x: -this.direction.x,
-			y: -this.direction.y
-		}
+	_bounce_player(player: Coordonates) {
+		this.direction = this._normalize_coordonates({
+			x: this.ball.x - player.x,
+			y: this.ball.y - player.y
+		});
 	}
 
 	//left = top left, right = down right
@@ -247,26 +250,26 @@ class Pong {
 		return (
 			{top_left: {
 				x: pos.x - (size.x / 2),
-				y: pos.y - (size.y / 2)
+				y: pos.y + (size.y / 2)
 			},
 			down_right: {
 				x: pos.x + (size.x / 2),
-				y: pos.y + (size.y / 2)
+				y: pos.y - (size.y / 2)
 			}
 		});
 	}
 
-	_check_players() {
+	_check_players(): Coordonates {
 		const corner_1: Corners = this._get_corners(this.pos_1, this.size_1);
 		const corner_2: Corners = this._get_corners(this.pos_2, this.size_2);
 		const ball_corner: Corners = this._get_corners(this.ball, this.ball_size);
-		if ( 
-			this._check_rectangle_intersection(corner_1, ball_corner) ||
-			this._check_rectangle_intersection(corner_2, ball_corner)
-		) {
-			return true;
+		if (this._check_rectangle_intersection(corner_1, ball_corner)) {
+			return this.pos_1;
 		}
-		return false;
+		else if (this._check_rectangle_intersection(corner_2, ball_corner)) {
+			return this.pos_2;
+		}
+		return null;
 	}
 
 	_check_rectangle_intersection(player: Corners, ball: Corners): boolean {
@@ -304,6 +307,11 @@ class Pong {
 			x: A.x + B.x,
 			y: A.y + B.y
 		}
+	}
+
+	_normalize_coordonates(coord: Coordonates): Coordonates {
+		const magnitude: number = Math.sqrt( Math.pow(coord.x, 2) + Math.pow(coord.y, 2) );
+		return {x: coord.x / magnitude, y: coord.y / magnitude};
 	}
 }
 

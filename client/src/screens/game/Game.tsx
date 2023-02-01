@@ -37,6 +37,7 @@ type Props = {
 	game_history?: any,
 	fetchSelectedGame?: any,
 	clearGame?: any,
+	fetchGameHistory?: any
 }
 
 const Game = (props: Props) => {
@@ -44,7 +45,7 @@ const Game = (props: Props) => {
 	const {in_game} = useContext(SocketContext);
 	const new_pos = useRef((player_1_x: number, player_1_y: number, player_2_x: number, player_2_y: number, ball_x: number, ball_y: number) => {});
 	const set_score = useRef((player_1: number, player_2: number) => {});
-	const {user} = useContext(AuthContext);
+	const {user, profile} = useContext(AuthContext);
 	const isup = useRef(false);
 	const isdown = useRef(false);
 	const [started, setStarted] = useState(false);
@@ -185,6 +186,8 @@ const Game = (props: Props) => {
 			window.removeEventListener("keydown", key_down_handler);
 			window.removeEventListener("keyup", key_up_handler);
 			props.clearGame();
+			props.fetchGameHistory();
+			profile(user.token);
 			in_game(false);
 			if (socket.current) {
 				socket.current.close()

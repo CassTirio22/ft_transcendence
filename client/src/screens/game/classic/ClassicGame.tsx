@@ -69,9 +69,10 @@ const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, 
 	context.clearRect(-100, -100, context.canvas.width + 100, context.canvas.height + 100);
 	context.fillStyle = '#000';
 	context.fillRect(0, 0, main_width, main_height);
+	const is_player_1 = player1_x < main_width / 2;
 	draw_ball(ball_x, ball_y, tic, ball_style, context, ratio);
-	draw_pad(player1_x, player1_y, tic, player_1_style == "classic-invisible" ? "classic-write" : player_1_style, context, ratio);
-	draw_pad(player2_x, player2_y, tic, player_2_style == "classic-invisible" ? "classic-impossible" : player_2_style, context, ratio);
+	draw_pad(player1_x, player1_y, tic, player_1_style == "classic-invisible" ? is_player_1 ? "classic-write" : "classic-impossible" : player_1_style, context, ratio);
+	draw_pad(player2_x, player2_y, tic, player_2_style == "classic-invisible" ? !is_player_1 ? "classic-write" : "classic-impossible" : player_2_style, context, ratio);
 
 	context.strokeStyle = "rgba(255, 255, 255, 0.6)";
 	

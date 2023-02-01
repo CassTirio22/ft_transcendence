@@ -168,3 +168,48 @@
           }          
     }
 }
+
+.game-asking {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+
+  .big-button {
+    display: block;
+    background-color: var(--primary);
+    max-width: 80%;
+    border-radius: var(--border_radius);
+    cursor: pointer;
+    text-align: center;
+    padding: 10px 20px;
+    border: 2px solid var(--primary);
+    transition: .3s;
+    
+    span {
+      color: #202020;
+      font-weight: bold;
+      font-size: 1.4rem;
+    }
+
+    &:hover {
+      background-color: rgba(77, 165, 224, 1);
+      border-color: rgba(77, 165, 224, 1);
+    }
+
+    &.outline {
+      background-color: var(--transparent);
+
+      span {
+        color: var(--text);
+      }
+
+      &:hover {
+        background-color: rgba(77, 165, 224, .2);
+      }
+    }
+  }
+}

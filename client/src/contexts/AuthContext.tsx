@@ -85,7 +85,7 @@ export function createCtx() {
 			if (!token) {
 				localStorage.clear();
 				unset_instance_token();
-				setUser(reset_user);
+				setUser({...reset_user});
 				return "error";
 			}
 			set_instance_token(token);
@@ -122,7 +122,7 @@ export function createCtx() {
 			if (!token) {
 				localStorage.clear();
 				unset_instance_token();
-				setUser(reset_user);
+				setUser({...reset_user});
 				return "error";
 			} else if (token.length < 16) {
 				return token;
@@ -153,7 +153,7 @@ export function createCtx() {
 			if (!user) {
 				localStorage.clear();
 				unset_instance_token();
-				setUser(reset_user);
+				setUser({...reset_user});
 				return ""
 			}
 			const custom = user.custom == null || user.custom == "{}" ? {

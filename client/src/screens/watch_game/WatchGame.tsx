@@ -21,6 +21,12 @@ const WatchGame = (props: Props) => {
 
 	useEffect(() => {
 		props.fetchWatch();
+
+		const inter = setInterval(() => props.fetchWatch(), 10000);
+
+		return () => {
+			clearInterval(inter);
+		}
 	}, [])
 		
 	return (

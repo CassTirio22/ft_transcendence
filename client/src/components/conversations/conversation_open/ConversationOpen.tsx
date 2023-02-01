@@ -235,7 +235,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 			<div className='conversation-header'>
 				<div>
 					<span>{current_conversation.title}</span>
-					<Button onClick={() => launch_game()} variant='outlined'>Launch game</Button>
+					<Button size='small' onClick={() => launch_game()} variant='outlined'>Launch game</Button>
 				</div>
 				{
 					props.messages.current.is_channel ?

@@ -12,6 +12,7 @@ import "./style.scss"
 type Props = {
 	friends?: any;
 	game_history?: any;
+	watch?: any;
 }
 
 const Home = (props: Props) => {
@@ -66,10 +67,10 @@ const Home = (props: Props) => {
 					{
 						props.game_history.pending.map((elem: any, id: number) => {
 							return (
-								<div key={id}>
-									<span>{elem.type == 0 ? "friendly" : "competitive"}</span>
+								<div className='game-list-elem' key={id}>
+									<span style={{color: elem.type == 0 ? "var(--success)" : "var(--error)"}}>{elem.type == 0 ? "friendly" : "competitive"}</span>
 									<span>{elem.address}</span>
-									<Button onClick={() => navigate(`/play/${elem.address}`)}>Rejoin</Button>
+									<Button variant='outlined' onClick={() => navigate(`/play/${elem.address}`)}>Rejoin</Button>
 								</div>
 							)
 						})
@@ -78,10 +79,10 @@ const Home = (props: Props) => {
 						!props.game_history.ongoing ? null :
 						<>
 						<h3>Ongoing game</h3>
-						<div >
-							<span>{props.game_history.ongoing.type == 0 ? "friendly" : "competitive"}</span>
+						<div className='game-list-elem'>
+							<span style={{color: props.game_history.ongoing.type == 0 ? "var(--success)" : "var(--error)"}}>{props.game_history.ongoing.type == 0 ? "friendly" : "competitive"}</span>
 							<span>{props.game_history.ongoing.address}</span>
-							<Button onClick={() => navigate(`/play/${props.game_history.ongoing.address}`)}>Rejoin</Button>
+							<Button variant='outlined' onClick={() => navigate(`/play/${props.game_history.ongoing.address}`)}>Rejoin</Button>
 						</div>
 						</>
 					}
@@ -89,10 +90,12 @@ const Home = (props: Props) => {
 				<div className='col home-box'>
 				<h2>Want to watch a game ?</h2>
 				{
-					props.game_history.pending.map((elem: any, id: number) => {
+					props.watch.watch.map((elem: any, id: number) => {
 						return (
-							<div key={id}>
-
+							<div className='game-list-elem' key={id}>
+								<span className='type' style={{color: elem.type == 0 ? "var(--success)" : "var(--error)"}}>{elem.type == 0 ? "friendly" : "competitive"}</span>
+								<span>{elem.address}</span>
+								<Button variant='outlined' onClick={() => navigate(`/play/${elem.address}`)}>Watch</Button>
 							</div>
 						)
 					})

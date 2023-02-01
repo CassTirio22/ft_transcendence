@@ -85,8 +85,13 @@ const GameMatching = (props: Props) => {
 		)
 	}
 	return (
-		<div className='game-matching'>
-			<Button onClick={() => launch_match()}>Really?</Button>
+		<div className='game-asking'>
+			<div onClick={() => launch_match()} className='big-button'>
+				<span>I want to start a game against some random people!</span>
+			</div>
+			<div onClick={() => navigate("/")} className='big-button outline'>
+				<span>Naaah, I'm not good enough to try real game...</span>
+			</div>
 		</div>
 	)
 }

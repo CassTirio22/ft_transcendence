@@ -92,36 +92,12 @@ const Game = (props: Props) => {
 		}
 	}
 
-	const get_out = () => {
-		if (watch == "watch") {
-			navigate("/watch")
-		} else if (watch == "") {
-			navigate("/watch-home")
-		} else {
-			navigate("/")
-		}
-	}
-
-	const event_stop = (e: any) => {
-		console.log("coucou")
-		if (true) {
-		
-			// Cancel the event and show alert that
-			// the unsaved changes would be lost
-			e.preventDefault();
-			e.returnValue = '';
-		}
-	}
-
 	useEffect(() => {
 		document.body.classList.add("full-screen");
 		in_game(true);
 
 		window.addEventListener("keydown", key_down_handler);
 		window.addEventListener("keyup", key_up_handler);
-		window.addEventListener("popstate", get_out)
-
-		window.addEventListener('beforeunload', event_stop);
 
 		if (user.token && !socket.current) {
 
@@ -178,7 +154,7 @@ const Game = (props: Props) => {
 
 			socket.current.on('error', () => {});
 
-			socket.current.on('join', () => {});
+			socket.current.on('join', () => {console.log("join")});
 
 			socket.current.on('watch', () => {
 				props.fetchSelectedGame(game_id).then((e: any) => {
@@ -205,11 +181,7 @@ const Game = (props: Props) => {
 			document.body.classList.remove("full-screen");
 			window.removeEventListener("keydown", key_down_handler);
 			window.removeEventListener("keyup", key_up_handler);
-			window.removeEventListener('beforeunload', event_stop);
 			props.clearGame();
-			setTimeout(() => {
-				window.removeEventListener("popstate", get_out)
-			}, 100);
 			in_game(false);
 			if (socket.current) {
 				socket.current.close()

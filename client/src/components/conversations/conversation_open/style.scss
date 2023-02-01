@@ -92,6 +92,22 @@
                 }
             }
 
+            .match-message {
+                display: flex;
+                border: 2px solid var(--divider);
+                border-radius: var(--border_radius);
+                padding: 20px;
+                flex-direction: column;
+                gap: 20px;
+
+                .match-header {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 10px;
+                }
+            }
+
             &:hover {
                 background-color: rgba($color: #fff, $alpha: .1);
             }

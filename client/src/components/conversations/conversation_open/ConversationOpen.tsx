@@ -10,6 +10,7 @@ import no_yet from "../../../assets/images/no_friends_yet.svg"
 import ImageBox from '../../main/image_box/ImageBox';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { CONV_LVL, TOAST_LVL } from '../../../constants/constants';
+import axios from "../../../service/axios"
 
 type Props = {
 	messages?: any;
@@ -116,11 +117,12 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 	const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement|null>(null);
 	const open = Boolean(anchorEl);
 	const {user} = useContext(AuthContext);
-	
+	let { channel_id, direct_id } = useParams();
 	const {show_profile} = useContext(PopupContext);
 	const scroll_view = createRef<HTMLDivElement>();
-	
+	const {set_toast} = useContext(ToastContext);
 	let navigate = useNavigate();
+	const {send_message} = useContext(SocketContext);
 
 	useEffect(() => {
 		if (scroll_view.current)
@@ -160,6 +162,42 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 		if (scroll_view.current)
 			scroll_view.current.scrollTo(0, scroll_view.current.scrollHeight);
 	}, [scroll_view])
+
+	const send = (message: string) => {
+		if (channel_id) {
+			props.sendChannel({origin: parseInt(channel_id), content: message}).then((e: any) => {
+				if (e.error?.message?.includes("401")) {
+					props.fetchMessages({user: user, channel_id: null, direct_id: null});
+					setTimeout(() => {
+						set_toast(TOAST_LVL.ERROR, "Unauthorize", "You cannot send message to this channel. You have probably been kiked or banned.")
+					}, 100);
+				}
+			})
+		} else if (direct_id) {
+			props.sendDirect({origin: parseInt(direct_id), content: message}).then((e: any) => {
+				if (e.error?.message?.includes("401")) {
+					props.fetchMessages({user: user, channel_id: null, direct_id: null});
+					setTimeout(() => {
+						set_toast(TOAST_LVL.ERROR, "Unauthorize", "You cannot send message to this user. He has probably blocked you.")
+					}, 100);
+				}
+			})
+		}
+		send_message(direct_id ? parseInt(direct_id) : null, channel_id ? parseInt(channel_id) : null, message);
+		setTimeout(() => {
+			document.getElementById("message-input")?.focus();
+		}, 100);
+	}
+
+	const launch_game = async () => {
+		const ret = await axios.post("/game/create", {friendly: true})
+			.then(e => e.data)
+			.catch(e => null);
+		if (ret) {
+			send(`##frien-game##:${ret.address}`);
+			navigate(`/play?friendly=${ret.address}`);
+		}
+	}
 	
 
 	const EmptyConvOrSelect = () => {
@@ -197,6 +235,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 			<div className='conversation-header'>
 				<div>
 					<span>{current_conversation.title}</span>
+					<Button onClick={() => launch_game()} variant='outlined'>Launch game</Button>
 				</div>
 				{
 					props.messages.current.is_channel ?
@@ -218,10 +257,38 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 					{
 						[...current_conversation.messages].map((message: Message, id: number) => {
 							const sender: User = current_conversation.members.filter((mem: User) => mem.id == message.author_id)[0];
-							console.log(sender)
 							if (!sender)
 								return null
 							const created_at = new Date(message.date);
+
+							if (message.content.startsWith("##frien-game##:")) {
+								const yet_join = current_conversation.messages.filter((elem: any) => elem.content.startsWith(`##frien-join##:${message.content.substring(15)}`)).length;
+								const join_send = () => {
+									if (message.author_id != user.id)
+										send(`##frien-join##:${message.content.substring(15)}|${user.id}`)
+									if (yet_join && user.id != sender.id) {
+										navigate(`/play/${message.content.substring(15)}?type=watch`);
+									} else {
+										navigate(`/play?friendly=${message.content.substring(15)}${user.id == sender.id ? "&is_creator=true" : ""}`);
+									}
+								}
+
+								return (
+									<div className='message-div' key={id}>
+										<div className='match-message'>
+											<div className='match-header'>
+												<ImageBox is_you={user.id == sender.id} user={sender} onClick={() =>show_profile(sender.id.toString())} />
+												<span className='message-sender-name'>{sender.name}{sender.id == user.id ? " ( you )" : ""} has created a game</span>
+											</div>
+											<Button onClick={join_send}>{user.id == sender.id ? "Re join" : !yet_join ? "Join it" : "Watch game"}</Button>
+										</div>
+									</div>
+								)
+							}
+
+							if (message.content.startsWith("##frien-join##:"))
+								return null;
+
 							return (
 								<div className='message-div' key={id}>
 									<ImageBox is_you={user.id == sender.id} user={sender} onClick={() =>show_profile(sender.id.toString())} />

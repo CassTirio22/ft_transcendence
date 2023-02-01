@@ -1,6 +1,6 @@
 import { Button } from '@mui/material'
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import { AuthContext, SocketContext } from '../..'
 import { socket_url } from '../../constants/constants'
@@ -33,7 +33,9 @@ type Score = {
 type Props = {
 	game?: any;
 	fetchCurrentGame?: any,
-	game_history?: any
+	game_history?: any,
+	fetchSelectedGame?: any,
+	clearGame?: any,
 }
 
 const Game = (props: Props) => {
@@ -47,7 +49,8 @@ const Game = (props: Props) => {
 	const [started, setStarted] = useState(false);
 	const [gameStatus, setgameStatus] = useState("");
 	const {game_id} = useParams();
-
+	let [searchParams, setSearchParams] = useSearchParams();
+	const watch = searchParams.get("type");
 	const socket = useRef<any | null>(null);
 
 	const send_socket = (message: any, type: string) => {
@@ -89,19 +92,39 @@ const Game = (props: Props) => {
 		}
 	}
 
+	const get_out = () => {
+		if (watch == "watch") {
+			navigate("/watch")
+		} else if (watch == "") {
+			navigate("/watch-home")
+		} else {
+			navigate("/")
+		}
+	}
+
+	const event_stop = (e: any) => {
+		console.log("coucou")
+		if (true) {
+		
+			// Cancel the event and show alert that
+			// the unsaved changes would be lost
+			e.preventDefault();
+			e.returnValue = '';
+		}
+	}
+
 	useEffect(() => {
 		document.body.classList.add("full-screen");
 		in_game(true);
 
-		const last_pop = window.onpopstate;
-
 		window.addEventListener("keydown", key_down_handler);
 		window.addEventListener("keyup", key_up_handler);
-		window.addEventListener("popstate", () => {navigate("/")})
+		window.addEventListener("popstate", get_out)
+
+		window.addEventListener('beforeunload', event_stop);
 
 		if (user.token && !socket.current) {
 
-			console.log(game_id)
 			socket.current = io(socket_url + `/game`, {
 				auth: {
 					"address": `${game_id}`
@@ -112,53 +135,62 @@ const Game = (props: Props) => {
 			});
 
 			socket.current.on('connect', () => {
-				props.fetchCurrentGame(game_id).then((e: any) => {
-					console.log(e.payload, "ee")
-					if (e.payload != "") {
-						console.log("set score", e.payload.winnerScore, e.payload.loserScore)
-						set_score.current(e.payload.winnerScore, e.payload.loserScore);
-					}
-				});
-				console.log("connected")
+				if (!watch) {
+					props.fetchCurrentGame().then((e: any) => {
+						console.log(e.payload, "ee")
+						if (e.payload != "") {
+							console.log("set score", e.payload.winnerScore, e.payload.loserScore)
+							set_score.current(e.payload.winnerScore, e.payload.loserScore);
+						}
+					});
+				} else {
+					props.fetchSelectedGame(game_id).then((e: any) => {
+						console.log(e.payload, "ee")
+						if (e.payload != "") {
+							console.log("set score", e.payload.winnerScore, e.payload.loserScore)
+							set_score.current(e.payload.winnerScore, e.payload.loserScore);
+						}
+					});
+				}
 			});
 
 			socket.current.on('disconnect', () => {
-				console.log("disconnect")
 				setgameStatus("stop");
 			});
 
 			socket.current.on('end', () => {
-				console.log("end")
 				setgameStatus("stop");
 			});
 
 			socket.current.on('start', () => {
 				setTimeout(() => {
-					props.fetchCurrentGame(game_id).then((e: any) => {
-						if (e.payload)
-							set_score.current(e.payload.winnerScore, e.payload.loserScore);
-						setTimeout(() => {
-							setgameStatus("started");
-						}, 100);
-					});
+					if (!watch) {
+						props.fetchCurrentGame().then((e: any) => {
+							if (e.payload)
+								set_score.current(e.payload.winnerScore, e.payload.loserScore);
+							setTimeout(() => {
+								setgameStatus("started");
+							}, 100);
+						});
+					}
 				}, 100);
 			});
 
-			socket.current.on('error', () => {
-				console.log("error")
-			});
+			socket.current.on('error', () => {});
 
-			socket.current.on('join', () => {
-				console.log("joinee")
-			});
+			socket.current.on('join', () => {});
 
 			socket.current.on('watch', () => {
-				console.log("watch")
+				props.fetchSelectedGame(game_id).then((e: any) => {
+					if (e.payload)
+						set_score.current(e.payload.winnerScore, e.payload.loserScore);
+					setTimeout(() => {
+						setgameStatus("started");
+					}, 100);
+				});
 			});
 
-			socket.current.on('watch', () => {
-				console.log("watch")
-			});
+			socket.current.on('watch', () => {});
 
 			socket.current.on('score', (e: Score) => {
 				set_score.current(e.player_1, e.player_2);
@@ -173,7 +205,11 @@ const Game = (props: Props) => {
 			document.body.classList.remove("full-screen");
 			window.removeEventListener("keydown", key_down_handler);
 			window.removeEventListener("keyup", key_up_handler);
-			window.removeEventListener("popstate", () => {navigate("/")})
+			window.removeEventListener('beforeunload', event_stop);
+			props.clearGame();
+			setTimeout(() => {
+				window.removeEventListener("popstate", get_out)
+			}, 100);
 			in_game(false);
 			if (socket.current) {
 				socket.current.close()

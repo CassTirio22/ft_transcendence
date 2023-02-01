@@ -25,6 +25,7 @@ const GameMatching = (props: Props) => {
 	}, [])
 
 	useEffect(() => {
+		console.log(props.game)
 		if (props.game) {
 			navigate(`/play/${props.game.address}`)
 		}

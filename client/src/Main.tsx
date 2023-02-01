@@ -13,6 +13,7 @@ import Profile from './screens/profile/Profile';
 import Ranking from './screens/ranking/Ranking';
 import Store from './screens/store/Store';
 import Users from './screens/users/Users';
+import WatchGame from './screens/watch_game/WatchGame';
 /**
  *	React Component
  *	Describe the different possible routes and UI rendered consequently.
@@ -30,7 +31,7 @@ return (
 		<Route path='/play' element={<GameMatching/>} />
 		<Route path='/users/:player_id' element={<Users/>} />
 		<Route path='/play/:game_id' element={<Game/>} />
-		<Route path='/watch' element={<DevAreWorking/>} />
+		<Route path='/watch' element={<WatchGame/>} />
 		<Route path='/ranking' element={<Ranking/>} />
 		<Route path='/me/profile' element={<Profile/>} />
 		<Route path='/me/profile/2fa-activation' element={<DoubleAuth/>} />

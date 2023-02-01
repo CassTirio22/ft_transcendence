@@ -81,15 +81,14 @@ const RenderSend = (props: Props) => {
 	const set_message_shift = (key: string, e: any) => {
 		if (key == "Enter" && last_key.current != "Shift") {
 			e.preventDefault();
-			send();
+			if (message != "")
+				send();
 		} else {
 			last_key.current = key;
 		}
 	}
 
-	console.log(props.status)
-
-	if (props.status != 0)
+	if (props.status != undefined && props.status != 0)
 		return null;
 
 	return (

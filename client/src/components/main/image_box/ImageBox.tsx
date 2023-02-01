@@ -10,7 +10,8 @@ type Props = {
     onClick?: any,
     friends?:any,
     is_you?: boolean,
-    blocked?: any
+    blocked?: any,
+    need_margin?: boolean,
 }
 
 const ImageBox = (props: Props) => {
@@ -33,7 +34,7 @@ const ImageBox = (props: Props) => {
     }
 
     return (
-        <div profile-id={props.user.id} onClick={props.onClick} className={`message-sender-image-container ${status}`}>
+        <div style={props.need_margin == false ? {margin: 0} : {}} profile-id={props.user.id} onClick={props.onClick} className={`message-sender-image-container ${status}`}>
             <img src={generate_url(props.user)} />
         </div>
     )

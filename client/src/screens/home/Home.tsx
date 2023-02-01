@@ -68,8 +68,6 @@ const Home = (props: Props) => {
 	const width = window.innerWidth;
 
 	const graph_data = generate_score_data(user.id, props.game_history.done);
-	console.log(graph_data)
-
 	return (
 		<div id="home">
 			<div className='home-header'>

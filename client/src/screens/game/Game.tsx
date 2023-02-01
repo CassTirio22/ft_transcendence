@@ -2,13 +2,14 @@ import { Button } from '@mui/material'
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { io } from 'socket.io-client'
-import { AuthContext, SocketContext } from '../..'
+import { AuthContext, PopupContext, SocketContext } from '../..'
 import { socket_url } from '../../constants/constants'
 import ClassicGame from './classic/ClassicGame'
 import "./style.scss"
 import "../game_matching/style.scss"
 import { connect } from 'react-redux'
 import { gameStateToProps, mapDispatchToProps } from '../../store/dispatcher'
+import ImageBox from '../../components/main/image_box/ImageBox'
 
 type Update = {
 	player_1: {
@@ -52,6 +53,7 @@ const Game = (props: Props) => {
 	let [searchParams, setSearchParams] = useSearchParams();
 	const watch = searchParams.get("type");
 	const socket = useRef<any | null>(null);
+	const {show_profile} = useContext(PopupContext);
 
 	const send_socket = (message: any, type: string) => {
 		if (socket.current) {
@@ -111,19 +113,18 @@ const Game = (props: Props) => {
 			});
 
 			socket.current.on('connect', () => {
+				console.log("connect")
 				if (!watch) {
 					props.fetchCurrentGame().then((e: any) => {
-						console.log(e.payload, "ee")
-						if (e.payload != "") {
-							console.log("set score", e.payload.winnerScore, e.payload.loserScore)
+						if (e.payload && e.payload != "") {
 							set_score.current(e.payload.winnerScore, e.payload.loserScore);
+						} else {
+							props.fetchSelectedGame(game_id);
 						}
 					});
 				} else {
 					props.fetchSelectedGame(game_id).then((e: any) => {
-						console.log(e.payload, "ee")
-						if (e.payload != "") {
-							console.log("set score", e.payload.winnerScore, e.payload.loserScore)
+						if (e.payload && e.payload != "") {
 							set_score.current(e.payload.winnerScore, e.payload.loserScore);
 						}
 					});
@@ -131,6 +132,7 @@ const Game = (props: Props) => {
 			});
 
 			socket.current.on('disconnect', () => {
+				console.log("disconnect")
 				setgameStatus("stop");
 			});
 
@@ -190,7 +192,7 @@ const Game = (props: Props) => {
 		}
 	}, [])
 	
-	if (gameStatus == "" && props.game?.status != 1) {
+	if ((gameStatus == "" && props.game?.status != 1) || !props.game) {
 		return (
 			<div id="game-matching">
 				<div className='center'>
@@ -219,10 +221,30 @@ const Game = (props: Props) => {
 		)
 	}
 
+
+	const is_watcher = user.id != props.game.loser_id && user.id != props.game.winner_id;
+
 	if (gameStatus == "stop") {
 		return (
-			<div>
-				stop
+			<div className='end-game'>
+				<div className='end-game-center'>
+					<h1>Game completed</h1>
+					<div className='game-winner-loser'>
+						<div className='user-container'>
+							<ImageBox need_margin={false} is_you={user.id == props.game.winner_id} user={props.game.winner} onClick={() =>show_profile(props.game.winner_id.toString())} />
+							<span className='win-name'>{props.game.winner.name} - <span className='win-score'>{props.game.winnerScore}</span></span>
+							<span className='win-box' style={{backgroundColor: "var(--success)"}}>Won</span>
+							<span className='win-elo'>+{props.game.elo} elo</span>
+						</div>
+						<div className='user-container'>
+							<ImageBox need_margin={false} is_you={user.id == props.game.loser_id} user={props.game.loser} onClick={() =>show_profile(props.game.loser_id.toString())} />
+							<span className='win-name'>{props.game.loser.name} - <span className='win-score'>{props.game.loserScore}</span></span>
+							<span className='win-box' style={{backgroundColor: "var(--error)"}}>Lost</span>
+							<span className='win-elo'>-{props.game.elo} elo</span>
+						</div>
+					</div>
+					<Button variant='outlined' onClick={() => navigate("/")}>Return home</Button>
+				</div>
 			</div>
 		)
 	}

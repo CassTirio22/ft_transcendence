@@ -198,7 +198,6 @@ export class GameService {
 			.leftJoinAndSelect("game.loser", "loser")
 			.select()
 			.where("game.address = :gameAddress", {gameAddress: address})
-			.where("game.status = :gameStatus", {gameStatus: GameStatus.ongoing})
 			.getOne();
 	}
 

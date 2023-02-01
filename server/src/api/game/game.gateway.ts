@@ -1,5 +1,5 @@
 import { GameService, IGames } from './game.service';
-import { Game, GameType } from './game.entity';
+import { Game, GameStatus, GameType } from './game.entity';
 import { FriendshipService } from './../user/friendship/friendship.service';
 import { User } from './../user/user.entity';
 import { UserService } from './../user/user.service';
@@ -525,8 +525,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this._startGame(this.channels.get(pending.address), client, user);
 		}
 		//if no waiting competitive we want to play a friendly
-		else if (joinable && joinable != undefined) {
-
+		else if (joinable && joinable != undefined && joinable.status != GameStatus.done) {
 			//no 2nd player => join the game
 			if (joinable.loser == null) {
 				await this.gameService.joinGame({address: joinable.address}, user);
@@ -540,6 +539,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			}
 		}
 		else {
+			console.log("4")
 			this._disconnnect_player(user.id);
 		}
 	}

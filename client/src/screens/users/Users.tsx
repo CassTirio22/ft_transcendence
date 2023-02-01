@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Loading from '../../components/main/loading/Loading';
 import "./style.scss"
 import axios from "../../service/axios"
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { generate_score_data } from '../../functions/score_data';
 import { Area, AreaChart, Tooltip, XAxis, YAxis } from 'recharts';
 import { connect } from 'react-redux';
@@ -21,6 +21,7 @@ const Users = (props: Props) => {
   const {player_id} = useParams();
   const user_id = parseInt(player_id ? player_id : "-1");
   const width = window.innerWidth;
+  const navigate = useNavigate();
 
   const get_user = async () => {
     const ret = await axios.get(`/user/other/${player_id}`)
@@ -91,7 +92,7 @@ const Users = (props: Props) => {
                 const is_winner = user_id == elem.winner_id;
                 const score = `${is_winner ? elem.winnerScore : elem.loserScore}-${is_winner ? elem.loserScore : elem.winnerScore}`
                 return (
-                  <tr key={id}>
+                  <tr onClick={() => navigate(`/play/${elem.address}`)} key={id}>
                     <td><div className='table-elem-card' style={{backgroundColor: is_winner ? "var(--success)" : "var(--error)"}}>{is_winner ? "Won" : "Lost"}</div></td>
                     <td>{date}</td>
                     <td>{is_winner ? elem.winner_id : elem.loser_id}</td>

@@ -183,6 +183,8 @@ export class GameService {
 
 	public async gameByAddress(address: string): Promise<Game | never> {
 		return await this.gameRepository.createQueryBuilder()
+			.innerJoinAndSelect("game.winner", "winner")
+			.innerJoinAndSelect("game.loser", "loser")
 			.select()
 			.where("address = :gameAddress", {gameAddress: address})
 			.getOne();

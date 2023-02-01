@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 import { AuthContext, PopupContext } from '../..'
 import { TOAST_LVL } from '../../constants/constants';
-import { friendsStateToProps } from '../../store/dispatcher';
+import { generate_score_data } from '../../functions/score_data';
+import { friendGameStateToProps, friendsStateToProps } from '../../store/dispatcher';
 import "./style.scss"
 
 const data = [
@@ -56,6 +57,7 @@ const data = [
 
 type Props = {
 	friends?: any;
+	game_history?: any;
 }
 
 const Home = (props: Props) => {
@@ -64,6 +66,9 @@ const Home = (props: Props) => {
 	const {user} = useContext(AuthContext);
 	const navigate = useNavigate();
 	const width = window.innerWidth;
+
+	const graph_data = generate_score_data(user.id, props.game_history.done);
+	console.log(graph_data)
 
 	return (
 		<div id="home">
@@ -89,7 +94,7 @@ const Home = (props: Props) => {
 					</div>
 				</div>
 				<div className='chart-container dashboard-box'>
-					<AreaChart width={width - 440} height={180} data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+					<AreaChart width={width - 440} height={180} data={graph_data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
 						<defs>
 							<linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
 								<stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
@@ -97,9 +102,9 @@ const Home = (props: Props) => {
 							</linearGradient>
 						</defs>
 						<XAxis dataKey="name" />
-						<YAxis />
+						<YAxis type="number" domain={['dataMin', 'dataMax']} />
 						<Tooltip contentStyle={{backgroundColor: "var(--background)"}} />
-						<Area type="monotone" dataKey="uv" stroke="#8884d8" fillOpacity={1} fill="url(#colorUv)" />
+						<Area type="monotone" dataKey="amt" stroke="#8884d8" fillOpacity={1} fill="url(#colorUv)" />
 					</AreaChart>
 				</div>
 			</div>
@@ -107,4 +112,4 @@ const Home = (props: Props) => {
 	)
 }
 
-export default connect(friendsStateToProps, null)(Home)
+export default connect(friendGameStateToProps, null)(Home)

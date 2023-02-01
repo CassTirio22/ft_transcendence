@@ -23,3 +23,5 @@ export const friendsStateToProps = (state: any) => ({friends: state.friends, blo
 export const messagesStateToProps = (state: any) => ({messages: state.messages});
 
 export const gameStateToProps = (state: any) => ({game: state.game, game_history: state.game_history})
+
+export const friendGameStateToProps = (state: any) => ({friends: state.friends, game_history: state.game_history})

@@ -228,6 +228,7 @@ class Pong {
 		if (this.ball.x >= 1000 ) {
 			this.score_1++;
 			this._reset_ball();
+			console.log(this.score_1 + " : " + this.score_2);
 			client.to(this.address).emit("score", {player_1: this.score_1, player_2: this.score_2});
 			client.emit("score", {player_1: this.score_1, player_2: this.score_2});
 			return true;
@@ -235,6 +236,7 @@ class Pong {
 		else if (this.ball.x <= 0 ) {
 			this.score_2++;
 			this._reset_ball();
+			console.log(this.score_1 + " : " + this.score_2);
 			client.to(this.address).emit("score", {player_1: this.score_1, player_2: this.score_2});
 			client.emit("score", {player_1: this.score_1, player_2: this.score_2});
 			return true;
@@ -361,8 +363,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				else if (state == GameState.score) {
 					this.gameService.updateScore({
 						address: game.pong.address,
-						player_1: game.player1.id,
-						player_2: game.player2.id
+						player_1: game.pong.score_1,
+						player_2: game.pong.score_2
 					});
 				}
 			})

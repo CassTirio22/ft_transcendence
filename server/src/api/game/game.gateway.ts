@@ -369,7 +369,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}, 17);
 	}
 
-    async handleConnection(client: Socket, args: {address: string}): Promise<any | never> {
+    async handleConnection(client: Socket): Promise<any | never> {
 		try {
 			// manage auth
 			const token: string = <string>client.handshake.headers.authorization;
@@ -379,7 +379,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.playing.set(user.id, {client: client, isPlaying: false});
 			this.clients.set(client.id, user.id);
 
-			await this._updatePlayer(client, user, args != undefined ? args.address : null);
+			await this._updatePlayer(client, user, client.handshake.auth.address?.toString());
 		}
 		catch (error) {
 			client.emit('error', {message: 'Connection unauthorized.'});
@@ -485,19 +485,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			game => game.type == GameType.competitive &&
 			( game.winner_id == user.id || game.loser_id == user.id)
 		);
-		if (address && address != null) {
+		if (address && address != undefined) {
 			joinable = await this.gameService.gameByAddress(address);
 		}
 
 		//we check if a game can start with user right now
 		if (games.ongoing && games.ongoing != undefined) {
-
 			client.join(games.ongoing.address);
 			this._recoverGame(this.ongoing.find( game => game.game.id == games.ongoing.id), user, client);
 		}
 		//if competitive is full let's start a pending game
 		else if (pending && pending != undefined) {
-
 			client.emit("join", {address: pending.address});
 			this._startGame(this.channels.get(pending.address), client, user);
 		}

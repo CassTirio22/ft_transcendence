@@ -87,6 +87,7 @@ type GameProps = {
 	new_pos: any,
 	set_score: any,
 	other_color: string,
+	your_color: string,
 	reverte: boolean
 }
 
@@ -97,14 +98,15 @@ const ClassicGame = (props: GameProps) => {
 	const {user} = useContext(AuthContext);
 	const [reload, setReload] = useState(0);
 	const color = props.other_color ? JSON.parse(props.other_color).selected_pad : null;
+	const p_color = props.your_color ? JSON.parse(props.your_color).selected_pad : null;
 
 	const get_new_pos = (player_1_x: number, player_1_y: number, player_2_x: number, player_2_y: number, ball_x: number, ball_y: number) => {
 		const ratio = main_width / 1000;
 
 		if (props.reverte) {
-			draw_game(contextRef.current, player_1_y * ratio, (1000 - player_1_x) * ratio, player_2_y * ratio, (1000 - player_2_x) * ratio, (1000 - ball_x) * ratio, ball_y * ratio, user.store.selected_ball, color, user.store.selected_pad, ratio);
+			draw_game(contextRef.current, player_1_y * ratio, (1000 - player_1_x) * ratio, player_2_y * ratio, (1000 - player_2_x) * ratio, (1000 - ball_x) * ratio, ball_y * ratio, user.store.selected_ball, color, p_color, ratio);
 		} else {
-			draw_game(contextRef.current, player_1_y * ratio, player_1_x * ratio, player_2_y * ratio, player_2_x * ratio, ball_x * ratio, ball_y * ratio, user.store.selected_ball, user.store.selected_pad, color, ratio);
+			draw_game(contextRef.current, player_1_y * ratio, player_1_x * ratio, player_2_y * ratio, player_2_x * ratio, ball_x * ratio, ball_y * ratio, user.store.selected_ball, p_color, color, ratio);
 		}
 	}
 

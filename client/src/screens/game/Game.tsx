@@ -100,10 +100,15 @@ const Game = (props: Props) => {
 		window.addEventListener("popstate", () => {navigate("/")})
 
 		if (user.token && !socket.current) {
-			socket.current = io(socket_url + `/game?address=${game_id}`, {
+
+			console.log(game_id)
+			socket.current = io(socket_url + `/game`, {
+				auth: {
+					"address": `${game_id}`
+				},
 				extraHeaders: {
-				  Authorization: `${user.token}`
-				}
+					Authorization: `${user.token}`
+				},
 			});
 
 			socket.current.on('connect', () => {
@@ -214,11 +219,11 @@ const Game = (props: Props) => {
 		)
 	}
 
-	const reverte = props.game.loser_id == user.id;
+	const reverte = (props.game.loser_id == user.id);
 	
   	return (
 		<div id="game">
-			<ClassicGame reverte={reverte} other_color={props.game.winner_id == user.id ? props.game.loser?.custom : props.game.winner?.custom} set_score={set_score} new_pos={new_pos} />
+			<ClassicGame reverte={reverte} your_color={reverte ? props.game.loser?.custom : props.game.winner?.custom} other_color={!reverte ? props.game.loser?.custom : props.game.winner?.custom} set_score={set_score} new_pos={new_pos} />
 		</div>
   	)
 }

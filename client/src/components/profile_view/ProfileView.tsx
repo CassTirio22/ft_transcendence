@@ -168,6 +168,7 @@ const ProfileView = (props: Props) => {
 							<div><span>Game number</span><span>{profile.gamesNumber}</span></div>
 							<div><span>Score</span><span>{profile.score}</span></div>
 						</div>
+						<Button fullWidth={true} variant='outlined' onClick={() => {navigate(`/users/${profile.id}`);setProfile({...profile, id: -1})}}>See game data</Button>
 					</div>
 				</div>
 			</div>

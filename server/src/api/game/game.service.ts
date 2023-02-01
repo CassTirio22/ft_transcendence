@@ -184,9 +184,11 @@ export class GameService {
 	}
 
 	public async allCurrents(): Promise<Game[] | never> {
-		return await this.gameRepository.createQueryBuilder()
-			.select("id")
-			.where("status :gameStatus", {gameStatus: GameStatus.ongoing})
+		return await this.gameRepository.createQueryBuilder("game")
+			.leftJoinAndSelect("game.winner", "winner")
+			.leftJoinAndSelect("game.loser", "loser")
+			.select()
+			.where("game.status = :gameStatus", {gameStatus: GameStatus.ongoing})
 			.getMany();
 	}
 

@@ -94,7 +94,7 @@ const Home = (props: Props) => {
 					</div>
 				</div>
 				<div className='chart-container dashboard-box'>
-					<AreaChart width={width - 440} height={180} data={graph_data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+					<AreaChart width={width < 673 ? width - 60 : width < 800 ? width - 120 : width - 440} height={180} data={graph_data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
 						<defs>
 							<linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
 								<stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>

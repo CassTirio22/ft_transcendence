@@ -89,7 +89,7 @@ function Profile() {
 	}
 
 	return (
-		<div id='profile-main'>
+		<div id='profile-main' className='main-view'>
 			<h1>My profile</h1>
 			<p>Manage your profile settings</p>
 

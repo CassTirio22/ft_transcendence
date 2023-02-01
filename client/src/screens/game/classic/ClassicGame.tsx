@@ -119,8 +119,6 @@ const ClassicGame = (props: GameProps) => {
 	}
 
 	useEffect(() => {}, [props.other_color])
-
-	console.log(color)
 	
 
 	useEffect(() => {

@@ -31,7 +31,16 @@ export const SocketContext = ctxs;
 const theme = createTheme({
 	palette: {
 		mode: "dark",
-	}
+	},
+	components: {
+		MuiDrawer: {
+		  styleOverrides: {
+			paper: {
+			  background: "#121212",
+			}
+		  }
+		}
+	  }
 });
 
 root.render(

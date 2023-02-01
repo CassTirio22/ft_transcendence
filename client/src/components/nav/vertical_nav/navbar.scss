@@ -152,15 +152,10 @@ aside.active nav ul {
 	color: var(--primary);
 }
 
-@media (max-width:500px) {
+@media (max-width: 673px) {
 	aside {
 		display: none;
 	}
-
-	body {
-		padding: 60px 10px 10px 10px;
-	}
-
 }
 
 @media (hover: hover) {
@@ -182,4 +177,94 @@ aside.active nav ul {
 		box-shadow: var(--box_shadow);
 	}
 
+}
+
+.drawer-button {
+	display: none;
+	position: fixed;
+	top: 20px;
+	right: 20px;
+}
+
+@media (max-width: 673px) {
+	.drawer-button {
+		display: flex;
+	}
+}
+
+.drawer-content {
+    background-color: var(--background);
+    padding: 10px;
+
+    .current-account-block {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+
+        .current-account-picture {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary_transparent);
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            margin-right: 10px;
+        }
+        span {
+            color: var(--secondary_text);
+        }
+    }
+
+    ul {
+        li {
+            list-style: none;
+            margin: 5px 0;
+            padding: 5px;
+
+            a {
+                text-decoration: none;
+                
+                .navigation_elem {
+                    display: flex;
+                    align-items: center;
+
+                    i {
+                        color: var(--deactivate);
+                        margin-right: 10px;
+                        width: 20px;
+                        text-align: center;
+                    }
+                    span {
+                        color: var(--secondary_text);
+                    }
+                }
+            }
+
+            .separator {
+                margin-top: 20px;
+
+                h2 {
+                    font-size: 1rem;
+                    text-transform: uppercase;
+                    color: var(--secondary_text);
+
+                    &.main {
+                        font-size: 1.1rem;
+                    }
+                }
+            }
+
+            &.active {
+                background-color: var(--primary_transparent);
+	            border-radius: var(--border_radius);
+                a {
+                    .navigation_elem {
+                        i {color: var(--text)}
+                        span {color: var(--text)}
+                    }
+                }
+            }
+        }
+    }
 }

@@ -72,8 +72,11 @@ export class DirectService {
 		else if (!friendship) {
 			throw new HttpException('Unauthorized. You are not friend with this user.', HttpStatus.UNAUTHORIZED);
 		}
-		else if (other.direct1.length > 0 || other.direct2.length > 0) {
-			throw new HttpException('Conflict. This direct already exists.', HttpStatus.CONFLICT);
+		else if (other.direct1.length > 0) {
+			return other.direct1[0];
+		}
+		else if (other.direct2.length > 0) {
+			return other.direct2[0];
 		}
 		await this._checkEitherBlocked(user.id, other.id);
 		return (await this.directRepository.createQueryBuilder()

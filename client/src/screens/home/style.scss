@@ -5,6 +5,12 @@
     flex-direction: column;
     padding: 20px 20px 20px 80px;
 
+    @media only screen and (max-width: 673px) {
+        & {
+            padding: 20px;
+        }
+    }
+
     .home-header {
         display: flex;
         flex-direction: row;
@@ -29,6 +35,12 @@
         flex-direction: row;
         width: 100%;
         gap: 20px;
+
+        @media only screen and (max-width: 800px) {
+            & {
+                flex-direction: column;
+            }
+        }
     }
 
     .col {

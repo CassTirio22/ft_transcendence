@@ -4,6 +4,7 @@ import friendsSlice from './slices/friends';
 import gamesSlice from './slices/game';
 import gameHistorySlice from './slices/game_history';
 import messagesSlice from './slices/messages';
+import watchSlice from './slices/watch';
 
 
 export const store = configureStore({
@@ -12,6 +13,7 @@ export const store = configureStore({
 		friends: friendsSlice.reducer,
 		blocked: blockedsSlice.reducer,
 		game: gamesSlice.reducer,
-		game_history: gameHistorySlice.reducer
+		game_history: gameHistorySlice.reducer,
+		watch: watchSlice.reducer
 	}
 });

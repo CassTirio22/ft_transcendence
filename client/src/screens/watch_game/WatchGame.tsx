@@ -1,39 +1,34 @@
 import { Button } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react'
+import { connect } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext, PopupContext } from '../..';
 import ImageBox from '../../components/main/image_box/ImageBox';
 import axios from "../../service/axios"
+import { friendGameStateToProps, mapDispatchToProps } from '../../store/dispatcher';
 import "./style.scss"
 
-const WatchGame = () => {
+type Props = {
+	watch?: any;
+	fetchWatch?: any;
+}
 
-	const [games, setGames] = useState([]);
+const WatchGame = (props: Props) => {
+
 	const {user} = useContext(AuthContext);
 	const {show_profile} = useContext(PopupContext);
 	const navigate = useNavigate();
 
-	const load_games = async () => {
-		const ret = await axios.get("/game/currents")
-			.then(e => e.data)
-			.catch(e => null);
-		if (ret) {
-			setGames(ret);
-		}
-	}
-
 	useEffect(() => {
-		load_games();
-	
+		props.fetchWatch();
 	}, [])
-	
 		
 	return (
 		<div id="watch-game" className='main-view'>
 				<h1>Watch game</h1>
 				<div className='games-wrapper'>
 					{
-						games.map((elem: any, number: any) => {
+						props.watch.watch.map((elem: any, number: any) => {
 							const user_1: any = elem.winner;
 							const user_2: any = elem.loser;
 							return (
@@ -56,4 +51,4 @@ const WatchGame = () => {
 	)
 }
 
-export default WatchGame
+export default connect(friendGameStateToProps, mapDispatchToProps)(WatchGame)

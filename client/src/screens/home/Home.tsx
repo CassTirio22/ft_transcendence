@@ -9,52 +9,6 @@ import { generate_score_data } from '../../functions/score_data';
 import { friendGameStateToProps, friendsStateToProps } from '../../store/dispatcher';
 import "./style.scss"
 
-const data = [
-	{
-	  "name": "Page A",
-	  "uv": 4000,
-	  "pv": 2400,
-	  "amt": 2400
-	},
-	{
-	  "name": "Page B",
-	  "uv": 3000,
-	  "pv": 1398,
-	  "amt": 2210
-	},
-	{
-	  "name": "Page C",
-	  "uv": 2000,
-	  "pv": 9800,
-	  "amt": 2290
-	},
-	{
-	  "name": "Page D",
-	  "uv": 2780,
-	  "pv": 3908,
-	  "amt": 2000
-	},
-	{
-	  "name": "Page E",
-	  "uv": 1890,
-	  "pv": 4800,
-	  "amt": 2181
-	},
-	{
-	  "name": "Page F",
-	  "uv": 2390,
-	  "pv": 3800,
-	  "amt": 2500
-	},
-	{
-	  "name": "Page G",
-	  "uv": 3490,
-	  "pv": 4300,
-	  "amt": 2100
-	}
-]
-	
-
 type Props = {
 	friends?: any;
 	game_history?: any;
@@ -104,6 +58,45 @@ const Home = (props: Props) => {
 						<Tooltip contentStyle={{backgroundColor: "var(--background)"}} />
 						<Area type="monotone" dataKey="amt" stroke="#8884d8" fillOpacity={1} fill="url(#colorUv)" />
 					</AreaChart>
+				</div>
+			</div>
+			<div className='row'>
+				<div className='col home-box'>
+				<h2>My pending games</h2>
+					{
+						props.game_history.pending.map((elem: any, id: number) => {
+							return (
+								<div key={id}>
+									<span>{elem.type == 0 ? "friendly" : "competitive"}</span>
+									<span>{elem.address}</span>
+									<Button onClick={() => navigate(`/play/${elem.address}`)}>Rejoin</Button>
+								</div>
+							)
+						})
+					}
+					{
+						!props.game_history.ongoing ? null :
+						<>
+						<h3>Ongoing game</h3>
+						<div >
+							<span>{props.game_history.ongoing.type == 0 ? "friendly" : "competitive"}</span>
+							<span>{props.game_history.ongoing.address}</span>
+							<Button onClick={() => navigate(`/play/${props.game_history.ongoing.address}`)}>Rejoin</Button>
+						</div>
+						</>
+					}
+				</div>
+				<div className='col home-box'>
+				<h2>Want to watch a game ?</h2>
+				{
+					props.game_history.pending.map((elem: any, id: number) => {
+						return (
+							<div key={id}>
+
+							</div>
+						)
+					})
+				}
 				</div>
 			</div>
 		</div>

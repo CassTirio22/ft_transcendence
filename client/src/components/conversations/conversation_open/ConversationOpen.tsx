@@ -195,7 +195,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 			.catch(e => null);
 		if (ret) {
 			send(`##frien-game##:${ret.address}`);
-			navigate(`/play?friendly=${ret.address}`);
+			navigate(`/play/${ret.address}`);
 		}
 	}
 	

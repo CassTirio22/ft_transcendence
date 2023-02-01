@@ -1,5 +1,5 @@
 import { GameService, IGames } from './game.service';
-import { Game, GameStatus, GameType } from './game.entity';
+import { Game, GameType } from './game.entity';
 import { FriendshipService } from './../user/friendship/friendship.service';
 import { User } from './../user/user.entity';
 import { UserService } from './../user/user.service';
@@ -409,7 +409,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			//we add it to the list of connected clients
 			this.playing.set(user.id, {client: client, isPlaying: false});
 			this.clients.set(client.id, user.id);
-
+			console.log(client.handshake.auth)
 			await this._updatePlayer(client, user, client.handshake.auth.address?.toString());
 		}
 		catch (error) {
@@ -454,7 +454,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		) {
 			return false;
 		}
-
 		//they are now officially playing
 		this.playing.set(game.player1.id, {client: client, isPlaying: true});
 		this.playing.set(game.player2.id, {client: client, isPlaying: true});
@@ -479,8 +478,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.gameService.updateGame( {
 			address: game.game.address,
 			winnerId:  game.pong.score_1 > game.pong.score_2 ? game.game.winner_id : game.game.loser_id,
-			winnerScore: game.game.winnerScore,
-			loserScore: game.game.loserScore,
+			winnerScore: game.pong.score_1 > game.pong.score_2 ? game.pong.score_1 : game.pong.score_2,
+			loserScore: game.pong.score_1 > game.pong.score_2 ? game.pong.score_2 : game.pong.score_1,
 			didInterrupt: false,
 		});
 		this.channels.delete(game.game.address);
@@ -510,6 +509,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			game => game.type == GameType.competitive &&
 			( game.winner_id == user.id || game.loser_id == user.id)
 		);
+		
 		if (address && address != undefined) {
 			joinable = await this.gameService.gameByAddress(address);
 		}
@@ -525,9 +525,39 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this._startGame(this.channels.get(pending.address), client, user);
 		}
 		//if no waiting competitive we want to play a friendly
-		else if (joinable && joinable != undefined && joinable.status != GameStatus.done) {
-			//no 2nd player => join the game
-			if (joinable.loser == null) {
+		else if (joinable && joinable != undefined) {
+			if (joinable.winner_id == user.id) {
+				const pending1: Game = games.pending.find(
+					game => game.type == GameType.friendly &&
+					( game.winner_id == user.id || game.loser_id == user.id)
+				);
+				client.emit("join", {address: pending1.address});
+				this._startGame(this.channels.get(pending1.address), client, user);
+			} 
+			else if (joinable.loser_id == user.id) {
+				const pending1: Game = games.pending.find(
+					game => game.type == GameType.friendly &&
+					( game.winner_id == user.id || game.loser_id == user.id)
+				);
+				client.emit("join", {address: pending1.address});
+				this._startGame(this.channels.get(pending1.address), client, user);
+			}
+			// //no 2nd player => join the game
+			// else if (joinable.loser == null) {
+			// 	await this.gameService.joinGame({address: joinable.address}, user);
+			// 	const old = this.channels.get(joinable.address)
+			// 	this.channels.set(joinable.address, {
+			// 		...old, 
+			// 		player2: await this.userService.userById(user.id)
+			// 	});
+			// 	this._startGame(this.channels.get(joinable.address), client, user);
+			// }
+			// //else watch the game
+			// else {
+			// 	client.join(joinable.address);
+			// 	client.emit("watch", {address: joinable.address});
+			// }
+			else if (joinable.loser == null) {
 				await this.gameService.joinGame({address: joinable.address}, user);
 				client.emit("join", {address: joinable.address});
 				this._startGame(this.channels.get(games.pending.find(game => game.winner != null && game.loser != null).address), client, user);
@@ -537,9 +567,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				client.join(joinable.address);
 				client.emit("watch", {address: joinable.address});
 			}
+
 		}
 		else {
-			console.log("4")
 			this._disconnnect_player(user.id);
 		}
 	}

@@ -137,6 +137,7 @@ const Game = (props: Props) => {
 			});
 
 			socket.current.on('end', () => {
+				props.fetchSelectedGame(game_id);
 				setgameStatus("stop");
 			});
 
@@ -154,7 +155,7 @@ const Game = (props: Props) => {
 				}, 100);
 			});
 
-			socket.current.on('error', () => {});
+			socket.current.on('error', (e: any) => {console.log("error", e)});
 
 			socket.current.on('join', () => {console.log("join")});
 
@@ -168,7 +169,7 @@ const Game = (props: Props) => {
 				});
 			});
 
-			socket.current.on('watch', () => {});
+			socket.current.on('watch', () => {console.log("watch")});
 
 			socket.current.on('score', (e: Score) => {
 				set_score.current(e.player_1, e.player_2);
@@ -221,6 +222,9 @@ const Game = (props: Props) => {
 		)
 	}
 
+	if (!props.game?.winner || !props.game?.loser) {
+		return null;
+	}
 
 	const is_watcher = user.id != props.game.loser_id && user.id != props.game.winner_id;
 

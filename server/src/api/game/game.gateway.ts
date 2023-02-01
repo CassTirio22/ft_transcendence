@@ -13,6 +13,7 @@ import {
 	WebSocketGateway,
 } from "@nestjs/websockets";
 import { Socket } from "socket.io";
+import { formToJSON } from 'axios';
 
 enum GameState {
 	keep,
@@ -86,7 +87,7 @@ class Pong {
 	public framecount: number;
 
 	constructor(framerate: number, cooldown: number, address: string, player1: number, player2: number) {
-		this.speed = 10;
+		this.speed = 12;
 		this.direction = {x: 1, y: 0};
 		this.size_1 = {x: 14, y: 90};
 		this.size_2 = {x: 14, y: 90};
@@ -156,6 +157,7 @@ class Pong {
 			playing.get(this.player_2).client.to(this.address).emit("update", updt);
 			playing.get(this.player_2).client.emit("update", updt);
 		}
+
 		return GameState.keep;
 	}
 
@@ -212,11 +214,12 @@ class Pong {
 		}
 		// this._ball_acceleration();
 		const tmp: Coordonates = {x: this.direction.x * this.speed, y: this.direction.y * this.speed};
+		this.old_ball = this.ball;
 		this.ball = this._sum_coordonates(this.ball, tmp);
 	}
 
 	_ball_acceleration() {
-		this.speed += 0.5;
+		this.speed += 1;
 	}
 
 	_check_borders(): boolean {
@@ -290,6 +293,7 @@ class Pong {
 			return this.pos_2;
 		}
 		return null;
+		// return this._check_ray_intersection();
 	}
 
 	_check_rectangle_intersection(player: Corners, ball: Corners): boolean {
@@ -299,7 +303,22 @@ class Pong {
    		// If one rectangle is above other
     	else if (player.down_right.y > ball.top_left.y || ball.down_right.y > player.top_left.y)
         	return false;
-    return true;
+    	return true;
+	}
+
+	_check_ray_intersection(): Coordonates {
+		console.log("TEST");
+		if (this.old_ball.x > this.pos_1.x && this.ball.x <= this.pos_1.x) {
+			console.log("\nINTERSECT 1\n");
+			this.ball = {x: (this.pos_1.x + 1 + this.size_1.x * 0.5), y: this.ball.y};
+			return this.pos_1;
+		}
+		else if (this.old_ball.x < this.pos_2.x && this.ball.x >= this.pos_2.x) {
+			console.log("\nINTERSECT 2\n");
+			this.ball = {x: (this.pos_2.x - 1 - this.size_2.x * 0.5), y: this.ball.y};
+			return this.pos_2;
+		}
+		return null;
 	}
 
 	_reset_ball(): any {

@@ -14,6 +14,12 @@ import {
 } from "@nestjs/websockets";
 import { Socket } from "socket.io";
 
+enum GameState {
+	keep,
+	score,
+	end
+}
+
 interface IGame {
 	game: Game;
 	pong: Pong;
@@ -104,7 +110,7 @@ class Pong {
 
 	//I need the id of the 2 users, i need the address of the game
 	//true == continue
-	update(playing: Map< number, {client: Socket, isPlaying: boolean} >): boolean {
+	update(playing: Map< number, {client: Socket, isPlaying: boolean} >): GameState {
 		//cooldown before starting the game
 
 		if ( (this.score_1 >= 11  && this.score_1 - this.score_2 > 1) || 
@@ -118,7 +124,7 @@ class Pong {
 				playing.get(this.player_2).client.to(this.address).emit("end", "");
 				playing.get(this.player_2).client.emit("end", "");
 			}
-			return false;
+			return GameState.end;
 		}
 
 		this._update_player_position();
@@ -128,13 +134,16 @@ class Pong {
 
 
 		this._update_ball_position();
-		if (playing.has(this.player_1)) {
-			this._check_limits(playing.get(this.player_1).client);
+		if (playing.has(this.player_1) &&
+			this._check_limits(playing.get(this.player_1).client)
+		) {
+			return GameState.score;
 		}
-		else if (playing.has(this.player_2)) {
-			this._check_limits(playing.get(this.player_2).client);
+		else if (playing.has(this.player_2) &&
+			this._check_limits(playing.get(this.player_2).client)
+		) {
+			return GameState.score;
 		}
-
 
 		const updt: Update = this._create_update_struct();
 		if (playing.has(this.player_1)) {
@@ -145,7 +154,7 @@ class Pong {
 			playing.get(this.player_2).client.to(this.address).emit("update", updt);
 			playing.get(this.player_2).client.emit("update", updt);
 		}
-		return true;
+		return GameState.keep;
 	}
 
 
@@ -345,8 +354,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//check if disconnected
 		setInterval(() => {
 			this.ongoing.forEach( game => {
-				if (!game.pong.update(this.playing)) {
+				const state: GameState = game.pong.update(this.playing);
+				if (state == GameState.end) {
 					this._endGame(game);
+				}
+				else if (state == GameState.score) {
+					this.gameService.updateScore({
+						address: game.pong.address,
+						player_1: game.player1.id,
+						player_2: game.player2.id
+					});
 				}
 			})
 		}, 17);

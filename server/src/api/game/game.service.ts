@@ -129,6 +129,15 @@ export class GameService {
 		return (await this._updateGame(settings));
 	}
 
+	public async updateScore(body: {address: string, player_1: number, player_2: number}): Promise<number> {
+		return (await this.gameRepository.createQueryBuilder()
+			.update()
+			.where("address = :gameAddress", {gameAddress: body.address})
+			.andWhere("status = :gameStatus", {gameStatus: GameStatus.ongoing})
+			.set({winnerScore: body.player_1, loserScore: body.player_2})
+			.execute()).affected;
+	}
+
 	public async joinGame(body: JoinGameDto, user: User): Promise<number> {
 		const { address }: JoinGameDto = body;
 

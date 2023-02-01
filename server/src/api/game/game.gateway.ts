@@ -455,7 +455,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	async _endGame(game: IGame) {
 		this.gameService.updateGame( {
 			address: game.game.address,
-			winnerId: game.game.winner.id,
+			winnerId:  game.pong.score_1 > game.pong.score_2 ? game.game.winner_id : game.game.loser_id,
 			winnerScore: game.game.winnerScore,
 			loserScore: game.game.loserScore,
 			didInterrupt: false,

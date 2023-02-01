@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { mapDispatchToProps, mapStateToProps } from '../../../../store/dispatcher';
 import "../style.scss"
 import Checkbox from '@mui/material/Checkbox';
-import { AuthContext, PopupContext, ToastContext } from '../../../..';
+import { AuthContext, PopupContext, SocketContext, ToastContext } from '../../../..';
 import { generate_url, TOAST_LVL } from '../../../../constants/constants';
 import { Button, TextField } from '@mui/material';
 import axios from "../../../../service/axios"
@@ -44,6 +44,7 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 	const {set_toast} = useContext(ToastContext);
 	const new_channel = useRef<CreateChannel>({type: "", password: "", name: ""});
 	const {user} = useContext(AuthContext);
+	const {reload_socket} = useContext(SocketContext);
 
 	const get_other_channels = async () => {
 		const res = await axios.get("/channel/otherChannels")
@@ -65,6 +66,7 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 			if (!exist.length) {
 				props.createDirect(id).then((e: any) => {
 					props.fetchMessages({user: user, channel_id: undefined, direct_id: e.payload});
+					reload_socket();
 				});
 			} else {
 				props.selectConversation({is_channel: false, id: exist[0].id});
@@ -91,6 +93,7 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 				name: new_channel.current.name
 			}).then((e: any) => {
 				props.fetchMessages({user: user, channel_id: e.payload.id, direct_id: undefined});
+				reload_socket();
 			});
 			new_channel.current = {type: "", password: "", name: ""};
 			selected_channel.current = -1;
@@ -101,7 +104,7 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 				password: new_channel.current.password == "" ? "undefined" : new_channel.current.password
 			}).then((e: any) => {
 				props.fetchMessages({user: user, channel_id: selected_channel.current, direct_id: undefined});
-				
+				reload_socket();
 			});
 			new_channel.current = {type: "", password: "", name: ""};
 			selected_channel.current = -1;

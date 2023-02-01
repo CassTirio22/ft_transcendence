@@ -23,10 +23,12 @@ export function createSocketCtx() {
 
     const send_message = (direct_id: number | null, channel_id: number | null, content: String) => {}
     const in_game = (isPlaying: boolean) => {}
+    const reload_socket = () => {};
 
 	const ctx = createContext({
 		send_message: send_message,
         in_game: in_game,
+        reload_socket: reload_socket
 	});
 
 	function SocketProvider(props: Props) {
@@ -52,6 +54,40 @@ export function createSocketCtx() {
                     isPlaying: isPlaying,
                 })
             }
+        }
+
+        const reload_socket = () => {
+            if (socket.current) {
+                socket.current.close();
+                socket.current = null;
+            }
+            socket.current = io(socket_url, {
+                extraHeaders: {
+                  Authorization: `${user.token}`
+                }
+            });
+
+            socket.current.on('connect', () => {
+                //console.log("connected")
+            });
+
+            socket.current.on('disconnect', () => {
+                //console.log("disconnected")
+            });
+
+            socket.current.on('messages', (e: any) => {
+                props.addMessage(e);
+            });
+
+            socket.current.on('game', (e: any) => {
+                e.game = true;
+                props.changeFriendStatus(e);
+            });
+
+            socket.current.on('connection', (e: any) => {
+                e.game = false;
+                props.changeFriendStatus(e);
+            });
         }
 
         useEffect(() => {
@@ -94,7 +130,8 @@ export function createSocketCtx() {
 		return (
 			<ctx.Provider value={{ 
                 send_message,
-                in_game
+                in_game,
+                reload_socket
 			}}
 			{...props} >
                 {props.children}

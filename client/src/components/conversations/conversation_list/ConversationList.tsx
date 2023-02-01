@@ -6,7 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import "./style.scss"
 import CreateBox from '../../main/create_box/CreateBox';
 import Checkbox from '@mui/material/Checkbox';
-import { AuthContext, PopupContext, ToastContext } from '../../..';
+import { AuthContext, PopupContext, SocketContext, ToastContext } from '../../..';
 import { generate_url, TOAST_LVL } from '../../../constants/constants';
 import { Button, TextField } from '@mui/material';
 import axios from "../../../service/axios"
@@ -47,6 +47,7 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 	const navigate = useNavigate();
 	const submit = useRef(() => {console.log("first")});
 	const cancel = useRef(() => {});
+	const {reload_socket} = useContext(SocketContext);
 
 	const redirect_set_conv = (is_channel: boolean, id: number) => {
 		navigate(`/conversations/${is_channel ? "channel" : "direct"}/${id}`);
@@ -57,6 +58,7 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 		props.fetchMessages({user: user, channel_id: channel_id, direct_id: direct_id}).then(() => {
 			set_toast(TOAST_LVL.SUCCESS, "Fetch successfull", `Channel and direct fetch`)
 		})
+		reload_socket();
 	}
 
 	return (

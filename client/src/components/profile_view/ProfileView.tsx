@@ -5,7 +5,7 @@ import { Button } from '@mui/material';
 import { connect } from 'react-redux';
 import { friendsStateToProps, mapDispatchToProps, mapStateToProps } from '../../store/dispatcher';
 import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext, ToastContext } from '../..';
+import { AuthContext, SocketContext, ToastContext } from '../..';
 import { base_url, generate_url, TOAST_LVL } from '../../constants/constants';
 
 type Props = {
@@ -34,6 +34,7 @@ const ProfileView = (props: Props) => {
 	const {user} = useContext(AuthContext);
 	const navigate = useNavigate();
 	const {set_toast} = useContext(ToastContext);
+	const {reload_socket} = useContext(SocketContext);
 	const [profile, setProfile] = useState({
 		id: -1,
 		email: "trash.todev2@gmail.com",
@@ -68,6 +69,7 @@ const ProfileView = (props: Props) => {
 				props.fetchMessages({user: user, channel_id: undefined, direct_id: e.payload.id}).then(() => {
 					navigate(`/conversations/direct/${e.payload.id}`);
 				});
+				reload_socket();
 			});
 		} else {
 			props.selectConversation({is_channel: false, id: exist[0].id});

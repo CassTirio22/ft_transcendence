@@ -142,10 +142,13 @@
 		background-color: var(--surface);
 		overflow: hidden;
 		margin-right: 10px;
+		width: 64px;
+		height: 64px;
 
 		img {
 			width: 64px;
 			height: 64px;
+			object-fit: cover;
 		}
 	}
 	>span {

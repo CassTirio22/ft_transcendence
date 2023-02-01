@@ -4,7 +4,7 @@ import { GameService, IGames } from './game.service';
 import { Game } from './game.entity'
 import { User } from '../user/user.entity'
 import { Request } from 'express';
-import { ClassSerializerInterceptor, Controller, Inject, Post, Put, UseGuards, UseInterceptors, Get, Req, Body } from '@nestjs/common';
+import { ClassSerializerInterceptor, Controller, Inject, Post, Put, UseGuards, UseInterceptors, Get, Req, Body, Param } from '@nestjs/common';
 
 @Controller('game')
 export class GameController {
@@ -17,7 +17,6 @@ export class GameController {
 	private matchmaking(@Req() req: Request) {
 		return this.service.matchmaking( <User>req.user);
 	}
-
 
 	@Post('create')
 	@UseGuards(JwtAuthGuard)
@@ -49,5 +48,17 @@ export class GameController {
 	@UseGuards(JwtAuthGuard)
 	private getCurrent(@Req() { user }: Request): Promise<Game | never> {
 		return this.service.currentGame(<User>user);
+	}
+
+	@Get('currents')
+	@UseGuards(JwtAuthGuard)
+	private currents(@Req() { user }: Request): Promise<Game[] | never> {
+		return this.service.allCurrents();
+	}
+
+	@Get('/:address')
+	@UseGuards(JwtAuthGuard)
+	private gameByAddress(@Param('address') address: string, @Req() { user }: Request): Promise<Game | never> {
+		return this.service.gameByAddress(address);
 	}
 }

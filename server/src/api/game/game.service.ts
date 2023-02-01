@@ -174,6 +174,20 @@ export class GameService {
 			.getOne();
 	}
 
+	public async allCurrents(): Promise<Game[] | never> {
+		return await this.gameRepository.createQueryBuilder()
+			.select("id")
+			.where("status :gameStatus", {gameStatus: GameStatus.ongoing})
+			.getMany();
+	}
+
+	public async gameByAddress(address: string): Promise<Game | never> {
+		return await this.gameRepository.createQueryBuilder()
+			.select()
+			.where("address = :gameAddress", {gameAddress: address})
+			.getOne();
+	}
+
 	public async allGames(user: User): Promise< IGames | never > {
 		const games: Game[] = await this.gameRepository.createQueryBuilder("game")
 			.innerJoinAndSelect("game.winner", "winner")

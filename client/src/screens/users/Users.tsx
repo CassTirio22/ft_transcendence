@@ -33,8 +33,13 @@ const Users = (props: Props) => {
       ret.lost.forEach((element: any) => {
         element.is_won = false;
       });
-      const new_user = {...ret, games: [...ret.won, ...ret.lost].sort((a: any, b: any) => a.date - b.date)}
-      console.log(new_user)
+      const games =  [...ret.won, ...ret.lost];
+      games.sort((a: any, b: any) => {
+        // Turn your strings into dates, and then subtract them
+        // to get a value that is either negative, positive, or zero.
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      })
+      const new_user = {...ret, games: games}
       setUser(new_user);
     }
   }
@@ -47,14 +52,14 @@ const Users = (props: Props) => {
   if (!user)
     return <Loading/>
 
-  const graph_data = generate_score_data(user_id, user.games);
+  const graph_data = generate_score_data(user_id, [...user.games].reverse());
 
   return (
     <div id="user-view">
       <h1>{user.name}</h1>
       <div className='user-div'>
         <h2>Elo evolution</h2>
-        <AreaChart width={width - 100} height={180} data={graph_data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <AreaChart width={width < 673 ? width - 40 : width - 100} height={180} data={graph_data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>

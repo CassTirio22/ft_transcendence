@@ -93,7 +93,7 @@ const Friends = (props: Props) => {
   
 
   return (
-    <div id="friends">
+    <div id="friends" className='main-view'>
         <div className='friends-header'>
           <div className='header-title'>
             <h1>My friends</h1>

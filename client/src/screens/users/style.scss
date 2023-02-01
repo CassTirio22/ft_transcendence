@@ -6,6 +6,12 @@
     padding: 80px 20px 80px 80px;
     width: 100%;
 
+    @media only screen and (max-width: 673px) {
+        & {
+            padding: 80px 20px;
+        }
+    }
+
     h1 {
         margin-bottom: 40px;
     }

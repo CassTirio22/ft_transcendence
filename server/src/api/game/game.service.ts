@@ -185,7 +185,9 @@ export class GameService {
 
 	public async allCurrents(): Promise<Game[] | never> {
 		return await this.gameRepository.createQueryBuilder()
-			.select("id")
+			.leftJoinAndSelect("game.winner", "winner")
+			.leftJoinAndSelect("game.loser", "loser")
+			.select()
 			.where("status :gameStatus", {gameStatus: GameStatus.ongoing})
 			.getMany();
 	}

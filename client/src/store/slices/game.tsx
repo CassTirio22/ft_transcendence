@@ -3,8 +3,8 @@ import axios from "../../service/axios"
 
 export const fetchCurrentGame = createAsyncThunk(
 	"games/fetchCurrentGame",
-	async () => {
-		const response = await axios.get("/game/current");
+	async (address: string) => {
+		const response = await axios.get(`/game/${address}`);
 		return response.data;
 	}
 )

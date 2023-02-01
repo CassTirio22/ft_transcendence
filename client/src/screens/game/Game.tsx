@@ -107,7 +107,7 @@ const Game = (props: Props) => {
 			});
 
 			socket.current.on('connect', () => {
-				props.fetchCurrentGame().then((e: any) => {
+				props.fetchCurrentGame(game_id).then((e: any) => {
 					console.log(e.payload, "ee")
 					if (e.payload != "") {
 						console.log("set score", e.payload.winnerScore, e.payload.loserScore)
@@ -129,7 +129,7 @@ const Game = (props: Props) => {
 
 			socket.current.on('start', () => {
 				setTimeout(() => {
-					props.fetchCurrentGame().then((e: any) => {
+					props.fetchCurrentGame(game_id).then((e: any) => {
 						if (e.payload)
 							set_score.current(e.payload.winnerScore, e.payload.loserScore);
 						setTimeout(() => {

@@ -107,8 +107,8 @@ class Pong {
 	update(playing: Map< number, {client: Socket, isPlaying: boolean} >): boolean {
 		//cooldown before starting the game
 
-		if ( (this.score_1 > 11  && this.score_1 - this.score_2 > 1) || 
-			(this.score_2 > 11 && this.score_1 - this.score_1 > 1)
+		if ( (this.score_1 >= 11  && this.score_1 - this.score_2 > 1) || 
+			(this.score_2 >= 11 && this.score_2 - this.score_1 > 1)
 		){
 			if (playing.has(this.player_1)) {
 				playing.get(this.player_1).client.to(this.address).emit("end", "");

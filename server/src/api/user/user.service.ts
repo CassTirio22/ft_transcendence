@@ -1,3 +1,4 @@
+import { GameStatus } from './../game/game.entity';
 import { AuthHelper } from './auth/auth.helper';
 import { Block } from './block/block.entity';
 import { BlockService } from './block/block.service';
@@ -73,9 +74,11 @@ export class UserService {
 		if (block) {
 			throw new HttpException("Unauthorized. The other user blocked you.", HttpStatus.UNAUTHORIZED);
 		}
-		return (this.repository.createQueryBuilder()
+		return (this.repository.createQueryBuilder("user")
+			.leftJoinAndSelect("user.won", "won", "won.status = :wonStatus", {wonStatus: GameStatus.done})
+			.leftJoinAndSelect("user.lost", "lost", "lost.status = :lostStatus", {lostStatus: GameStatus.done})
 			.select()
-			.where("id = :userId", {userId: id})
+			.where("user.id = :userId", {userId: id})
 			.getOne());
 	}
 

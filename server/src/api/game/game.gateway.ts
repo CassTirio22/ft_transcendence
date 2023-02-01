@@ -114,8 +114,8 @@ class Pong {
 	update(playing: Map< number, {client: Socket, isPlaying: boolean} >): GameState {
 		//cooldown before starting the game
 
-		if ( (this.score_1 >= 11  && this.score_1 - this.score_2 > 1) || 
-			(this.score_2 >= 11 && this.score_2 - this.score_1 > 1)
+		if ( (this.score_1 >= 3  && this.score_1 - this.score_2 > 1) || 
+			(this.score_2 >= 3 && this.score_2 - this.score_1 > 1)
 		){
 			if (playing.has(this.player_1) && playing.get(this.player_1).client.connected) {
 				playing.get(this.player_1).client.to(this.address).emit("end", "");
@@ -526,6 +526,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 		//if no waiting competitive we want to play a friendly
 		else if (joinable && joinable != undefined) {
+			// have debug here
 			if (joinable.winner_id == user.id) {
 				const pending1: Game = games.pending.find(
 					game => game.type == GameType.friendly &&

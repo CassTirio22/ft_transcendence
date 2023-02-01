@@ -141,9 +141,12 @@ export class GameService {
 	public async joinGame(body: JoinGameDto, user: User): Promise<number> {
 		const { address }: JoinGameDto = body;
 
+		// have debug here
+
 		let games: Game[] = await this.gameRepository.createQueryBuilder()
 			.select()
 			.where(':userId IN (winner_id, loser_id)', {userId: user.id})
+			.andWhere("status = :gameStatus", {gameStatus: GameStatus.pending})
 			.orWhere(new Brackets( query => { query
 				.where('address = :gameAddress', {gameAddress: address})
 				.andWhere('loser_id IS NULL')

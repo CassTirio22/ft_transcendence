@@ -262,9 +262,14 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 							const created_at = new Date(message.date);
 
 							if (message.content.startsWith("##frien-game##:")) {
-								const yet_join = current_conversation.messages.filter((elem: any) => elem.content.startsWith(`##frien-join##:${message.content.substring(15)}`)).length;
+								const yet_join_lst = current_conversation.messages.filter((elem: any) => elem.content.startsWith(`##frien-join##:${message.content.substring(15)}`));
+								let yet_id = -1;
+								if (yet_join_lst.length) {
+									yet_id = parseInt(yet_join_lst[0].content.split("|")[1])
+								}
+								const yet_join = yet_join_lst.length;
 								const join_send = () => {
-									if (message.author_id != user.id)
+									if (message.author_id != user.id && !yet_join)
 										send(`##frien-join##:${message.content.substring(15)}|${user.id}`)
 									if (yet_join && user.id != sender.id) {
 										navigate(`/play/${message.content.substring(15)}?type=watch`);
@@ -280,7 +285,7 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 												<ImageBox is_you={user.id == sender.id} user={sender} onClick={() =>show_profile(sender.id.toString())} />
 												<span className='message-sender-name'>{sender.name}{sender.id == user.id ? " ( you )" : ""} has created a game</span>
 											</div>
-											<Button onClick={join_send}>{user.id == sender.id ? "Re join" : !yet_join ? "Join it" : "Watch game"}</Button>
+											<Button onClick={join_send}>{user.id == sender.id || yet_id == user.id ? "Re join" : !yet_join ? "Join it" : "Watch game"}</Button>
 										</div>
 									</div>
 								)

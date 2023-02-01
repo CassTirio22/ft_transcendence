@@ -23,7 +23,6 @@ const GameMatching = (props: Props) => {
 	}
 
 	const launch_friendly = async () => {
-		console.log("fe")
 		if (!searchParams.get("is_creator")) {
 			const ret = await axios.put("/game/join", {address: friendly})
 				.then(e => e.data)

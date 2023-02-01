@@ -468,6 +468,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	async _updatePlayer(client: Socket, user: User, address: string) {
 		//we get all related games with the user
 		let games: IGames = await this.gameService.allGames(user);
+		let joinable: Game;
 
 		//we set all pending match for this user
 		for (let index = 0; index < games.pending.length; index++) {
@@ -484,7 +485,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			game => game.type == GameType.competitive &&
 			( game.winner_id == user.id || game.loser_id == user.id)
 		);
-		const joinable: Game = games.pending.find(game => game.address == address);
+		if (address && address != null) {
+			joinable = await this.gameService.gameByAddress(address);
+		}
 
 		//we check if a game can start with user right now
 		if (games.ongoing && games.ongoing != undefined) {
@@ -499,7 +502,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this._startGame(this.channels.get(pending.address), client, user);
 		}
 		//if no waiting competitive we want to play a friendly
-		else if (address && joinable && joinable != undefined) {
+		else if (joinable && joinable != undefined) {
 
 			//no 2nd player => join the game
 			if (joinable.loser == null) {

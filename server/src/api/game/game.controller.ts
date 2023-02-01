@@ -35,7 +35,13 @@ export class GameController {
 	@Get('games')
 	@UseGuards(JwtAuthGuard)
 	private games(@Req() { user }: Request): Promise< Game[] | never > {
-		return this.service.games(<User>user);
+		return this.service.games((<User>user).id);
+	}
+
+	@Get('games/:id')
+	@UseGuards(JwtAuthGuard)
+	private otherGames(@Param('id') id: number, @Req() { user }: Request): Promise<Game[] | never> {
+		return this.service.games(id);
 	}
 	
 	@Get('all')

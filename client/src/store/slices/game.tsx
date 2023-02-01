@@ -32,6 +32,8 @@ const gamesSlice = createSlice({
 			return payload;
         })
         builder.addCase(fetchCurrentGame.fulfilled, (state, {payload}) => {
+			if (payload == "")
+				return state;
 			return payload;
         })
         builder.addCase(gameMaking.rejected, (state, action) => {

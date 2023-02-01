@@ -8,13 +8,11 @@ import Friends from './screens/friends/Friends';
 import Game from './screens/game/Game';
 import GameMatching from './screens/game_matching/GameMatching';
 import Home from './screens/home/Home';
-import Login from './screens/log/login/Login';
-import Register from './screens/log/register/Register';
-import Oauth from './screens/oauth/Oauth';
 import DoubleAuth from './screens/profile/2fa/DoubleAuth';
 import Profile from './screens/profile/Profile';
 import Ranking from './screens/ranking/Ranking';
 import Store from './screens/store/Store';
+import Users from './screens/users/Users';
 /**
  *	React Component
  *	Describe the different possible routes and UI rendered consequently.
@@ -30,6 +28,7 @@ return (
 		<Route path='/friends' element={<Friends/>} />
 		<Route path='/store' element={<Store/>} />
 		<Route path='/play' element={<GameMatching/>} />
+		<Route path='/users/:player_id' element={<Users/>} />
 		<Route path='/play/:game_id' element={<Game/>} />
 		<Route path='/watch' element={<DevAreWorking/>} />
 		<Route path='/ranking' element={<Ranking/>} />

@@ -12,12 +12,12 @@ const instance = axios.create({
 	timeout: 2000,
 });
 
-export const set_instance_token = (token) => {
-	instance.defaults.headers.authorization = `Bearer ${token}`;
+export const set_instance_token = (token: string) => {
+	instance.defaults.headers.common["authorization"] = `Bearer ${token}`;
 }
 
 export const unset_instance_token = () => {
-	instance.defaults.headers.authorization = "";
+	instance.defaults.headers.common["authorization"] = "";
 }
 
 export default instance;

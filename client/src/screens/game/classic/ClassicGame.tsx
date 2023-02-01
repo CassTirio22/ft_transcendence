@@ -1,5 +1,5 @@
 import { Button } from '@mui/material'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { AuthContext } from '../../..';
 import { draw_ball, draw_pad } from '../draw/draw_fcts';
 import "./style.scss"
@@ -46,25 +46,25 @@ const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, 
 		tic = 0;
 	if (!context)
 		return;
-	if (last_ball_x != -1) {
-		if (ball_x_side != -1) {
-			if ((ball_x > last_ball_x && ball_x_side == 1) || (ball_x < last_ball_x && ball_x_side == 0)) {
-				ball_pad_song.play()
-			}
-		}
-		ball_x_side = ball_x > last_ball_x ?  0 : 1;
-	}
-	last_ball_x = ball_x;
+	// if (last_ball_x != -1) {
+	// 	if (ball_x_side != -1) {
+	// 		if ((ball_x > last_ball_x && ball_x_side == 1) || (ball_x < last_ball_x && ball_x_side == 0)) {
+	// 			ball_pad_song.play()
+	// 		}
+	// 	}
+	// 	ball_x_side = ball_x > last_ball_x ?  0 : 1;
+	// }
+	// last_ball_x = ball_x;
 
-	if (last_ball_y != -1) {
-		if (ball_y_side != -1) {
-			if ((ball_y > last_ball_y && ball_y_side == 1) || (ball_y < last_ball_y && ball_y_side == 0)) {
-				ball_wall_song.play()
-			}
-		}
-		ball_y_side = ball_y > last_ball_y ?  0 : 1;
-	}
-	last_ball_y = ball_y;
+	// if (last_ball_y != -1) {
+	// 	if (ball_y_side != -1) {
+	// 		if ((ball_y > last_ball_y && ball_y_side == 1) || (ball_y < last_ball_y && ball_y_side == 0)) {
+	// 			ball_wall_song.play()
+	// 		}
+	// 	}
+	// 	ball_y_side = ball_y > last_ball_y ?  0 : 1;
+	// }
+	// last_ball_y = ball_y;
 
 	context.clearRect(-100, -100, context.canvas.width + 100, context.canvas.height + 100);
 	context.fillStyle = '#000';
@@ -85,7 +85,9 @@ const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, 
 
 type GameProps = {
 	new_pos: any,
-	set_score: any
+	set_score: any,
+	other_color: string,
+	reverte: boolean
 }
 
 const ClassicGame = (props: GameProps) => {
@@ -94,15 +96,30 @@ const ClassicGame = (props: GameProps) => {
 	const [score, setScore] = useState([0, 0]);
 	const {user} = useContext(AuthContext);
 	const [reload, setReload] = useState(0);
+	const color = props.other_color ? JSON.parse(props.other_color).selected_pad : null;
 
 	const get_new_pos = (player_1_x: number, player_1_y: number, player_2_x: number, player_2_y: number, ball_x: number, ball_y: number) => {
 		const ratio = main_width / 1000;
-		draw_game(contextRef.current, player_1_y * ratio, player_1_x * ratio, player_2_y * ratio, player_2_x * ratio, ball_x * ratio, ball_y * ratio, user.store.selected_ball, user.store.selected_pad, "", ratio);
+
+		if (props.reverte) {
+			draw_game(contextRef.current, player_1_y * ratio, (1000 - player_1_x) * ratio, player_2_y * ratio, (1000 - player_2_x) * ratio, (1000 - ball_x) * ratio, ball_y * ratio, user.store.selected_ball, color, user.store.selected_pad, ratio);
+		} else {
+			draw_game(contextRef.current, player_1_y * ratio, player_1_x * ratio, player_2_y * ratio, player_2_x * ratio, ball_x * ratio, ball_y * ratio, user.store.selected_ball, user.store.selected_pad, color, ratio);
+		}
 	}
 
 	const set_score = (player_1: number, player_2: number) => {
-		setScore([player_1, player_2]);
+		if (props.reverte) {
+			setScore([player_2, player_1]);
+		} else {
+			setScore([player_1, player_2]);
+		}
 	}
+
+	useEffect(() => {}, [props.other_color])
+
+	console.log(color)
+	
 
 	useEffect(() => {
 		function handleResize() {

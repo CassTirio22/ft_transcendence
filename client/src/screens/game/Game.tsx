@@ -1,5 +1,5 @@
 import { Button } from '@mui/material'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import { AuthContext, SocketContext } from '../..'
@@ -55,6 +55,7 @@ const Game = (props: Props) => {
 			socket.current.emit(type, message);
 		}
 	}
+	
 
 	const key_down_handler = (e: any) => {
 		if (e.key == "ArrowDown") {
@@ -87,8 +88,6 @@ const Game = (props: Props) => {
 			}, "input")
 		}
 	}
-	
-	console.log("reload")
 
 	useEffect(() => {
 		document.body.classList.add("full-screen");
@@ -108,6 +107,13 @@ const Game = (props: Props) => {
 			});
 
 			socket.current.on('connect', () => {
+				props.fetchCurrentGame().then((e: any) => {
+					console.log(e.payload, "ee")
+					if (e.payload != "") {
+						console.log("set score", e.payload.winnerScore, e.payload.loserScore)
+						set_score.current(e.payload.winnerScore, e.payload.loserScore);
+					}
+				});
 				console.log("connected")
 			});
 
@@ -122,8 +128,15 @@ const Game = (props: Props) => {
 			});
 
 			socket.current.on('start', () => {
-				console.log("start")
-				setgameStatus("started");
+				setTimeout(() => {
+					props.fetchCurrentGame().then((e: any) => {
+						if (e.payload)
+							set_score.current(e.payload.winnerScore, e.payload.loserScore);
+						setTimeout(() => {
+							setgameStatus("started");
+						}, 100);
+					});
+				}, 100);
 			});
 
 			socket.current.on('error', () => {
@@ -131,7 +144,7 @@ const Game = (props: Props) => {
 			});
 
 			socket.current.on('join', () => {
-				console.log("join")
+				console.log("joinee")
 			});
 
 			socket.current.on('watch', () => {
@@ -147,17 +160,10 @@ const Game = (props: Props) => {
 			});
 
 			socket.current.on('update', (e: Update) => {
-				console.log("update")
-				setgameStatus("started");
 				new_pos.current(e.player_1.x, e.player_1.y, e.player_2.x, e.player_2.y, e.ball.x, e.ball.y);
 			});
 		}
-		if (!props.game) {
-			props.fetchCurrentGame().then((e: any) => {
-				if (e.payload)
-					set_score.current(e.payload.winnerScore, e.payload.loserScore);
-			});
-		}
+		
 		return () => {
 			document.body.classList.remove("full-screen");
 			window.removeEventListener("keydown", key_down_handler);
@@ -170,9 +176,7 @@ const Game = (props: Props) => {
 			}
 		}
 	}, [])
-
-	console.log(props.game)
-
+	
 	if (gameStatus == "" && props.game?.status != 1) {
 		return (
 			<div id="game-matching">
@@ -209,10 +213,12 @@ const Game = (props: Props) => {
 			</div>
 		)
 	}
+
+	const reverte = props.game.loser_id == user.id;
 	
   	return (
 		<div id="game">
-			<ClassicGame set_score={set_score} new_pos={new_pos} />
+			<ClassicGame reverte={reverte} other_color={props.game.winner_id == user.id ? props.game.loser?.custom : props.game.winner?.custom} set_score={set_score} new_pos={new_pos} />
 		</div>
   	)
 }

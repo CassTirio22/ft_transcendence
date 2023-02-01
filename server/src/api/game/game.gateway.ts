@@ -13,6 +13,7 @@ import {
 	WebSocketGateway,
 } from "@nestjs/websockets";
 import { Socket } from "socket.io";
+import { formToJSON } from 'axios';
 
 enum GameState {
 	keep,
@@ -57,7 +58,7 @@ interface Score {
 	//players just have to send their position to server and receive => the other position, the ball position 
 //find a solution to manage the game's framerate (thought to use setInterval but doesn't seem perfect)
 class Pong {
-	private player_speed: number = 17;
+	private player_speed: number = 20;
 	public address: string;
 
 	public player_1: number;
@@ -86,7 +87,7 @@ class Pong {
 	public framecount: number;
 
 	constructor(framerate: number, cooldown: number, address: string, player1: number, player2: number) {
-		this.speed = 8;
+		this.speed = 12;
 		this.direction = {x: 1, y: 0};
 		this.size_1 = {x: 14, y: 90};
 		this.size_2 = {x: 14, y: 90};
@@ -116,11 +117,11 @@ class Pong {
 		if ( (this.score_1 >= 11  && this.score_1 - this.score_2 > 1) || 
 			(this.score_2 >= 11 && this.score_2 - this.score_1 > 1)
 		){
-			if (playing.has(this.player_1)) {
+			if (playing.has(this.player_1) && playing.get(this.player_1).client.connected) {
 				playing.get(this.player_1).client.to(this.address).emit("end", "");
 				playing.get(this.player_1).client.emit("end", "");
 			}
-			else if (playing.has(this.player_2)) {
+			else if (playing.has(this.player_2) && playing.get(this.player_2).client.connected) {
 				playing.get(this.player_2).client.to(this.address).emit("end", "");
 				playing.get(this.player_2).client.emit("end", "");
 			}
@@ -135,25 +136,28 @@ class Pong {
 
 		this._update_ball_position();
 		if (playing.has(this.player_1) &&
+		    playing.get(this.player_1).client.connected &&
 			this._check_limits(playing.get(this.player_1).client)
 		) {
 			return GameState.score;
 		}
 		else if (playing.has(this.player_2) &&
+			playing.get(this.player_2).client.connected &&
 			this._check_limits(playing.get(this.player_2).client)
 		) {
 			return GameState.score;
 		}
 
 		const updt: Update = this._create_update_struct();
-		if (playing.has(this.player_1)) {
+		if (playing.has(this.player_1) && playing.get(this.player_1).client.connected) {
 			playing.get(this.player_1).client.to(this.address).emit("update", updt);
 			playing.get(this.player_1).client.emit("update", updt);
 		}
-		else if (playing.has(this.player_2)) {
+		else if (playing.has(this.player_2) && playing.get(this.player_2).client.connected) {
 			playing.get(this.player_2).client.to(this.address).emit("update", updt);
 			playing.get(this.player_2).client.emit("update", updt);
 		}
+
 		return GameState.keep;
 	}
 
@@ -208,17 +212,23 @@ class Pong {
 		else if (this._check_borders()) {
 			this._bounce_border();
 		}
-		this._ball_acceleration();
+		// this._ball_acceleration();
 		const tmp: Coordonates = {x: this.direction.x * this.speed, y: this.direction.y * this.speed};
+		this.old_ball = this.ball;
 		this.ball = this._sum_coordonates(this.ball, tmp);
 	}
 
 	_ball_acceleration() {
-		this.speed += this.speed * 0.001;
+		this.speed += 1;
 	}
 
 	_check_borders(): boolean {
-		if (this.ball.y + (this.ball_size.y / 2) >= 1000 || this.ball.y - (this.ball_size.y / 2) <= 0) {
+		if (this.ball.y + (this.ball_size.y * 0.5) >= 1000) {
+			this.ball.y = 999 - (this.ball_size.y * 0.5);
+			return true;
+		}
+		else if (this.ball.y - (this.ball_size.y * 0.5) <= 0) {
+			this.ball.y = 0 + (this.ball_size.y * 0.5);
 			return true;
 		}
 		return false;
@@ -228,7 +238,6 @@ class Pong {
 		if (this.ball.x >= 1000 ) {
 			this.score_1++;
 			this._reset_ball();
-			console.log(this.score_1 + " : " + this.score_2);
 			client.to(this.address).emit("score", {player_1: this.score_1, player_2: this.score_2});
 			client.emit("score", {player_1: this.score_1, player_2: this.score_2});
 			return true;
@@ -236,7 +245,6 @@ class Pong {
 		else if (this.ball.x <= 0 ) {
 			this.score_2++;
 			this._reset_ball();
-			console.log(this.score_1 + " : " + this.score_2);
 			client.to(this.address).emit("score", {player_1: this.score_1, player_2: this.score_2});
 			client.emit("score", {player_1: this.score_1, player_2: this.score_2});
 			return true;
@@ -252,8 +260,10 @@ class Pong {
 	}
 
 	_bounce_player(player: Coordonates) {
+		this._ball_acceleration();
+		const sign: number = (this.ball.x - player.x) / Math.abs(this.ball.x - player.x);
 		this.direction = this._normalize_coordonates({
-			x: this.ball.x - player.x,
+			x: this.size_1.x * sign,//(this.ball.x - player.x) * 0.2,
 			y: this.ball.y - player.y
 		});
 	}
@@ -283,6 +293,7 @@ class Pong {
 			return this.pos_2;
 		}
 		return null;
+		// return this._check_ray_intersection();
 	}
 
 	_check_rectangle_intersection(player: Corners, ball: Corners): boolean {
@@ -292,14 +303,29 @@ class Pong {
    		// If one rectangle is above other
     	else if (player.down_right.y > ball.top_left.y || ball.down_right.y > player.top_left.y)
         	return false;
-    return true;
+    	return true;
+	}
+
+	_check_ray_intersection(): Coordonates {
+		console.log("TEST");
+		if (this.old_ball.x > this.pos_1.x && this.ball.x <= this.pos_1.x) {
+			console.log("\nINTERSECT 1\n");
+			this.ball = {x: (this.pos_1.x + 1 + this.size_1.x * 0.5), y: this.ball.y};
+			return this.pos_1;
+		}
+		else if (this.old_ball.x < this.pos_2.x && this.ball.x >= this.pos_2.x) {
+			console.log("\nINTERSECT 2\n");
+			this.ball = {x: (this.pos_2.x - 1 - this.size_2.x * 0.5), y: this.ball.y};
+			return this.pos_2;
+		}
+		return null;
 	}
 
 	_reset_ball(): any {
 		this.framecount = 0;
 		this.speed = 8;
 		this.ball = {x: 500, y: 500};
-		let x: number = (Math.random() * 1000 % 2) ? 1 : -1;
+		let x: number = Math.random() < 0.5 ? 1 : -1;
 		this.direction = {x: x, y: 0};
 	}
 
@@ -336,6 +362,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	private playing: Map< number, {client: Socket, isPlaying: boolean} >;
 	private clients: Map<string, number>;
 	private ongoing: IGame[];
+	private disconnectQueue: Socket[];
 
 	constructor(
 		@Inject(AuthHelper)
@@ -349,6 +376,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.playing = new Map<number, {client: Socket, isPlaying: boolean}>();
 		this.clients = new Map<string, number>();
 		this.ongoing = [];
+		this.disconnectQueue = [];
 	}
 	
 	async afterInit(): Promise<any | never> {
@@ -367,7 +395,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 						player_2: game.pong.score_2
 					});
 				}
-			})
+			});
+			this._disconnect_queue();
 		}, 17);
 	}
 
@@ -390,13 +419,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
     async handleDisconnect(client: Socket): Promise<any> {
-		client.rooms.forEach( room => { client.leave(room) } );
-		if (this.clients.get(client.id) != undefined) {
-			this.playing.delete(this.clients.get(client.id));
-		}
-		if (this.clients.get(client.id) != undefined) {
-			this.clients.delete(client.id);
-		}
+		this.disconnectQueue.push(client);
 	}
 
 	@SubscribeMessage("update")
@@ -522,13 +545,25 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	_disconnnect_player(user: number): any {
-		if (this.playing.get(user) == undefined)
+		if (this.playing.get(user) == undefined || !this.playing.get(user))
 			return ;
 		const client: Socket = this.playing.get(user).client;
 		client.rooms.forEach( room => { client.leave(room) } );
 		this.playing.delete(this.clients.get(client.id));
 		this.clients.delete(client.id);
 		client.disconnect();
+	}
+
+	_disconnect_queue() {
+		this.disconnectQueue.forEach( client => {
+			client.rooms.forEach( room => { client.leave(room) } );
+			if (this.clients.get(client.id) != undefined) {
+				this.playing.delete(this.clients.get(client.id));
+			}
+			if (this.clients.get(client.id) != undefined) {
+				this.clients.delete(client.id);
+			}
+		});
 	}
 
 }

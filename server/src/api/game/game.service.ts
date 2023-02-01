@@ -133,7 +133,7 @@ export class GameService {
 		return (await this.gameRepository.createQueryBuilder()
 			.update()
 			.where("address = :gameAddress", {gameAddress: body.address})
-			.andWhere("status = :gameStatus", {gameStatus: GameStatus.ongoing})
+			// .andWhere("status = :gameStatus", {gameStatus: GameStatus.ongoing})
 			.set({winnerScore: body.player_1, loserScore: body.player_2})
 			.execute()).affected;
 	}

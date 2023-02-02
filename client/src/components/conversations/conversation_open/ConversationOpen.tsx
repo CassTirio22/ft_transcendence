@@ -228,7 +228,11 @@ const ConversationOpen: React.FC<Props> = (props: Props) => {
 		return <EmptyConvOrSelect/>;
 	}
 
-	const user_status = current_conversation.members.filter((elem: any) => elem.id == user.id)[0].status;
+	const user_status_lst = current_conversation.members.filter((elem: any) => elem.id == user.id);
+	if (!user_status_lst.length) {
+		return <EmptyConvOrSelect/>;
+	}
+	const user_status = user_status_lst[0].status;
 
 	return (
 		<div className='current-conversation'>

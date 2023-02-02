@@ -4,7 +4,7 @@ import { mapDispatchToProps, mapStateToProps } from '../../../../store/dispatche
 import "../style.scss"
 import Checkbox from '@mui/material/Checkbox';
 import { AuthContext, PopupContext, SocketContext, ToastContext } from '../../../..';
-import { generate_url, TOAST_LVL } from '../../../../constants/constants';
+import { CHANNEL_LVL, generate_url, TOAST_LVL } from '../../../../constants/constants';
 import { Button, TextField } from '@mui/material';
 import axios from "../../../../service/axios"
 import LockIcon from '@mui/icons-material/Lock';
@@ -108,10 +108,14 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 				channel: selected_channel.current,
 				password: new_channel.current.password == "" ? "undefined" : new_channel.current.password
 			}).then((e: any) => {
-				props.fetchMessages({user: user, channel_id: selected_channel.current, direct_id: undefined});
-				reload_socket();
+				if (!e.payload && new_channel.current.password != "") {
+					set_toast(TOAST_LVL.WARNING, "Bad password", `You have to enter the correct password`)
+				} else {
+					props.fetchMessages({user: user, channel_id: selected_channel.current, direct_id: undefined});
+					reload_socket();
+					reset();
+				}
 			});
-			reset();
 		}
 	}
 

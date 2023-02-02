@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@/api/user/user.entity';
@@ -26,6 +27,7 @@ function makeid(length: number, all: boolean = false) {
 
 @Injectable()
 export class AuthService {
+	constructor(private configService: ConfigService) {}
 	/**
 	 * A Repository based on the User.
 	 */
@@ -93,7 +95,7 @@ export class AuthService {
 					message: `Your verification code is: ${code}`
 				},
 				headers: {
-					"Authorization": `Bearer ${"eyJhbGciOiJIUzI1NiJ9.eyJpZCI6ImFlMjQ1YjUyLWMyYjctNDg0ZS05ZmExLWRmNTY2YjFhMTZkZSJ9.mKm7FosdC87wC0ZwvS63214XDr7-DKgezqbrUchmGnE"}`
+					"Authorization": `Bearer ${this.configService.get<string>('SMS_DISPATCHER_API_KEY')}`
 				}
 			})
 			.then(e => e.data)
@@ -187,7 +189,7 @@ export class AuthService {
 					message: `Your verification code is: ${sms_code}`
 				},
 				headers: {
-					"Authorization": `Bearer ${"eyJhbGciOiJIUzI1NiJ9.eyJpZCI6ImFlMjQ1YjUyLWMyYjctNDg0ZS05ZmExLWRmNTY2YjFhMTZkZSJ9.mKm7FosdC87wC0ZwvS63214XDr7-DKgezqbrUchmGnE"}`
+					"Authorization": `Bearer ${this.configService.get<string>('SMS_DISPATCHER_API_KEY')}`
 				}
 			})
 			.then(e => e.data)

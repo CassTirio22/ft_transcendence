@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { Body, Get, Redirect, Query, Controller, Inject, Post, ClassSerializerInterceptor, UseInterceptors, UseGuards, Req } from '@nestjs/common';
 import { User } from '@/api/user/user.entity';
 import { RegisterDto, LoginDto, TwoFaDto, LoginTwoFaOauthDto } from './auth.dto';
@@ -14,6 +15,7 @@ import { AuthHelper } from './auth.helper';
  */
 @Controller('auth')
 export class AuthController {
+	constructor(private configService: ConfigService) {}
 	/**
 	 * Endpoint management using the AuthService class.
 	 */
@@ -69,8 +71,8 @@ export class AuthController {
 		url: "https://api.intra.42.fr/oauth/token",
 		data: {
 			grant_type: "authorization_code",
-			client_id: "u-s4t2ud-1eaad37c69601826513dcbd2aad3181a977d8eeedfa631117021f93c40e84db0",
-			client_secret: "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",
+			client_id: this.configService.get<string>('APP_42_PARIS_PUBLIC_KEY'),
+			client_secret: this.configService.get<string>('APP_42_PARIS_PRIVATE_KEY'),
 			code: query.code,
 			redirect_uri: "http://localhost:5000/auth/oauth"
 		}
@@ -116,7 +118,7 @@ export class AuthController {
 					message: `Your verification code is: ${code}`
 				},
 				headers: {
-					"Authorization": `Bearer ${"eyJhbGciOiJIUzI1NiJ9.eyJpZCI6ImFlMjQ1YjUyLWMyYjctNDg0ZS05ZmExLWRmNTY2YjFhMTZkZSJ9.mKm7FosdC87wC0ZwvS63214XDr7-DKgezqbrUchmGnE"}`
+					"Authorization": `Bearer ${this.configService.get<string>('SMS_DISPATCHER_API_KEY')}`
 				}
 			})
 			.then(e => e.data)

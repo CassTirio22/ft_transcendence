@@ -205,7 +205,7 @@ class Pong {
 	}
 
 	_update_ball_position() {
-		const bouncing_player: Coordonates = this._check_players();
+		const bouncing_player: Coordonates = this._check_ray_intersection();
 		if (bouncing_player) {
 			this._bounce_player(bouncing_player);
 		}
@@ -219,7 +219,9 @@ class Pong {
 	}
 
 	_ball_acceleration() {
-		this.speed += 1;
+		if (this.speed < 100) {
+			this.speed += 1;
+		}
 	}
 
 	_check_borders(): boolean {
@@ -282,19 +284,9 @@ class Pong {
 		});
 	}
 
-	_check_players(): Coordonates {
-		const corner_1: Corners = this._get_corners(this.pos_1, this.size_1);
-		const corner_2: Corners = this._get_corners(this.pos_2, this.size_2);
-		const ball_corner: Corners = this._get_corners(this.ball, this.ball_size);
-		if (this._check_rectangle_intersection(corner_1, ball_corner)) {
-			return this.pos_1;
-		}
-		else if (this._check_rectangle_intersection(corner_2, ball_corner)) {
-			return this.pos_2;
-		}
-		return null;
-		// return this._check_ray_intersection();
-	}
+	// _check_players(): Coordonates {
+	// 	return this._check_ray_intersection();
+	// }
 
 	_check_rectangle_intersection(player: Corners, ball: Corners): boolean {
     	// If one rectangle is on left side of other
@@ -307,12 +299,21 @@ class Pong {
 	}
 
 	_check_ray_intersection(): Coordonates {
-		if (this.old_ball.x > this.pos_1.x && this.ball.x <= this.pos_1.x) {
-			this.ball = {x: (this.pos_1.x + 1 + this.size_1.x * 0.5), y: this.ball.y};
+		const new_ball: Coordonates = this._sum_coordonates(this.ball, {x: this.direction.x * this.speed, y: this.direction.y * this.speed});
+		if (
+			this.ball.x > this.pos_1.x &&
+			new_ball.x <= this.pos_1.x &&
+			new_ball.y <= this.pos_1.y + this.size_1.y * 0.5 &&
+			new_ball.y >= this.pos_1.y - this.size_1.y * 0.5 
+		) {
 			return this.pos_1;
 		}
-		else if (this.old_ball.x < this.pos_2.x && this.ball.x >= this.pos_2.x) {
-			this.ball = {x: (this.pos_2.x - 1 - this.size_2.x * 0.5), y: this.ball.y};
+		else if (
+			this.ball.x < this.pos_2.x &&
+			new_ball.x >= this.pos_2.x &&
+			new_ball.y <= this.pos_2.y + this.size_2.y * 0.5 &&
+			new_ball.y >= this.pos_2.y - this.size_2.y * 0.5 
+		) {
 			return this.pos_2;
 		}
 		return null;

@@ -125,7 +125,7 @@ export class GameService {
 			winnerScore: winnerScore,
 			loserScore: loserScore,
 			elo: 0,
-			coins: game.type == GameType.competitive ? game.coins : game.coins + 50
+			coins: game.type == GameType.competitive ? game.winner.coins : game.winner.coins + 50
 		});
 		if (game.type == GameType.friendly) {
 			settings.elo = 0;
@@ -289,6 +289,7 @@ export class GameService {
 			query = query.set ({
 				gamesNumber: () => `CASE WHEN id = ${players.loser.id} THEN ${players.loser.gamesNumber} ELSE ${players.winner.gamesNumber} END`,
 				score: () => `CASE WHEN id = ${players.loser.id} THEN ${players.loser.score} ELSE ${players.winner.score} END`,
+				coins: () => `CASE WHEN id = ${players.loser.id} THEN ${players.loser.coins} ELSE ${players.coins} END`,
 				status: UserStatus.online
 			});
 		return (await query

@@ -1,12 +1,11 @@
-FROM node:16
+FROM node
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/app/client
 
-COPY *.json ./
+COPY package*.json ./
 
 RUN npm install
 
-COPY src ./src
-COPY public ./public
+COPY . .
 
 CMD ["npm", "start"]

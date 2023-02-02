@@ -1,4 +1,3 @@
-import { Channel } from './../message/channel/channel.entity';
 import { ChannelService } from './../message/channel/channel.service';
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,8 +5,6 @@ import { Brackets, Repository } from 'typeorm';
 import {Game, GameType, GameStatus} from './game.entity';
 import { UpdateGameDto, JoinGameDto, CreateGameDto } from './game.dto';
 import { User, UserStatus } from '../user/user.entity';
-import { Request } from 'express';
-import { MemberStatus } from '../message/channel/member/member.entity';
 import { generate } from 'shortid';
 
 
@@ -117,7 +114,7 @@ export class GameService {
 		if (!game) {
 			throw new HttpException('Not found. Did not found a game with those criterias.', HttpStatus.NOT_FOUND);
 		}
-		let settings: UpdateGameSettings = this._recalculateELO({
+		let settings: UpdateGameSettings = {
 			address: address,
 			interrupted: false,
 			winner: (game.winner.id == winnerId) ? game.winner : game.loser,
@@ -126,7 +123,10 @@ export class GameService {
 			loserScore: loserScore,
 			elo: 0,
 			coins: game.type == GameType.competitive ? game.winner.coins : game.winner.coins + 50
-		});
+		};
+		if (game.type == GameType.competitive) {
+			settings = this._recalculateELO(settings);
+		}
 		if (game.type == GameType.friendly) {
 			settings.elo = 0;
 		}
@@ -160,9 +160,9 @@ export class GameService {
 		if (games.length == 0) {
 			throw new HttpException('Not found. Did not found a game with those criterias.', HttpStatus.NOT_FOUND);
 		}
-		else if (games.length > 1 || games[0].address != address || user.id == games[0].winner_id) {
-			throw new HttpException('Conflict. You seem to already be playing a game.', HttpStatus.CONFLICT);
-		}
+		// else if ( games.length > 1 || games[0].address != address || user.id == games[0].winner_id) {
+		// 	throw new HttpException('Conflict. You seem to already be playing a game.', HttpStatus.CONFLICT);
+		// }
 		return (await this.gameRepository.createQueryBuilder()
 			.update()
 			.set({loser: user})

@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14.2
+    container_name: postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "5432:5432"
+    networks:
+            - transcendence
+
+  server:
+    restart: unless-stopped
+    container_name: server
+    build: ./server
+    depends_on:
+      - postgres
+    ports:
+      - '5000:5000'
+    networks:
+      - transcendence
+
+  client:
+    restart: unless-stopped
+    container_name: client
+    build: ./client
+    depends_on:
+          - server
+    ports:
+      - "3000:3000"
+    networks:
+      - transcendence
+
+networks:
+    transcendence:

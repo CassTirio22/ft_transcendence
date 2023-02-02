@@ -33,6 +33,7 @@ interface UpdateGameSettings {
 	winnerScore:	number;
 	loserScore:		number;
 	elo:			number;
+	coins:			number;
 }  
 
 @Injectable()
@@ -124,7 +125,11 @@ export class GameService {
 			winnerScore: winnerScore,
 			loserScore: loserScore,
 			elo: 0,
-		})
+			coins: game.type == GameType.competitive ? game.coins : game.coins + 50
+		});
+		if (game.type == GameType.friendly) {
+			settings.elo = 0;
+		}
 		await this._updatePlayers(settings);
 		return (await this._updateGame(settings));
 	}
@@ -184,6 +189,17 @@ export class GameService {
 			.where("game.status = :gameStatus", {gameStatus: GameStatus.ongoing})
 			.andWhere(":userId IN (winner.id, loser.id)", {userId: user.id})
 			.getOne();
+	}
+
+	public async abortMatchmaking(id: number): Promise<number | never> {
+		return (await this.gameRepository.createQueryBuilder("game")
+			.innerJoin("game.winner", "winner")
+			.innerJoin("game.loser", "loser")
+			.delete()
+			.where("game.type = :gameType", {gameType: GameType.competitive})
+			.andWhere("winner.id = :userId", {userId: id})
+			.andWhere("loser IS NULL")
+			.execute()).affected;
 	}
 
 	public async allCurrents(): Promise<Game[] | never> {
@@ -259,7 +275,8 @@ export class GameService {
 			winner: settings.winner,
 			winnerScore: settings.winnerScore,
 			loserScore: settings.loserScore,
-			elo: settings.elo})
+			elo: settings.elo,
+		})
 		.where("address = :addressId", {addressId: settings.address})
 		.execute()).affected;
 	}

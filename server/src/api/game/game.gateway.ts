@@ -307,14 +307,11 @@ class Pong {
 	}
 
 	_check_ray_intersection(): Coordonates {
-		console.log("TEST");
 		if (this.old_ball.x > this.pos_1.x && this.ball.x <= this.pos_1.x) {
-			console.log("\nINTERSECT 1\n");
 			this.ball = {x: (this.pos_1.x + 1 + this.size_1.x * 0.5), y: this.ball.y};
 			return this.pos_1;
 		}
 		else if (this.old_ball.x < this.pos_2.x && this.ball.x >= this.pos_2.x) {
-			console.log("\nINTERSECT 2\n");
 			this.ball = {x: (this.pos_2.x - 1 - this.size_2.x * 0.5), y: this.ball.y};
 			return this.pos_2;
 		}
@@ -382,7 +379,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	async afterInit(): Promise<any | never> {
 		//loop all 10secs
 		//check if disconnected
-		setInterval(() => {
+		setInterval( async () => {
 			this.ongoing.forEach( game => {
 				const state: GameState = game.pong.update(this.playing);
 				if (state == GameState.end) {
@@ -419,6 +416,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
     async handleDisconnect(client: Socket): Promise<any> {
+		await this.gameService.abortMatchmaking(this.clients.get(client.id));
 		this.disconnectQueue.push(client);
 	}
 
@@ -512,7 +510,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		
 		if (address && address != undefined) {
 			joinable = await this.gameService.gameByAddress(address);
-		}
+	}
 
 		//we check if a game can start with user right now
 		if (games.ongoing && games.ongoing != undefined) {
@@ -568,7 +566,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				client.join(joinable.address);
 				client.emit("watch", {address: joinable.address});
 			}
-
 		}
 		else {
 			this._disconnnect_player(user.id);
@@ -586,15 +583,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	_disconnect_queue() {
-		this.disconnectQueue.forEach( client => {
+		for (let index = 0; index < this._disconnect_queue.length; index++) {
+			const client = this.disconnectQueue[index];
 			client.rooms.forEach( room => { client.leave(room) } );
-			if (this.clients.get(client.id) != undefined) {
+			if (this.clients.get(client.id) != undefined && this.playing.has(this.clients.get(client.id))) {
 				this.playing.delete(this.clients.get(client.id));
 			}
 			if (this.clients.get(client.id) != undefined) {
 				this.clients.delete(client.id);
 			}
-		});
+		}
 	}
 
 }

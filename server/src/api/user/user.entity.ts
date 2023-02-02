@@ -31,6 +31,10 @@ export class User extends BaseEntity {
 	 */	
 	@Column({ type: 'varchar' })
 	public email!: string;
+
+	@Column({ type: 'varchar', default: null })
+	public intra_id: string;
+
 	/**
 	 * The User's password. Note that it will be removed from the response data.
 	 */

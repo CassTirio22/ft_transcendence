@@ -93,8 +93,6 @@ export class AuthController {
 				picture: user.image.link
 			}
 			const token = await this.service.createUser(body);
-			if (token[0] == "")
-				return {url: `http://localhost:3000/#/login`};
 			if (!token[1]) {
 				return {url: `http://localhost:3000/#/oauth-2fa?token=${token[0]}`};
 			}

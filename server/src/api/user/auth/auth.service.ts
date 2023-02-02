@@ -136,35 +136,54 @@ export class AuthService {
 	}
 
 	public async createUser(body: IntraRegisterDto): Promise<[string, boolean] | never> {
-		let user: User = await this.repository.createQueryBuilder()
+		const user: User = await this.repository.createQueryBuilder()
 			.select()
 			.where("name = :userName", {userName: body.name})
 			.orWhere("email = :userMail", {userMail: body.email})
 			.getOne();
-		if (!user || user == undefined) {
-			user = (await this.repository.createQueryBuilder()
+
+		let user_from_intra: User = await this.repository.createQueryBuilder()
+			.select()
+			.where("intra_id = :intra_id", {intra_id: body.name})
+			.getOne();
+
+		if (!user_from_intra && (!user || user == undefined)) {
+			const new_user: User = (await this.repository.createQueryBuilder()
 				.insert()
 				.values({
 					name: body.name,
+					picture: body.picture,
+					intra_id: body.name,
+					email: body.email,
+					intraAuth: true,
+					password: "coucou"
+				})
+				.execute()).generatedMaps[0] as User;
+			return [this.helper.generateToken(new_user), true];
+		} else if (!user_from_intra && !user.intraAuth) {
+			const name_updated = `${user.name} 1`
+			const new_user: User = (await this.repository.createQueryBuilder()
+				.insert()
+				.values({
+					name: name_updated,
+					intra_id: body.name,
 					picture: body.picture,
 					email: body.email,
 					intraAuth: true,
 					password: "coucou"
 				})
 				.execute()).generatedMaps[0] as User;
-			return [this.helper.generateToken(user), true];
+			return [this.helper.generateToken(new_user), true];
 		}
-		if (!user.intraAuth)
-			return ["", true];
-		if (user.phone) {
+		if (user_from_intra.phone) {
 			const code = makeid(32, true)
 			const sms_code = makeid(6)
-			this.repository.update(user.id, { twoFaOauthRandom: code, phoneCode: sms_code });
+			this.repository.update(user_from_intra.id, { twoFaOauthRandom: code, phoneCode: sms_code });
 			const ret = await axios({
 				method: "post",
 				url: "https://api.smsdispatcher.app/api/text-messages",
 				data: {
-					phone_number: user.phone,
+					phone_number: user_from_intra.phone,
 					message: `Your verification code is: ${sms_code}`
 				},
 				headers: {
@@ -175,7 +194,7 @@ export class AuthService {
 			.catch(e => null)
 			return [code, false];
 		}
-		return [this.helper.generateToken(user), true]; 
+		return [this.helper.generateToken(user_from_intra), true]; 
 	}
 
 	public async update2fa(phone_id: PhoneNumberId): Promise<string | never> {

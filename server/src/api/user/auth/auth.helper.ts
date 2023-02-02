@@ -47,7 +47,11 @@ export class AuthHelper {
 	 */
 	public async validateUser(decoded: any): Promise<User> {
 		const { email }: RegisterDto = decoded;
-		return this.repository.findOne({ where: { email } });
+		return this.repository.createQueryBuilder()
+			.select()
+			.where("id = :userId", {userId: decoded.id})
+			.getOne();
+		// return this.repository.findOne({ where: { email } });
 	}
 
 	/**

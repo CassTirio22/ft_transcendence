@@ -1,11 +1,11 @@
 
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext, PopupContext, ToastContext } from '../../..';
 import "./login.scss"
 import logo from "../../../assets/images/test.png"
 import { intra_url, TOAST_LVL } from '../../../constants/constants';
 import { Button, TextField } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import LoadingButton from '@mui/lab/LoadingButton';
 
 function AlreadyLogged() {
@@ -28,6 +28,7 @@ function LogInForm()
 	const {set_toast} = useContext(ToastContext);
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
+	let [searchParams, setSearchParams] = useSearchParams();
 
 	const handleSubmit = async () => {
 		setLoading(true);
@@ -76,7 +77,7 @@ function LogInForm()
 			</div>
 			<div className='center-input'>
 				<form className="form" onSubmit={() => console.log("first")}>
-					<TextField size='small' fullWidth autoComplete='username' label='Email or username' type="username" value={userName} onChange={(e) => setUserName(e.target.value)} />
+					<TextField size='small' fullWidth autoComplete='username' label='Email' type="username" value={userName} onChange={(e) => setUserName(e.target.value)} />
 					<TextField size='small' fullWidth autoComplete='password' onKeyDown={handleKeyDown} label='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 				</form>
 				<Button variant='outlined' href={intra_url}>Login with intra</Button>

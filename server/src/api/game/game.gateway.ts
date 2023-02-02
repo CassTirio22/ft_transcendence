@@ -205,7 +205,10 @@ class Pong {
 	}
 
 	_update_ball_position() {
-		const bouncing_player: Coordonates = this._check_ray_intersection();
+		let bouncing_player: Coordonates = this._check_ray_intersection();
+		if (!bouncing_player) {
+			bouncing_player = this._check_rectangles();
+		}
 		if (bouncing_player) {
 			this._bounce_player(bouncing_player);
 		}
@@ -284,9 +287,18 @@ class Pong {
 		});
 	}
 
-	// _check_players(): Coordonates {
-	// 	return this._check_ray_intersection();
-	// }
+	_check_rectangles(): Coordonates {
+		const corner_1: Corners = this._get_corners(this.pos_1, this.size_1);
+		const corner_2: Corners = this._get_corners(this.pos_2, this.size_2);
+		const ball_corner: Corners = this._get_corners(this.ball, this.ball_size);
+		if (this._check_rectangle_intersection(corner_1, ball_corner)) {
+			return this.pos_1;
+		}
+		else if (this._check_rectangle_intersection(corner_2, ball_corner)) {
+			return this.pos_2;
+		}
+		return null;
+	}
 
 	_check_rectangle_intersection(player: Corners, ball: Corners): boolean {
     	// If one rectangle is on left side of other

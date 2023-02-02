@@ -74,7 +74,7 @@ const draw_game = (context: CanvasRenderingContext2D | null, player1_y: number, 
 	draw_pad(player1_x, player1_y, tic, player_1_style == "classic-invisible" ? is_player_1 ? "classic-write" : "classic-impossible" : player_1_style, context, ratio);
 	draw_pad(player2_x, player2_y, tic, player_2_style == "classic-invisible" ? !is_player_1 ? "classic-write" : "classic-impossible" : player_2_style, context, ratio);
 
-	context.strokeStyle = "rgba(255, 255, 255, 0.6)";
+	context.strokeStyle = "#909090";
 	
 	context.beginPath();
 	context.setLineDash([5, 15]);

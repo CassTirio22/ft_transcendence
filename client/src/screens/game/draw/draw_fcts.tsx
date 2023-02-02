@@ -17,7 +17,7 @@ export const draw_ball = (ball_x: number, ball_y: number, tic: number, key: stri
     if (!ball.color) {
         ball = {
             shape: "square",
-            color: "rgba(255, 255, 255, 0.7)",
+            color: "#909090",
         };
     }
     if (ball.color == "rainbow") {
@@ -52,7 +52,7 @@ export const draw_pad = (pad_x: number, pad_y: number, tic: number, key: string,
     let ball = {...store_items["pads"][key]};
     if (!ball.color) {
         ball = {
-            color: "rgba(255, 255, 255, 0.7)",
+            color: "#909090",
             type: "classic"
         };
     }

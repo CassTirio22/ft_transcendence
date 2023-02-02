@@ -45,8 +45,7 @@ const App: React.FC<Props> = (props) => {
 		}
 	}, [user])
 	
-
-	if (!isLoggedIn()) {
+	if (!user || !user.token || user.token.length < 10) {
 		return (
 			<HashRouter>
 				<div>

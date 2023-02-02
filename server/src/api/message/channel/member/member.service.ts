@@ -160,7 +160,7 @@ export class MemberService {
 
 	public async quit(body: QuitChannelDto, req: Request): Promise<number> {
 		const user: User = <User>req.user;
-		const { channel, newOwner }: QuitChannelDto = body;
+		const { channel }: QuitChannelDto = body;
 
 		let members: Member[] = await this.members(channel, user);
 		if (members.length == 0) {
@@ -170,16 +170,11 @@ export class MemberService {
 			await this.channelService.delete({channel: channel}, user);
 			return (await this.delete({ channel: channel, member: user.id}));
 		}
-		let owner: Member = members.find( (obj) => {return obj.user_id == newOwner} );
-		if (!owner || user.id == newOwner) {
-			throw new HttpException('Unauthorized. You are no owner of this channel OR you have put yourself as next owner.', HttpStatus.UNAUTHORIZED);
-		}
 		let member: Member = members.find( (obj) => {return obj.user_id == user.id} );
 		if (member.level == MemberLevel.owner) {
 			let tmp: number = (await this.memberRepository.createQueryBuilder('member')
 				.update()
 				.set({level: MemberLevel.owner})
-				.where("member.user_id = :memberId", {memberId: newOwner})
 				.andWhere("member.user_id != :userId", {userId: user.id})
 				.andWhere("member.channel_id = :channelId", {channelId: channel})
 				.execute()).affected;

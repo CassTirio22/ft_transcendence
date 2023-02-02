@@ -1,6 +1,18 @@
 
 
 #channel-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    h1 {
+        width: 100%;
+    }
+
+    >button {
+        margin-top: 40px;
+    }
+
     .channel-setting-div {
         display: flex;
         flex-direction: column;

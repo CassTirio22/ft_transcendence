@@ -6,6 +6,7 @@ import logo from "../../../assets/images/test.png"
 import { intra_url, TOAST_LVL } from '../../../constants/constants';
 import { Button, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 function AlreadyLogged() {
 	return (
@@ -20,31 +21,32 @@ function AlreadyLogged() {
 
 function LogInForm()
 {
-	const [userName, setUserName] = useState("1@gmail.com");
-	const [password, setPassword] = useState("12345678");
+	const [userName, setUserName] = useState("");
+	const [password, setPassword] = useState("");
 	const [twoFa, settwoFa] = useState<string | null>(null);
 	const {user, signIn, profile} = useContext(AuthContext)
 	const {set_toast} = useContext(ToastContext);
 	const navigate = useNavigate();
+	const [loading, setLoading] = useState(false);
 
 	const handleSubmit = async () => {
+		setLoading(true);
 		const response = await signIn(userName, password, twoFa);
+		setLoading(false);
 		if (response == "error") {
-			//console.log(response)
+			set_toast(TOAST_LVL.ERROR, "Login error", `Please use a valid email or a other username`)
 		} else if (response.length < 16) {
 			if (response == "2fa") {
 				settwoFa("");
 			}
 		} else {
-			setTimeout(() => {
-				set_toast(TOAST_LVL.SUCCESS, "Successfully login", `Welcome ${response.substring(20)}`)
-				navigate("/");
-			}, 200);
+			set_toast(TOAST_LVL.SUCCESS, "Successfully login", `Welcome ${response.substring(20)}`)
+			navigate("/");
 		}
 	}
 
 	const validateEntry = () => {
-		if (password == "" || userName == "")
+		if (password.length < 8 || userName == "")
 			return false;
 		return true;
 	}
@@ -78,7 +80,7 @@ function LogInForm()
 					<TextField size='small' fullWidth autoComplete='password' onKeyDown={handleKeyDown} label='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 				</form>
 				<Button variant='outlined' href={intra_url}>Login with intra</Button>
-				<Button disabled={!validateEntry()} variant="contained" onClick={handleSubmit} fullWidth >Sign in</Button>
+				<LoadingButton loading={loading} disabled={!validateEntry()} variant="contained" onClick={handleSubmit} fullWidth >Sign in</LoadingButton>
 			</div>
 		</section>
 	)

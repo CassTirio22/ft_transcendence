@@ -142,7 +142,7 @@ const ChannelInfo = (props: Props) => {
     }
 
     const save_changes = async () => {
-      if (type == CHANNEL_LVL.PROTECTED && password.length < 6) {
+      if (type == CHANNEL_LVL.PROTECTED && password.length < 8) {
         set_toast(TOAST_LVL.WARNING, "Password needed", "Password for protected channel is needed and need to be at least 6 char long.");
         return;
       } else if (channelName == "") {
@@ -205,7 +205,6 @@ const ChannelInfo = (props: Props) => {
       }
 			setToggle(!toggle);
 		}
-
     
     return (
       <div className='create-conversation'>
@@ -232,6 +231,19 @@ const ChannelInfo = (props: Props) => {
         </div>
       </div>
     )
+  }
+
+  const leave = async (user_status: number, specific_channel: any) => {
+    if (user_status == CONV_LVL.OWNER && specific_channel.members.length != 1) {
+      set_toast(TOAST_LVL.ERROR, "Action needed", "You are the owner of this channel. Please select an other owner before leaving it.");
+      return;
+    }
+    const ret = await axios.delete(`/member/quit/${channel_id}`)
+      .then(e => e.data)
+      .catch(e => null)
+    set_toast(TOAST_LVL.SUCCESS, "Channel left", "You have left the channel.");
+    navigate("/conversations")
+    props.fetchMessages({user: user, channel_id: 0, direct_id: undefined});
   }
 
   if (!loaded) {
@@ -288,6 +300,7 @@ const ChannelInfo = (props: Props) => {
           }
           </div>
         </div>
+        <Button onClick={() => leave(user_status, specific_channel)} variant='outlined' color={'error'} >Leave</Button>
         <Menu
           id="basic-menu"
           anchorEl={anchorEl}

@@ -125,7 +125,7 @@ function Profile() {
 					<TextField autoComplete='username' sx={{display: "none"}} />
 					<TextField autoComplete='new-password' type={"password"} fullWidth value={password} onChange={(e) => setPassword(e.target.value)} className='value-input' label={"New password"} variant="outlined" />
 					<TextField autoComplete='new-password' type={"password"} fullWidth value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className='value-input' label={"New password confirmation"} variant="outlined" />
-					<Button disabled={password.length < 6 || newPassword != password} variant="contained" onClick={() => change_password()}>Save password</Button>
+					<Button disabled={password.length < 8 || newPassword != password} variant="contained" onClick={() => change_password()}>Save password</Button>
 				</form>
 			</div>
 			<div className='update-footer'>

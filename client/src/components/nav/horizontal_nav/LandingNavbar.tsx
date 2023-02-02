@@ -19,23 +19,6 @@ function LandingNavbar() {
 			</div>
 			<ul>
 				<li className={location.pathname === "/" ? "active hov" : "hov" }>
-					<Link to='/'>
-						<p>Home</p>
-					</Link>
-				</li>
-				<li className={location.pathname === "/play" ? "active hov" : "hov" }>
-					<Link to='/play'>
-						<p>How does it work</p>
-					</Link>
-				</li>
-				<li className={location.pathname === "/watch" ? "active hov" : "hov" }>
-					<Link to='/watch'>
-						<p>About team</p>
-					</Link>
-				</li>
-			</ul>
-			<ul>
-				<li className={location.pathname === "/" ? "active hov" : "hov" }>
 					<Link to='/login'>
 						<p>Login</p>
 					</Link>

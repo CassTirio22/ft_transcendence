@@ -27,17 +27,15 @@ function RegistrationForm() {
 	const handleSubmit = async () => {
 		const register_response = await register(userMail, password, userName);
 		if (register_response === "error") {
-			alert("error");
+			set_toast(TOAST_LVL.ERROR, "Register error", `Please use a valid email or a other username`)
 		} else {
-			setTimeout(() => {
-				set_toast(TOAST_LVL.SUCCESS, "Successfully register", `Welcome ${register_response}`)
-				navigate("/me/profile");
-			}, 200);
+			set_toast(TOAST_LVL.SUCCESS, "Successfully register", `Welcome ${register_response}`)
+			navigate("/me/profile");
 		}
 	}
 
 	const validateEntry = () => {
-		if (password.length < 6 || userName === "" || userMail === "")
+		if (password.length < 8 || userName === "" || userMail === "")
 			return false;
 		return true;
 	}

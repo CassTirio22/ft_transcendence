@@ -42,9 +42,13 @@ export class MemberController {
 		return this.memberService.changeStatus(body, req);
 	}
 
-	@Delete('quit')
+	@Delete('quit/:channel')
 	@UseGuards(JwtAuthGuard)
-	private quit(@Body() body: QuitChannelDto, @Req() req: Request): Promise<number> {
+	private quit(@Param('channel') channel: number, @Req() req: Request): Promise<number> {
+		const body: QuitChannelDto = {
+			channel: channel,
+			newOwner: 0
+		}
 		return this.memberService.quit(body, req);
 	}
 }

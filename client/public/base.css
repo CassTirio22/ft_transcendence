@@ -152,7 +152,7 @@ a.button_primary {
 	flex-direction: column;
 	align-items: flex-start;
 	justify-content: flex-start;
-	padding: 50px calc(60px + 10%) 60px calc(60px + 10%);
+	padding: 50px 10% 60px calc(60px + 10%);
 }
 
 @media only screen and (max-width: 673px) {

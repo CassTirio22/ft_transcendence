@@ -67,7 +67,7 @@ export class QuitChannelDto {
 	@IsNotEmpty()
 	public readonly channel: number;
 
-	@IsOptional()
 	@IsNumber()
+	@IsOptional()
 	public readonly newOwner: number;
 }

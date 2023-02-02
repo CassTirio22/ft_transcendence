@@ -86,6 +86,7 @@ export function createSocketCtx() {
 
             socket.current.on('connection', (e: any) => {
                 e.game = false;
+                console.log("get user status: ", e);
                 props.changeFriendStatus(e);
             });
         }
@@ -99,12 +100,17 @@ export function createSocketCtx() {
                 });
 
                 socket.current.on('connect', () => {
-                    //console.log("connected")
+                    console.log("connected")
                 });
 
                 socket.current.on('disconnect', () => {
-                    //console.log("disconnected")
+                    console.log("disconnected")
                 });
+
+                socket.current.on('error', () => {
+                    console.log("error")
+                });
+
 
                 socket.current.on('messages', (e: any) => {
                     props.addMessage(e);
@@ -117,6 +123,7 @@ export function createSocketCtx() {
 
                 socket.current.on('connection', (e: any) => {
                     e.game = false;
+                    console.log("get user status: ", e);
                     props.changeFriendStatus(e);
                 });
             }

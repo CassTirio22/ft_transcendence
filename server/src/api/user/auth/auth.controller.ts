@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { Request } from 'express';
 import axios from 'axios';
 import { UserService } from '../user.service';
+import { AuthHelper } from './auth.helper';
 
 /**
  * A Controller class for authentification.
@@ -19,6 +20,9 @@ export class AuthController {
 	@Inject(AuthService)
 	private readonly service: AuthService;
 
+	@Inject(AuthHelper)
+	private readonly helper: AuthHelper;
+
 	/**
 	 * Manage a User registration Post request.
 	 * @param {RegisterDto} body The registration infos in the form of RegisterDto.
@@ -26,8 +30,9 @@ export class AuthController {
 	 */
 	@Post('register')
 	@UseInterceptors(ClassSerializerInterceptor)
-	private register(@Body() body: RegisterDto): Promise<User | never> {
-		return this.service.register(body);
+	private async register(@Body() body: RegisterDto): Promise<string | never> {
+		const user: User = await this.service.register(body);
+		return this.helper.generateToken(user);
 	}
 
 	/**

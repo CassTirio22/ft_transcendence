@@ -272,9 +272,7 @@ const messagesSlice = createSlice({
 
 		builder.addCase(sendChannel.fulfilled , (state, {payload}) => {})
 
-		builder.addCase(sendChannel.rejected , (state, action) => {
-			console.log(action.error.code)
-		})
+		builder.addCase(sendChannel.rejected , (state, action) => {})
 
 		builder.addCase(sendDirect.fulfilled , (state, {payload}) => {})
 

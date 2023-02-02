@@ -36,7 +36,6 @@ const GameMatching = (props: Props) => {
 	useEffect(() => {
 		document.body.classList.add("full-screen");
 		if (props.game != null) {
-			console.log("out")
 			navigate(-1);
 			return;
 		}

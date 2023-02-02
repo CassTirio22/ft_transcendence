@@ -29,9 +29,8 @@ function LogInForm()
 
 	const handleSubmit = async () => {
 		const response = await signIn(userName, password, twoFa);
-		console.log(response)
 		if (response == "error") {
-			console.log(response)
+			//console.log(response)
 		} else if (response.length < 16) {
 			if (response == "2fa") {
 				settwoFa("");
@@ -40,7 +39,7 @@ function LogInForm()
 			setTimeout(() => {
 				set_toast(TOAST_LVL.SUCCESS, "Successfully login", `Welcome ${response.substring(20)}`)
 				navigate("/");
-			}, 100);
+			}, 200);
 		}
 	}
 

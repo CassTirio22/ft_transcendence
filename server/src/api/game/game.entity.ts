@@ -9,8 +9,7 @@ export enum GameType {
 export enum GameStatus {
 	pending,
 	ongoing,
-	done,
-	interrupted
+	done
 }
 
 @Entity()

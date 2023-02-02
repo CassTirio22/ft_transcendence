@@ -119,7 +119,7 @@ export class GameService {
 		}
 		let settings: UpdateGameSettings = this._recalculateELO({
 			address: address,
-			interrupted: didInterrupt,
+			interrupted: false,
 			winner: (game.winner.id == winnerId) ? game.winner : game.loser,
 			loser: (game.winner.id == winnerId) ? game.loser : game.winner,
 			winnerScore: winnerScore,
@@ -270,7 +270,7 @@ export class GameService {
 		return ( await this.gameRepository.createQueryBuilder()
 		.update(Game)
 		.set({
-			status: settings.interrupted ? GameStatus.interrupted : GameStatus.done,
+			status: GameStatus.done,
 			loser: settings.loser,
 			winner: settings.winner,
 			winnerScore: settings.winnerScore,

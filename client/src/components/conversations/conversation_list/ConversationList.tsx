@@ -4,12 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { mapDispatchToProps, mapStateToProps } from '../../../store/dispatcher';
 import AddIcon from '@mui/icons-material/Add';
 import "./style.scss"
-import CreateBox from '../../main/create_box/CreateBox';
-import Checkbox from '@mui/material/Checkbox';
 import { AuthContext, PopupContext, SocketContext, ToastContext } from '../../..';
 import { generate_url, TOAST_LVL } from '../../../constants/constants';
-import { Button, TextField } from '@mui/material';
-import axios from "../../../service/axios"
 import LockIcon from '@mui/icons-material/Lock';
 import CachedIcon from '@mui/icons-material/Cached';
 import CreateChannelOrDirect from "./CreateJoinChannel/CreateJoinChannel"

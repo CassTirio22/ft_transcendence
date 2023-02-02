@@ -12,9 +12,21 @@
 		margin-bottom: 60px;
 
 		.header-title {
-			h1 {
-				font-size: 2rem;
+			.title-recycle {
+				display: flex;
+				flex-direction: row;
 				margin-bottom: 20px;
+				align-items: center;
+
+				svg {
+					font-size: 1.4rem;
+					margin-left: 10px;
+				}
+
+				h1 {
+					font-size: 2rem;
+					
+				}
 			}
 		}
 
@@ -136,6 +148,11 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+
+	svg {
+		margin-left: 10px;
+		cursor: pointer;
+	}
 
 	.image-div {
 		border-radius: var(--border_radius);

@@ -255,7 +255,12 @@ const ChannelInfo = (props: Props) => {
     )
   }
 
-  const specific_channel = props.messages?.channels.filter((elem: any) => elem.id == parseInt(channel_id ? channel_id : "-1"))[0];
+  let specific_channel_list = props.messages?.channels.filter((elem: any) => elem.id == parseInt(channel_id ? channel_id : "-1"));
+  if (!specific_channel_list?.length) {
+    navigate("/conversations");
+    return null;
+  }
+  const specific_channel = specific_channel_list[0];
   const user_status = specific_channel.members.filter((elem: any) => elem.id == user.id)[0].level;
 
   return (

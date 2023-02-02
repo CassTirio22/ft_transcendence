@@ -46,6 +46,14 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 	const {user} = useContext(AuthContext);
 	const {reload_socket} = useContext(SocketContext);
 
+	const reset = () => {
+		selected.current = [];
+		selected_channel.current = -1;
+		new_channel.current = {type: "", password: "", name: ""};
+		setCurrentStep(0);
+		props.setNewConversation("")		
+	}
+
 	const get_other_channels = async () => {
 		const res = await axios.get("/channel/otherChannels")
 		.then(e => e.data)
@@ -71,8 +79,7 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 			} else {
 				props.selectConversation({is_channel: false, id: exist[0].id});
 			}
-			selected.current = [];
-			props.setNewConversation("");
+			reset()
 		} else if (selected_channel.current == -1) {
 			if (new_channel.current.type == "") {
 				set_toast(TOAST_LVL.WARNING, "Selection needed", `Please select one kind of channel`)
@@ -95,9 +102,7 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 				props.fetchMessages({user: user, channel_id: e.payload.id, direct_id: undefined});
 				reload_socket();
 			});
-			new_channel.current = {type: "", password: "", name: ""};
-			selected_channel.current = -1;
-			props.setNewConversation("");
+			reset()
 		} else {
 			props.joinChannel({
 				channel: selected_channel.current,
@@ -106,9 +111,7 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 				props.fetchMessages({user: user, channel_id: selected_channel.current, direct_id: undefined});
 				reload_socket();
 			});
-			new_channel.current = {type: "", password: "", name: ""};
-			selected_channel.current = -1;
-			props.setNewConversation("");
+			reset();
 		}
 	}
 
@@ -226,7 +229,7 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 	}
 
 	return (
-		<CreateBox visible={props.newConversation != ""} submit={submit} submitable={true} cancel={() => {new_channel.current={type: "", password: "", name: ""};props.setNewConversation("")}} submit_text="Next" title={props.newConversation == "direct" ? "New direct conversation" : "New channel"}>
+		<CreateBox visible={props.newConversation != ""} submit={submit} submitable={true} cancel={reset} submit_text="Next" title={props.newConversation == "direct" ? "New direct conversation" : "New channel"}>
 			<CreateChannelInner/>
 		</CreateBox>
 	)

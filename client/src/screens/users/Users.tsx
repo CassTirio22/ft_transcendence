@@ -99,7 +99,7 @@ const Users = (props: Props) => {
                     <td><div className='table-elem-card' style={{backgroundColor: is_winner ? "var(--success)" : "var(--error)"}}>{is_winner ? "Won" : "Lost"}</div></td>
                     <td style={{color: elem.type == 0 ? "var(--success)" : "var(--warning)"}}>{elem.type == 0 ? "friendly" : "competitive"}</td>
                     <td>{date}</td>
-                    <td>{is_winner ? elem.winner.name : elem.loser.name}</td>
+                    <td>{!is_winner ? elem.winner.name : elem.loser.name}</td>
                     <td>{score}</td>
                     <td>{elem.elo}</td>
                   </tr>

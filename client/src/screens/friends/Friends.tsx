@@ -1,14 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { connect } from 'react-redux';
-import { friendsStateToProps, mapDispatchToProps, mapStateToProps } from '../../store/dispatcher';
+import { friendGameStateToProps, friendsStateToProps, mapDispatchToProps, mapStateToProps } from '../../store/dispatcher';
 import "./style.scss"
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { PopupContext, ToastContext } from '../..';
+import { PopupContext, SocketContext, ToastContext } from '../..';
 import axios from "../../service/axios"
 import { Button } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { generate_url, TOAST_LVL } from '../../constants/constants';
 import ImageBox from '../../components/main/image_box/ImageBox';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { useNavigate } from 'react-router-dom';
+import CachedIcon from '@mui/icons-material/Cached';
 
 type Props = {
 	friends?: any,
@@ -16,6 +19,8 @@ type Props = {
   acceptFriendRequest?: any,
   removeFriendRequest?: any,
   fetchFriends?: any,
+  watch?: any,
+  fetchWatch?: any
 };
 
 type Others = {
@@ -33,6 +38,8 @@ const Friends = (props: Props) => {
   const [search, setSearch] = useState<any[]>([]);
   const [openSearch, setOpenSearch] = useState(false);
   const {set_toast} = useContext(ToastContext);
+  const navigate = useNavigate();
+  const {reload_socket} = useContext(SocketContext);
 
   const setup_lists = async () => {
       const lists = await axios.get("friendship/others")
@@ -88,15 +95,29 @@ const Friends = (props: Props) => {
   }
 
   useEffect(() => {
+    props.fetchWatch();
+		const inter = setInterval(() => props.fetchWatch(), 10000);
     setup_lists();
+    return () => {
+			clearInterval(inter);
+		}
   }, [])
   
+  const fetch_friends = async () => {
+    set_toast(TOAST_LVL.SUCCESS, "Success", `You are up to date`)
+    await props.fetchFriends();
+    await props.fetchWatch();
+    reload_socket();
+  }
 
   return (
     <div id="friends" className='main-view'>
         <div className='friends-header'>
           <div className='header-title'>
-            <h1>My friends</h1>
+            <div className='title-recycle'>
+              <h1>My friends</h1>
+              <CachedIcon onClick={() => fetch_friends()} />
+            </div>
             <p>Manage your friend list and create new relations</p>
           </div>
           <SearchIcon onClick={() => setOpenSearch(true)}/>
@@ -153,11 +174,16 @@ const Friends = (props: Props) => {
             </li>
             {
               props.friends.map((elem: any, id: number) => {
+                const game = props.watch.watch.filter((el: any) => el.winner_id == elem.id || el.loser_id == elem.id);
                 return (
                   <li className='friend-elem' key={id}>
                     <div className='friend-picture-name'>
                       <ImageBox onClick={() => show_profile(elem.id)} user={elem} />
                       <span>{elem.name}</span>
+                      {
+                        !game?.length ? null :
+                        <VisibilityIcon onClick={() => navigate(`/play/${game[0].address}?type=watch`)} />
+                      }
                     </div>
                     <div className='friend-more'>
                       <div className='friend-score'>{elem.score}</div>
@@ -208,4 +234,4 @@ const Friends = (props: Props) => {
   )
 }
 
-export default connect(friendsStateToProps, mapDispatchToProps)(Friends)
+export default connect(friendGameStateToProps, mapDispatchToProps)(Friends)

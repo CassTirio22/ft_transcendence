@@ -24,23 +24,25 @@ const Users = (props: Props) => {
   const navigate = useNavigate();
 
   const get_user = async () => {
-    const ret = await axios.get(`/user/other/${player_id}`)
-    .then(e => e.data)
-    .catch(e => {console.log(e);return null})
-    if (ret) {
-      ret.won.forEach((element: any) => {
-        element.is_won = true;
-      });
-      ret.lost.forEach((element: any) => {
-        element.is_won = false;
-      });
-      const games =  [...ret.won, ...ret.lost];
+    const [user_data, games] = await Promise.all([
+      axios.get(`/user/other/${player_id}`).then(e => e.data).catch(e => {console.log(e);return null}),
+      axios.get(`/game/games/${player_id}`).then(e => e.data).catch(e => null)
+    ])
+    if (user_data && games) {
+      games.forEach((element: any) => {
+        if (user_data.id == element.winner_id) {
+          element.is_won = true;
+        } else {
+          element.is_won = false;
+        }
+      })
       games.sort((a: any, b: any) => {
         // Turn your strings into dates, and then subtract them
         // to get a value that is either negative, positive, or zero.
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       })
-      const new_user = {...ret, games: games}
+      
+      const new_user = {...user_data, games: games}
       setUser(new_user);
     }
   }
@@ -79,6 +81,7 @@ const Users = (props: Props) => {
           <thead>
             <tr>
               <th>Status</th>
+              <th>Type</th>
               <th>Date</th>
               <th>Opponent</th>
               <th>Score</th>
@@ -94,8 +97,9 @@ const Users = (props: Props) => {
                 return (
                   <tr onClick={() => navigate(`/play/${elem.address}`)} key={id}>
                     <td><div className='table-elem-card' style={{backgroundColor: is_winner ? "var(--success)" : "var(--error)"}}>{is_winner ? "Won" : "Lost"}</div></td>
+                    <td style={{color: elem.type == 0 ? "var(--success)" : "var(--warning)"}}>{elem.type == 0 ? "friendly" : "competitive"}</td>
                     <td>{date}</td>
-                    <td>{is_winner ? elem.winner_id : elem.loser_id}</td>
+                    <td>{is_winner ? elem.winner.name : elem.loser.name}</td>
                     <td>{score}</td>
                     <td>{elem.elo}</td>
                   </tr>

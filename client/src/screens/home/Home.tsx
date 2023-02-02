@@ -68,7 +68,7 @@ const Home = (props: Props) => {
 						props.game_history.pending.map((elem: any, id: number) => {
 							return (
 								<div className='game-list-elem' key={id}>
-									<span style={{color: elem.type == 0 ? "var(--success)" : "var(--error)"}}>{elem.type == 0 ? "friendly" : "competitive"}</span>
+									<span style={{color: elem.type == 0 ? "var(--success)" : "var(--warning)"}}>{elem.type == 0 ? "friendly" : "competitive"}</span>
 									<span>{elem.address}</span>
 									<Button variant='outlined' onClick={() => navigate(`/play/${elem.address}`)}>Rejoin</Button>
 								</div>
@@ -80,7 +80,7 @@ const Home = (props: Props) => {
 						<>
 						<h3>Ongoing game</h3>
 						<div className='game-list-elem'>
-							<span style={{color: props.game_history.ongoing.type == 0 ? "var(--success)" : "var(--error)"}}>{props.game_history.ongoing.type == 0 ? "friendly" : "competitive"}</span>
+							<span style={{color: props.game_history.ongoing.type == 0 ? "var(--success)" : "var(--warning)"}}>{props.game_history.ongoing.type == 0 ? "friendly" : "competitive"}</span>
 							<span>{props.game_history.ongoing.address}</span>
 							<Button variant='outlined' onClick={() => navigate(`/play/${props.game_history.ongoing.address}`)}>Rejoin</Button>
 						</div>
@@ -93,7 +93,7 @@ const Home = (props: Props) => {
 					props.watch.watch.map((elem: any, id: number) => {
 						return (
 							<div className='game-list-elem' key={id}>
-								<span className='type' style={{color: elem.type == 0 ? "var(--success)" : "var(--error)"}}>{elem.type == 0 ? "friendly" : "competitive"}</span>
+								<span className='type' style={{color: elem.type == 0 ? "var(--success)" : "var(--warning)"}}>{elem.type == 0 ? "friendly" : "competitive"}</span>
 								<span>{elem.address}</span>
 								<Button variant='outlined' onClick={() => navigate(`/play/${elem.address}`)}>Watch</Button>
 							</div>

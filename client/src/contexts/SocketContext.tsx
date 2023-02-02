@@ -86,7 +86,7 @@ export function createSocketCtx() {
 
             socket.current.on('connection', (e: any) => {
                 e.game = false;
-                console.log("get user status: ", e);
+                //console.log("get user status: ", e);
                 props.changeFriendStatus(e);
             });
         }

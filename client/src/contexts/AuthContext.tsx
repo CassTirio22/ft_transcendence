@@ -127,6 +127,7 @@ export function createCtx() {
 				return token;
 			}
 			const name = await profile(token);
+			// feature not a bullshit
 			return `aaaaaaaaaaaaaaaaaaaa${name}`;
 		}
 
@@ -138,29 +139,32 @@ export function createCtx() {
 		}
 
 		const profile = async (token: string) => {
+			console.log(token)
 			localStorage.clear();
 			set_instance_token(token);
 			localStorage.setItem("token", token);
-			const user = await axios.get("user/profile")
+			const user_get = await axios.get("user/profile")
 			.then(response => {
 				return response.data;
 			})
 			.catch(e => {
+				console.log(e)
 				return null;
 			})
-			if (!user) {
+			if (!user_get) {
 				localStorage.clear();
 				unset_instance_token();
 				setUser({...reset_user});
 				return ""
 			}
-			const custom = user.custom == null || user.custom == "{}" ? {
+			console.log(user_get)
+			const custom = user_get.custom == null || user_get.custom == "{}" ? {
 				balls: [""],
 				pads: [""],
 				selected_ball: "",
 				selected_pad: "",
-			} : JSON.parse(user.custom);
-			setUser({...user, email: user.email, token: token, store: custom, picture: !user.picture ?  null : user.picture.startsWith("http") ?  user.picture : base_url + user.picture});
+			} : JSON.parse(user_get.custom);
+			setUser({...user_get, email: user_get.email, token: token, store: custom, picture: !user_get.picture ?  null : user_get.picture.startsWith("http") ?  user_get.picture : base_url + user_get.picture});
 			return user.name;
 		}
 

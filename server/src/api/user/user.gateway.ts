@@ -55,12 +55,16 @@ export class UserGatewayUtil {
 	/* MESSAGES EMITION */
 
 	public emitConnection(client: Socket, message: ConnectionMessage): boolean {
-		client.emit('connection', message);
+		if (client.connected) {
+			client.emit('connection', message);
+		}
 		return true;
 	}
 
 	public emitGame(client: Socket, message: ConnectionMessage): boolean {
-		client.emit('game', message);
+		if (client.connected) {
+			client.emit('game', message);
+		}
 		return true;
 	}
 
@@ -84,8 +88,10 @@ export class UserGatewayUtil {
 		});
 		blockerSockets.forEach( blocker => {blocker.join('blockRoom'); });
 
-		client.to(channelId).except('blockRoom').emit('messages', message);
-		client.emit('messages', message);
+		if (client.connected) {
+			client.to(channelId).except('blockRoom').emit('messages', message);
+			client.emit('messages', message);
+		}
 
 		blockerSockets.forEach( blocker => blocker.leave('blockRoom'));
 
@@ -140,7 +146,6 @@ export class UserGatewayUtil {
 		return ("channel" + settings.channel_id);
 	}
 }
-
 
 @WebSocketGateway({cors: true})
 export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
@@ -212,6 +217,10 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			//manage auth
 			const token: string = <string>client.handshake.headers.authorization;
 			const user: User = await this.authHelper.getUser(token); //not ok if wrong token
+			const already = this.clients.find(client => client.id == user.socket);
+			if (already != undefined) {
+				this.clients.splice(this.clients.indexOf(already));
+			}
 			await this.userService.saveSocket(user, client.id);
 			this.clients.push(client);
 			
@@ -233,19 +242,19 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	//client disconnect
     async handleDisconnect(client: Socket): Promise<any> {
-		const user: User = await this.userService.userBySocket(client.id);
 		client.rooms.forEach( room => { client.leave(room)} );
+		const user: User = await this.userService.userBySocket(client.id);
 		if (!user)
 			return ;
 		this.clients = await this.util.userDisconnection(this.clients, user, client);
-		const message: ConnectionMessage = {user_id: user.id, status: false};
 	}
 
 	//client send message to channel
 	@SubscribeMessage("message")
 	handleMessage(client: Socket, data: DiscussionMessage) {
-		if (!this.util.emitMessage(client, data, this.clients))
+		if (!this.util.emitMessage(client, data, this.clients) && client.connected) {
 			client.emit('error', {message: 'Sending messages in this channel unauthorized.'});
+		}
 	}
 
 	@SubscribeMessage("game")
@@ -258,11 +267,15 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let message: GameMessage = { user_id: user.id, status: val };
 		let ret: number = (val == true) ? (await this.userService.socketInGame(client.id)) : (await this.userService.socketOutGame(client.id));
 		if (ret) {
-			client.emit("game", message);
+			if (client.connected) {
+				client.emit("game", message);
+			}
 			this.util.emitToFriends(this.clients, client.id, message, this.util.emitGame);
 		}
 		else {
-			client.emit("error", {message: "Couldn't change your status."});
+			if (client.connected) {
+				client.emit("error", {message: "Couldn't change your status."});
+			}
 		}
 	}
 	

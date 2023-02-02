@@ -88,9 +88,8 @@ export function createCtx() {
 				setUser({...reset_user});
 				return "error";
 			}
-			set_instance_token(token);
-			setUser({...user, token: token});
-			return "";
+			const namee = await profile(token);
+			return namee;
 		}
 
 		const rename = async (name: string) =>
@@ -127,7 +126,6 @@ export function createCtx() {
 			} else if (token.length < 16) {
 				return token;
 			}
-			setUser({...user, token: token});
 			const name = await profile(token);
 			return `aaaaaaaaaaaaaaaaaaaa${name}`;
 		}

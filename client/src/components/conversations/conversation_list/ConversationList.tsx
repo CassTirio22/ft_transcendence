@@ -45,8 +45,6 @@ const ConversationList: React.FC<Props> = (props: Props) => {
 	const {set_toast} = useContext(ToastContext);
 	let { channel_id, direct_id } = useParams();
 	const navigate = useNavigate();
-	const submit = useRef(() => {console.log("first")});
-	const cancel = useRef(() => {});
 	const {reload_socket} = useContext(SocketContext);
 
 	const redirect_set_conv = (is_channel: boolean, id: number) => {

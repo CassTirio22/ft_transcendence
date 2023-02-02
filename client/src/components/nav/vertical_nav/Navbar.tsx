@@ -80,6 +80,14 @@ function Navbar() {
 							</div>
 						</Link>
 					</li>
+					<li className={location.pathname === `/users/${user.id}` ? "active hov" : "hov" }>
+						<Link to={`/users/${user.id}`}>
+							<div className="navigation_elem">
+								<i className="fas fa-history"></i>
+								<p>Game history</p>
+							</div>
+						</Link>
+					</li>
 					<li>
 						<div className="separator">
 							<h2 className="separator_title">Social</h2>

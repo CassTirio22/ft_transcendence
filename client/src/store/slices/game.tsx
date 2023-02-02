@@ -53,9 +53,7 @@ const gamesSlice = createSlice({
 				return state;
 			return payload;
         })
-        builder.addCase(gameMaking.rejected, (state, action) => {
-			console.log(action)
-        })
+        builder.addCase(gameMaking.rejected, (state, action) => {})
     }
 })
 

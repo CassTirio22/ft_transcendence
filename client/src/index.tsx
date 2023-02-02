@@ -43,6 +43,8 @@ const theme = createTheme({
 	  }
 });
 
+window.console.log = () => {}
+
 root.render(
 	<Provider store={store}>
 		<AuthProvider>

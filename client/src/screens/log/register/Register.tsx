@@ -1,8 +1,9 @@
 import { Button, TextField } from '@mui/material';
 import React, { useContext, useState } from 'react'
-import { AuthContext } from '../../..';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext, ToastContext } from '../../..';
 import logo from "../../../assets/images/test.png"
-import { intra_url } from '../../../constants/constants';
+import { intra_url, TOAST_LVL } from '../../../constants/constants';
 
 function AlreadyRegistered() {
 	return (
@@ -20,22 +21,23 @@ function RegistrationForm() {
 	const [password, setPassword] = useState("");
 	const [userName, setUserName] = useState("");
 	const {user, signIn, register, profile} = useContext(AuthContext)
+	const {set_toast} = useContext(ToastContext);
+	const navigate = useNavigate();
 
 	const handleSubmit = async () => {
 		const register_response = await register(userMail, password, userName);
 		if (register_response === "error") {
 			alert("error");
-		}
-		else {
-			const login_response = await signIn(userMail, password, null);
-			if (login_response === "error") {
-				alert("error");
-			}
+		} else {
+			setTimeout(() => {
+				set_toast(TOAST_LVL.SUCCESS, "Successfully register", `Welcome ${register_response}`)
+				navigate("/me/profile");
+			}, 200);
 		}
 	}
 
 	const validateEntry = () => {
-		if (password === "" || userName === "" || userMail === "")
+		if (password.length < 6 || userName === "" || userMail === "")
 			return false;
 		return true;
 	}
@@ -54,7 +56,7 @@ function RegistrationForm() {
 				<h2>Sign up</h2>
 			</div>
 			<div className='center-input'>
-				<form className="form" onSubmit={() => console.log("first")}>
+				<form className="form">
 					<TextField size='small' fullWidth autoComplete='email' label='Email' type="email" value={userMail} onChange={(e) => setUserMail(e.target.value)} />
 					<TextField size='small' fullWidth autoComplete='username' label='Username' type="username" value={userName} onChange={(e) => setUserName(e.target.value)} />
 					<TextField size='small' fullWidth autoComplete='password' onKeyDown={handleKeyDown} label='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />

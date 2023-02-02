@@ -1,0 +1,29 @@
+
+
+#watch-game {
+    h1 {
+        margin-bottom: 40px;
+    }
+    .games-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+
+        .watch-game-div {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+
+            .game-player {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                width: 120px;
+                justify-content: space-between;
+            }
+        }
+    }
+}

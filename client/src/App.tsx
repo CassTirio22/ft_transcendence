@@ -1,4 +1,4 @@
-import React, { Component, useContext, useEffect } from "react";
+import React, { Component, useContext, useEffect, useState } from "react";
 import {
   Route,
   NavLink,
@@ -10,14 +10,20 @@ import Navbar from "./components/nav/vertical_nav/Navbar";
 import Main from "./Main";
 import { mapDispatchToProps, mapStateToProps } from "./store/dispatcher";
 import { fetchMessages } from "./store/slices/messages";
-import { AuthContext } from ".";
+import { AuthContext, PopupProvider } from ".";
 import Landing from "./screens/landing/Landing";
 import LandingNavbar from "./components/nav/horizontal_nav/LandingNavbar";
 import LandingMain from "./LandingMain";
+import { createPopupCtx } from "./contexts/PopupContext";
+import Loading from "./components/main/loading/Loading";
 
 export type Props = {
 	messages?: any,
 	fetchMessages?: any,
+	fetchFriends?: any,
+	fetchBlockeds?: any,
+	fetchGameHistory?: any,
+	fetchWatch?: any
 };
 
 /**
@@ -25,9 +31,20 @@ export type Props = {
  * Use the HashRouter to keep the UI in sync with the URL.
  * Call of the NavBar with Main as child.
  */
-const App: React.FC<Props> = ({messages, fetchMessages}) => {
+const App: React.FC<Props> = (props) => {
 
-	const {isLoggedIn} = useContext(AuthContext);
+	const {isLoggedIn, user} = useContext(AuthContext);
+	const [loaded, setLoaded] = useState(false);
+
+	useEffect(() => {
+		if (isLoggedIn()) {
+			props.fetchBlockeds();
+			props.fetchGameHistory();
+			props.fetchWatch();
+			props.fetchFriends().then(setLoaded(true));
+		}
+	}, [user])
+	
 
 	if (!isLoggedIn()) {
 		return (
@@ -42,16 +59,21 @@ const App: React.FC<Props> = ({messages, fetchMessages}) => {
 		)
 	}
 
+	if (!loaded)
+		return <Loading/>
+
 	return (
 		<HashRouter>
 			<div>
 				<Navbar/>
 				<div className="content">
-					<Main />
+					<PopupProvider>
+							<Main/>
+					</PopupProvider>
 				</div>
 			</div>
 		</HashRouter>
 	);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default connect(null, mapDispatchToProps)(App);

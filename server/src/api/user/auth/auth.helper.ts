@@ -80,6 +80,18 @@ export class AuthHelper {
 		return bcrypt.hashSync(password, salt);
 	}
 
+	public async getUser(token: string): Promise<User | never> {
+		const decoded: unknown = this.jwt.verify(token);
+		if (!decoded) {
+			throw new HttpException('Forbidden. You token is not correct.', HttpStatus.FORBIDDEN);
+		}
+		const user: User = (await this.validateUser(decoded));
+		if (!user) {
+			throw new UnauthorizedException();
+		}
+		return user;
+	}
+
 	/**
 	 * Validate JWT Token, throw forbidden error if JWT Token is invalid.
 	 * @param {string} token The JWT Token.
@@ -89,7 +101,7 @@ export class AuthHelper {
 		const decoded: unknown = this.jwt.verify(token);
 
 		if (!decoded) {
-			throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+			throw new HttpException('Forbidden. You token is not correct.', HttpStatus.FORBIDDEN);
 		}
 
 		const user: User = await this.validateUser(decoded);

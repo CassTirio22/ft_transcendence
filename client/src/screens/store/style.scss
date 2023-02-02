@@ -1,0 +1,174 @@
+
+
+#store {
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+
+    .store-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+
+        .money {
+            i {
+                margin-right: 10px;
+                font-size: 1.4rem;
+            }
+            span {
+                font-size: 1.4rem;
+                font-weight: bold;
+            }
+        }
+    }
+
+    .store-part {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .store-part-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+            gap: 20px;
+            flex-wrap: wrap;
+
+            .store-item {
+                display: flex;
+                width: 240px;
+                flex-direction: column;
+                background-color: var(--surface);
+                padding: 10px;
+                border-radius: var(--border_radius);
+
+                .item-image {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 220px;
+                    height: 220px;
+                    background-color: #000;
+                    border-radius: var(--border_radius);
+
+                    &:hover .ball {
+                        animation: ball_animation 2s infinite;
+                    }
+
+                    .ball {
+                        display: block;
+                        width: 30px;
+                        height: 30px;
+
+                        &.circle {
+                            border-radius: 15px;
+                        }
+                    }
+
+                    &:hover .ball.change {
+                        animation: ball_animation_rain 2s infinite;
+                    }
+
+                    &:hover .pad {
+                        animation: pad_animation 2s infinite;
+                    }
+
+                    &:hover .pad.spec {
+                        animation: pad_animation_spec 2s infinite;
+                    }
+
+                    &:hover .pad.change {
+                        animation: pad_animation_rainbow 2s infinite;
+                    }
+
+                    .pad {
+                        display: block;
+                        width: 10px;
+                        height: 50px;
+
+                        &.dotted {
+                            border: 4px dotted red;
+                        }
+                    }
+
+                    @keyframes ball_animation_rain {
+                        0%   {transform: translateY(0);}
+                        14% {background-color: #ffa500;}
+                        20%   {transform: translateY(-90px);}
+                        28% {background-color: #ffff00;}
+                        40%  {transform: translateX(-90px);background-color: #008000;}
+                        60%  {transform: translateY(90px);background-color: #0000ff;}
+                        70% {background-color: #4b0082;}
+                        80% {transform: translateX(90px);}
+                        84% {background-color: #ee82ee;}
+                        100% {transform: translateX(0);}
+                    }
+
+                    @keyframes ball_animation {
+                        0%   {transform: translateY(0);}
+                        20%   {transform: translateY(-90px);}
+                        40%  {transform: translateX(-90px);}
+                        60%  {transform: translateY(90px);}
+                        80% {transform: translateX(90px);}
+                        100% {transform: translateX(0);}
+                    }
+
+                    @keyframes pad_animation {
+                        0%   {transform: translateY(0);}
+                        33%   {transform: translateY(-70px);}
+                        66%  {transform: translateY(70px);}
+                        100% {transform: translateY(0);}
+                    }
+
+                    @keyframes pad_animation_spec {
+                        0%   {transform: translateY(0);}
+                        33%   {transform: translateY(-70px);opacity: 0;}
+                        66%  {transform: translateY(70px);opacity: 0;}
+                        100% {transform: translateY(0);}
+                    }
+
+                    @keyframes pad_animation_rainbow {
+                        0%  {transform: translateY(0);}
+                        14% {background-color: #ffa500;}
+                        28% {background-color: #ffff00;}
+                        33% {transform: translateY(-70px)}
+                        42% {background-color: #008000;}
+                        56% {background-color: #0000ff;}
+                        66% {transform: translateY(70px)}
+                        70% {background-color: #4b0082;}
+                        84% {background-color: #ee82ee;}
+                        100% {transform: translateY(0);}
+                    }
+                }
+
+                h4 {
+                    font-size: 1rem;
+                    margin: 10px 0;
+                    font-weight: bold;
+                    color: var(--secondary_text);
+                    height: 60px;
+                }
+
+                .price {
+                    margin-bottom: 10px;
+                    padding: 0 10px;
+
+                    i {
+                        margin-right: 10px;
+                    }
+
+                    span {
+                        font-weight: bold;
+                        font-size: 1.2rem;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,141 @@
+
+
+.absolute-top-all {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba($color: #000000, $alpha: .6);
+    z-index: 10000;
+
+    .absolute-top-center {
+        padding: 20px;
+        background-color: var(--surface);
+        border-radius: var(--border_radius);
+    }
+}
+
+#profile-view {
+    .profile {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+
+        >button {
+            margin-top: 20px;
+        }
+
+        .profile-top {
+            display: flex;
+            flex-direction: row;
+            margin-bottom: 40px;
+
+            .profile-top-right {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                height: 86px;
+
+                .profile-name-status {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    width: 100%;
+
+                    h1 {
+                        font-size: 1.4rem;
+                    }
+
+                    span {
+                        display: flex;
+                        flex-direction: row;
+                        gap: 8px;
+                        align-items: center;
+                        margin-left: 20px;
+
+                        .bubble {
+                            display: block;
+                            width: 10px;
+                            height: 10px;
+                            background-color: var(--divider);
+                            border-radius: 5px;
+
+                            &.connected {
+                                background-color: var(--success);
+                            }
+
+                            &.blocked {
+                                background-color: var(--error);
+                            }
+
+                            &.disconnected {
+                                background-color: var(--warning);
+                            }
+
+                            &.in-game {
+                                background-color: var(--primary);
+                            }
+                        }
+                    }
+                }
+
+                .profile-content {
+                    display: flex;
+                    flex-direction: column;
+        
+                    .profile-actions {
+                        button:first-child {
+                            margin-right: 10px;
+                        }
+                    }
+                }
+            }
+
+            .img-container {
+                background-color: var(--divider);
+                border-radius: var(--border_radius);
+                box-shadow: var(--box_shadow);
+                margin-right: 20px;
+                width: 84px;
+                height: 84px;
+                overflow: hidden;
+    
+                img {
+                    width: 84px;
+                    height: 84px;
+                    object-fit: cover;
+                }
+            }
+        }
+
+        .profile-data {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            justify-content: space-evenly;
+
+            div {
+                display: flex;
+                width: 100px;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+
+                span {
+                    &:last-child {
+                        font-weight: bold;
+                        font-size: 1.2rem;
+                        margin-top: 10px;
+                    }
+                }
+            }
+        }
+
+    }
+}

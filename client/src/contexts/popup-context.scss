@@ -1,0 +1,150 @@
+
+
+.confirm-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    z-index: 100000;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+
+    .confirm-view-center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        background-color: var(--background);
+        border-radius: var(--border_radius);
+        overflow: hidden;
+        width: 350px;
+
+        .confirm-view-header,
+        .confirm-view-footer {
+            background-color: var(--surface);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 10px;
+            width: 100%;
+        }
+
+        .confirm-view-footer {
+            justify-content: flex-end;
+
+            button {
+                margin-left: 10px;
+            }
+        }
+
+        .confirm-view-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+
+            p {
+                width: 100%;
+                text-align: justify;
+                margin: 5px 0;
+            }
+
+            .bold {
+                font-weight: bold;
+                font-size: 1.1rem;
+                padding: 0 3px;
+            }
+
+            .value-input {
+                margin-top: 10px;
+            }
+        }
+    }
+}
+
+.toasts-container {
+    position: fixed;
+    right: 0;
+    top: 10px;
+    z-index: 100000;
+
+    .toast {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 5px;
+        background-color: var(--surface);
+        transform: translateX(300px);
+        width: 300px;
+        margin-bottom: 10px;
+        transition: .3s;
+        border-radius: var(--border_radius);
+        box-shadow: var(--box_shadow);
+        border: 1px solid var(--divider);
+
+        .row-toast {
+            display: flex;
+            flex-direction: row;
+        }
+        svg {
+            font-size: 1.4rem;
+            margin-right: 5px;
+        }
+
+        span {
+            font-weight: bold;
+        }
+
+        &.active {
+            transform: translateX(-10px);
+        }
+
+        &.info {
+            svg {
+                fill: var(--text);
+            }
+            span {
+                color: var(--text);
+            }
+        }
+
+        &.success {
+            svg {
+                fill: var(--success);
+            }
+            span {
+                color: var(--success);
+            }
+        }
+
+        &.warning {
+            svg {
+                fill: var(--warning);
+            }
+            span {
+                color: var(--warning);
+            }
+        }
+
+        &.error {
+            svg {
+                fill: var(--error);
+            }
+            span {
+                color: var(--error);
+            }
+        }
+
+        .close-btn {
+            font-size: 1.2rem;
+            margin: 0;
+            cursor: pointer;
+        }
+    }
+}

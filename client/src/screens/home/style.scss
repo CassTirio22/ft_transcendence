@@ -1,0 +1,123 @@
+
+
+#home {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 20px 20px 80px;
+    gap: 20px;
+
+    @media only screen and (max-width: 673px) {
+        & {
+            padding: 20px;
+        }
+    }
+
+    .home-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 20px;
+        padding: 20px;
+
+        h1 {
+            font-size: 1.6rem;
+            span {
+                font-size: 2.2rem;
+                color: var(--primary);
+                margin-left: 10px;
+            }
+        }
+    }
+
+    .row {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        gap: 20px;
+
+        @media only screen and (max-width: 800px) {
+            & {
+                flex-direction: column;
+            }
+        }
+    }
+
+    .col {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+
+        &.home-box {
+            padding: 20px;
+            border: 2px solid var(--divider);
+            border-radius: var(--border_radius);
+
+            .game-list-elem {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
+            }
+        }
+    }
+
+    .dashboard-box {
+        
+        border: 1px solid var(--divider);
+        border-radius: var(--border_radius);
+        transition: .3s;
+        
+        &:hover {
+            background-color: var(--surface_transparent);
+        }
+
+        &.text-color {
+            display: flex;
+            overflow: hidden;
+
+            >div {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 10px;
+                background-color: #F24236;
+                border-top-left-radius: var(--border_radius);
+                border-bottom-left-radius: var(--border_radius);
+                width: 120px;
+                gap: 10px;
+                
+                span {
+                    font-size: 1rem;
+                    font-weight: bold;
+                }
+            }
+
+            >span {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 180px;
+                text-align: center;
+                padding: 20px;
+                font-weight: bold;
+                font-size: 2rem;
+                height: 90px;
+            }
+
+            &:last-child {
+               >div {
+                    background-color: #2E86AB;
+               }
+            }
+        }
+    }
+
+    .chart-container {
+        border: none;
+        padding: 10px;
+    }
+}

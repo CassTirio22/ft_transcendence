@@ -11,9 +11,6 @@ function LandingNavbar() {
 
 	const location = useLocation();
 	const {user} = useContext(AuthContext);
-
-	console.log(user.token)
-
 	return (
 		<nav className='navbar_vertical' id="navbar">
 			<div className="logo_div">

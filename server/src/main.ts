@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { join } from "path"
 
 /**
  * Every NestJS application needs to be boostrapped.
@@ -23,13 +24,18 @@ async function bootstrap() {
 	app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
 	app.enableCors({
-		origin: "http://localhost:3000",
+		origin: true,
 		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
 		credentials:true,
 	});
 
+	app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+		index: false,
+		prefix: '/uploads',
+	});
+
 	await app.listen(port, () => {
-		console.log('[WEB]', `http://localhost:${port}`);
+		console.log('[WEB]', `http://0.0.0.0:${port}`);
 	});
 }
 

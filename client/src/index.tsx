@@ -6,6 +6,11 @@ import { Provider } from 'react-redux';
 import reportWebVitals from './reportWebVitals';
 import { createCtx } from './contexts/AuthContext';
 import { store } from './store';
+import { createPopupCtx } from './contexts/PopupContext';
+import { createTheme, ThemeProvider } from '@mui/material';
+import { createToastCtx } from './contexts/ToastContext';
+import Socket from './contexts/Socket';
+import { createSocketCtx } from './contexts/SocketContext';
 
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
@@ -14,10 +19,42 @@ const root = ReactDOM.createRoot(
 const [ctx, AuthProvider] = createCtx();
 export const AuthContext = ctx;
 
+export const [ctxe, PopupProvider] = createPopupCtx();
+export const PopupContext = ctxe;
+
+export const [ctxt, ToastProvider] = createToastCtx();
+export const ToastContext = ctxt;
+
+export const [ctxs, SocketProvider] = createSocketCtx();
+export const SocketContext = ctxs;
+
+const theme = createTheme({
+	palette: {
+		mode: "dark",
+	},
+	components: {
+		MuiDrawer: {
+		  styleOverrides: {
+			paper: {
+			  background: "#121212",
+			}
+		  }
+		}
+	  }
+});
+
+//window.console.log = () => {}
+
 root.render(
 	<Provider store={store}>
 		<AuthProvider>
-			<App/>
+			<SocketProvider>
+				<ThemeProvider theme={theme}>
+					<ToastProvider>
+						<App/>
+					</ToastProvider>
+				</ThemeProvider>
+			</SocketProvider>
 		</AuthProvider>
 	</Provider>
 );

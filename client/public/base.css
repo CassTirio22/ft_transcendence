@@ -39,18 +39,19 @@ html {
 }
 
 html.dark {
-	--background: #082032;
-	--background_transparent: rgba(8, 32, 50, 0.6);
-	--surface: #2C394B;
+	--background: #121212;
+	--background_transparent: rgba(18, 18, 18, 0.6);
+	--surface_transparent: rgba(28, 28, 28, 0.6);
+	--surface: #262626;
 	--text: #fff;
 	--strong_text: #fff;
 	--secondary_text: #909090;
 	--on_surface: #000;
-	--primary: #FF4C29;
-	--primary_transparent: rgba(255, 76, 41, 0.2);
+	--primary: #90caf9;
+	--primary_transparent: rgba(144, 202, 249, 0.2);
 	--error: #e23636;
 	--warning: #F7DC6F;
-	--success: #82dd55;
+	--success: #239B56;
 	--graph_grey: rgba(255, 255, 255, 0.3);
 	--graph_color_1: #80DFD2;
 	--graph_color_2: #A380DF;
@@ -143,5 +144,19 @@ a.button_primary {
 	.button_primary:hover {
 		background-color: var(--surface);
 		color: var(--primary);
+	}
+}
+
+.main-view {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+	padding: 50px calc(60px + 10%) 60px calc(60px + 10%);
+}
+
+@media only screen and (max-width: 673px) {
+	.main-view {
+		padding: 50px;
 	}
 }

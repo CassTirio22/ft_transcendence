@@ -1,0 +1,158 @@
+
+
+#friends {
+
+	.friends-header {
+
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		margin-bottom: 60px;
+
+		.header-title {
+			h1 {
+				font-size: 2rem;
+				margin-bottom: 20px;
+			}
+		}
+
+		svg {
+			font-size: 2rem;
+			cursor: pointer;
+		}
+	}
+
+   
+
+	.friends-wrapper {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		gap: 10px;
+
+		.title-list {
+			list-style: none;
+			margin-top: 20px;
+			margin-bottom: 5px;
+		}
+	}
+	
+	.friend-elem {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		
+		.friend-more {
+			display: flex;
+			flex-direction: row;
+			gap: 10px;
+			align-items: center;
+
+			.friend-score {
+				background-color: var(--primary);
+				padding: 2px 4px;
+				border-radius: var(--border_radius);
+
+				font-size: 1rem;
+				font-weight: bold;
+			}
+			
+			svg {
+				cursor: pointer;
+			}
+		}
+
+		.accept-buttons {
+			display: flex;
+			flex-direction: row;
+			gap: 10px;
+		}
+	}
+
+	.search-div {
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background-color: rgba(0, 0, 0, 0.6);
+		z-index:1000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+
+		.center-search {
+			width: 50%;
+			min-width: 200px;
+			max-width: 600px;
+			border-radius: var(--border_radius);
+			border: 2px solid var(--divider);
+			background-color: rgba($color: #082032, $alpha: .5);
+			backdrop-filter: blur(8px);
+
+			.search-input input {
+				outline: none;
+				background-color: transparent;
+				padding: 10px 20px;
+				font-size: 1.4rem;
+				width: 100%;
+				border: none;
+			}
+
+			.wrapper {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				max-height: 60vh;
+				overflow-y: auto;
+
+				.friend-request-div {
+					display: flex;
+					flex-direction: row;
+					align-items: center;
+					justify-content: space-between;
+					width: 100%;
+					padding: 0 10px;
+
+					&:first-child {
+						margin-top: 20px;
+					}
+
+					&:last-child {
+						margin-bottom: 10px;
+					}
+				}
+			}
+		}
+	}
+}
+
+.friend-picture-name {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	.image-div {
+		border-radius: var(--border_radius);
+		background-color: var(--surface);
+		overflow: hidden;
+		margin-right: 10px;
+		width: 64px;
+		height: 64px;
+
+		img {
+			width: 64px;
+			height: 64px;
+			object-fit: cover;
+		}
+	}
+	>span {
+		font-weight: bold;
+		font-size: 1.2rem;
+	}
+}

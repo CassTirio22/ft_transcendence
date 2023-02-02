@@ -1,0 +1,176 @@
+
+
+.current-conversation {
+    width: calc(100% - 200px);
+    height: 100vh;
+    background-color: var(--surface);
+    padding-top: 60px;
+
+    .body-header-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        justify-content: space-between;
+        height: calc(100vh - 60px);
+    }
+
+    textarea {
+        outline: none;
+        border: none;
+    }
+
+    .conversation-header {
+        position: fixed;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        top: 0;
+        width: calc(100% - 260px);
+        height: 60px;
+        background-color: var(--surface);
+        border-bottom: 1px solid var(--divider);
+
+        svg {
+            cursor: pointer;
+        }
+
+        span {
+            font-weight: bold;
+            margin-right: 20px;
+        }
+    }
+
+    .conversation-body {
+        overflow: auto;
+        max-height: calc(100vh - 120px);
+
+        .empty-channel {
+            display: flex;
+            min-height: calc(100vh - 180px);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 10px;
+
+            img {
+                width: 40%;
+            }
+        }
+
+        .message-div {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            transition: .3s;
+
+            .message-sender-image-container {
+                background-color: var(--divider);
+                border-radius: var(--border_radius);
+                overflow: hidden;
+
+                img {
+                    height: 48px;
+                    width: 48px;
+                }
+            }
+
+            .message-content {
+                display: flex;
+                padding-left: 20px;
+                flex-direction: column;
+
+                .message-header {
+                    span {
+                        color: var(--secondary_text);
+                    }
+                    .message-sender-name {
+                        margin-right: 10px;
+                        font-weight: bold;
+                        color: var(--text);
+                    }
+                    margin-bottom: 5px;
+                }
+            }
+
+            .match-message {
+                display: flex;
+                border: 2px solid var(--divider);
+                border-radius: var(--border_radius);
+                padding: 20px;
+                flex-direction: column;
+                gap: 20px;
+
+                .match-header {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 10px;
+                }
+            }
+
+            &:hover {
+                background-color: rgba($color: #fff, $alpha: .1);
+            }
+        }
+    }
+
+    .conversation-footer {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        align-items: flex-end;
+        height: fit-content;
+        padding: 10px;
+
+        .new-message {
+            width: 100%;
+            border-radius: var(--border_radius);
+            padding: 10px;
+            background-color: var(--surface);
+            border: 1px solid var(--divider);
+
+            .text-area-new {
+                width: 100%;
+                resize: none;
+                border: none;
+                background-color: transparent;
+            }
+
+            .send-message {
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-end;
+                width: 100%;
+            }
+        }
+
+        
+    }
+
+    &.empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+
+        .current-empty-div {
+            max-width: 640px;
+            padding: 0 20px;
+
+            h1 {
+                font-weight: bold;
+                font-size: 2.6rem;
+            }
+
+            p {
+                margin-top: 20px;
+                font-size: 1.4rem;
+            }
+        }
+    }
+}

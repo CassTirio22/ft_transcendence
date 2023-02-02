@@ -1,0 +1,43 @@
+
+
+.message-sender-image-container {
+
+    border-radius: var(--border_radius);
+    background-color: var(--surface);
+    overflow: hidden;
+    margin-right: 10px;
+    width: 64px;
+    height: 64px;
+
+    img {
+        width: 64px !important;
+        height: 64px !important;
+        object-fit: cover;
+    }
+
+    &.disconnected {
+        opacity: .4;
+    }
+
+    &.blocked {
+        background-color: var(--error);
+        border: 2px solid var(--error);
+    }
+
+    &.connected {
+        border: 2px solid var(--success);
+    }
+    
+    &.disconnected {
+        border: 2px solid var(--warning);
+    }
+
+    &.unknown {
+        border: 2px solid var(--divider);
+    }
+
+    &.in-game {
+        border: 2px solid var(--primary);
+    }
+}
+

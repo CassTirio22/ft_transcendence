@@ -1,13 +1,15 @@
+import { Button, TextField } from '@mui/material';
 import React, { useContext, useState } from 'react'
-import { AuthContext } from '../../..';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext, ToastContext } from '../../..';
 import logo from "../../../assets/images/test.png"
-import Button from '../../../components/button/Button';
+import { intra_url, TOAST_LVL } from '../../../constants/constants';
 
 function AlreadyRegistered() {
 	return (
 		<section>
 			<div className='registered'>
-				<h2>You are already logged in</h2>
+				<h2>You are already logged in.</h2>
 				<p>Please log out if you want to use another account.</p>
 			</div>
 		</section>
@@ -19,14 +21,23 @@ function RegistrationForm() {
 	const [password, setPassword] = useState("");
 	const [userName, setUserName] = useState("");
 	const {user, signIn, register, profile} = useContext(AuthContext)
+	const {set_toast} = useContext(ToastContext);
+	const navigate = useNavigate();
 
 	const handleSubmit = async () => {
-		await register(userMail, password, userName);
-		const response = await signIn(userMail, password);
+		const register_response = await register(userMail, password, userName);
+		if (register_response === "error") {
+			alert("error");
+		} else {
+			setTimeout(() => {
+				set_toast(TOAST_LVL.SUCCESS, "Successfully register", `Welcome ${register_response}`)
+				navigate("/me/profile");
+			}, 200);
+		}
 	}
 
 	const validateEntry = () => {
-		if (password == "" || userName == "" || userMail == "")
+		if (password.length < 6 || userName === "" || userMail === "")
 			return false;
 		return true;
 	}
@@ -41,15 +52,18 @@ function RegistrationForm() {
 	return (
 		<section className='login'>
 			<div className='center_div'>
-				<img src={logo} />
+				<img src={logo} alt="logo" />
 				<h2>Sign up</h2>
 			</div>
-			<div className="form">
-				<input placeholder='Email' type="email" value={userMail} onChange={(e) => setUserMail(e.target.value)} />
-				<input placeholder='Username' type="name" value={userName} onChange={(e) => setUserName(e.target.value)} />
-				<input onKeyDown={handleKeyDown} placeholder='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+			<div className='center-input'>
+				<form className="form">
+					<TextField size='small' fullWidth autoComplete='email' label='Email' type="email" value={userMail} onChange={(e) => setUserMail(e.target.value)} />
+					<TextField size='small' fullWidth autoComplete='username' label='Username' type="username" value={userName} onChange={(e) => setUserName(e.target.value)} />
+					<TextField size='small' fullWidth autoComplete='password' onKeyDown={handleKeyDown} label='Password' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+				</form>
+				<Button variant='outlined' href={intra_url}>Register with intra</Button>
+				<Button disabled={!validateEntry()} variant="contained" onClick={handleSubmit} fullWidth >Sign up</Button>
 			</div>
-			<Button disable={!validateEntry()} title="Sign up" onPress={handleSubmit} width="300px" />
 		</section>
 	)
 }

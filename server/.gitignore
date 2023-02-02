@@ -36,3 +36,9 @@ lerna-debug.log*
 
 # Documentation
 /docs/*
+
+
+# Pictures
+*/uploads/pictures/*
+
+/uploads/pictures/profile*

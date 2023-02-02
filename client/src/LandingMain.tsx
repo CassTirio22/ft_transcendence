@@ -20,7 +20,7 @@ return (
 		<Route path='/register' element={<Register/>} />
 		<Route path='/oauth' element={<Oauth/>} />
 		<Route path='/oauth-2fa' element={<Oauth2fa/>} />
-		<Route path='*' element={<Loading/>} />
+		<Route path='*' element={<Landing/>} />
 	</Routes>
 );
 }

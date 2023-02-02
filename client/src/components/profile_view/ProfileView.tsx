@@ -160,6 +160,7 @@ const ProfileView = (props: Props) => {
 										profile.id != user.id ?
 										<div>
 											<Button onClick={() => send_friend_request()} variant='contained'>Send friend request</Button>
+											<Button onClick={() => toggle_block(status=="blocked")} variant='outlined'>{status != "blocked" ? "Block" : "Unblock"}</Button>
 										</div> :
 										<div>
 											<Button onClick={() => {navigate("/me/profile");setProfile({...profile, id: -1})}} variant='contained'>Edit profile</Button>

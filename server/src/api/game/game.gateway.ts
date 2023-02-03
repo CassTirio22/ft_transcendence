@@ -114,7 +114,7 @@ class Pong {
 	update(playing: Map< number, {client: Socket, isPlaying: boolean} >): GameState {
 		//cooldown before starting the game
 
-		if ( (this.score_1 >= 11  && this.score_1 - this.score_2 > 1) || 
+		if ( (this.score_1 >= 11 && this.score_1 - this.score_2 > 1) || 
 			(this.score_2 >= 11 && this.score_2 - this.score_1 > 1)
 		){
 			if (playing.has(this.player_1) && playing.get(this.player_1).client.connected) {
@@ -206,14 +206,14 @@ class Pong {
 
 	_update_ball_position() {
 		let bouncing_player: Coordonates = this._check_ray_intersection();
-		if (!bouncing_player) {
+		if (this._check_borders()) {
+			this._bounce_border();
+		}
+		else if (!bouncing_player) {
 			bouncing_player = this._check_rectangles();
 		}
-		if (bouncing_player) {
+		else {
 			this._bounce_player(bouncing_player);
-		}
-		else if (this._check_borders()) {
-			this._bounce_border();
 		}
 		// this._ball_acceleration();
 		const tmp: Coordonates = {x: this.direction.x * this.speed, y: this.direction.y * this.speed};
@@ -228,12 +228,12 @@ class Pong {
 	}
 
 	_check_borders(): boolean {
-		if (this.ball.y + (this.ball_size.y * 0.5) >= 1000) {
-			this.ball.y = 999 - (this.ball_size.y * 0.5);
+		if (this.ball.y + (this.ball_size.y * 0.5) + 1 >= 1000) {
+			this.ball.y = 999 - (this.ball_size.y * 0.5) - 1;
 			return true;
 		}
-		else if (this.ball.y - (this.ball_size.y * 0.5) <= 0) {
-			this.ball.y = 0 + (this.ball_size.y * 0.5);
+		else if (this.ball.y - (this.ball_size.y * 0.5) - 1 <= 0) {
+			this.ball.y = 0 + (this.ball_size.y * 0.5) + 1;
 			return true;
 		}
 		return false;

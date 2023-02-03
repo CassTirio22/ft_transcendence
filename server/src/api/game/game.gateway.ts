@@ -393,10 +393,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//loop all 10secs
 		//check if disconnected
 		setInterval( async () => {
-			this.ongoing.forEach( game => {
+			let deletables: IGame[] = [];
+			for (let index = 0; index < this.ongoing.length; index++) {
+				const game: IGame = this.ongoing[index];
 				const state: GameState = game.pong.update(this.playing);
 				if (state == GameState.end) {
-					this._endGame(game);
+					// this._endGame(game);
+					deletables.push(game);
 				}
 				else if (state == GameState.score) {
 					this.gameService.updateScore({
@@ -405,8 +408,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 						player_2: game.pong.score_2
 					});
 				}
+			}
+			deletables.forEach( (deletable, index) => {
+				this._endGame(deletable);
 			});
-			this._disconnect_queue();
+			// this._disconnect_queue();
 		}, 17);
 	}
 
@@ -419,7 +425,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			//we add it to the list of connected clients
 			this.playing.set(user.id, {client: client, isPlaying: false});
 			this.clients.set(client.id, user.id);
-			console.log(client.handshake.auth)
 			await this._updatePlayer(client, user, client.handshake.auth.address?.toString());
 		}
 		catch (error) {
@@ -470,8 +475,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.playing.set(game.player2.id, {client: client, isPlaying: true});
 
 		//telling to anyone joined to this game that it will start
-		client.to(game.game.address).emit('start', game.game.address);
-		client.emit('start', game.game.address);
+		if (client.connected) {
+			client.to(game.game.address).emit('start', game.game.address);
+			client.emit('start', game.game.address);
+		}
 
 		//game is ongoing in DB
 		await this.gameService.ongoingGame(game.game.id);
@@ -493,8 +500,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			loserScore: game.pong.score_1 > game.pong.score_2 ? game.pong.score_2 : game.pong.score_1,
 			didInterrupt: false,
 		});
-		this.channels.delete(game.game.address);
-		this.ongoing.splice( this.ongoing.indexOf(game));
+		// this.channels.delete(game.game.address);
+		this.ongoing.splice(this.ongoing.indexOf(game), 1);
 
 		this._disconnnect_player(game.player1.id);
 		this._disconnnect_player(game.player2.id);

@@ -108,7 +108,7 @@ const CreateChannelOrDirect = (props: CreateProps) => {
 				channel: selected_channel.current,
 				password: new_channel.current.password == "" ? "undefined" : new_channel.current.password
 			}).then((e: any) => {
-				if (!e.payload && new_channel.current.password != "") {
+				if (e.error && new_channel.current.password != "") {
 					set_toast(TOAST_LVL.WARNING, "Bad password", `You have to enter the correct password`)
 				} else {
 					props.fetchMessages({user: user, channel_id: selected_channel.current, direct_id: undefined});

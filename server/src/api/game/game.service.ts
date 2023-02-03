@@ -122,7 +122,7 @@ export class GameService {
 			winnerScore: winnerScore,
 			loserScore: loserScore,
 			elo: 0,
-			coins: game.type == GameType.competitive ? game.winner.coins : game.winner.coins + 50
+			coins: game.type == GameType.competitive ? game.winner.coins + 50 : game.winner.coins
 		};
 		if (game.type == GameType.competitive) {
 			settings = this._recalculateELO(settings);

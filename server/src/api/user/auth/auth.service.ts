@@ -102,7 +102,6 @@ export class AuthService {
 			.catch(e => null)
 			return "2fa"
 		} else if (user.phone && body.code && body.code != user.phoneCode) {
-			console.log(body.code, user.phoneCode)
 			return "2fa-invalid"
 		}
 

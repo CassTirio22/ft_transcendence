@@ -31,8 +31,6 @@ services:
     restart: unless-stopped
     container_name: client
     build: ./client
-    depends_on:
-          - server
     ports:
       - "3000:3000"
     networks:

@@ -17,9 +17,9 @@ function AlreadyRegistered() {
 }
 
 function RegistrationForm() {
-	const [userMail, setUserMail] = useState("trash.todev@gmail.com");
-	const [password, setPassword] = useState("helloHello987654321");
-	const [userName, setUserName] = useState("tpetit");
+	const [userMail, setUserMail] = useState("");
+	const [password, setPassword] = useState("");
+	const [userName, setUserName] = useState("");
 	const {user, signIn, register, profile} = useContext(AuthContext)
 	const {set_toast} = useContext(ToastContext);
 	const navigate = useNavigate();

@@ -11,7 +11,7 @@ import { Interface } from 'readline';
 /**
  * @type {string} envFilePath The path to the environment file
 **/
-const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
+const envFilePath: string = getEnvPath(`${__dirname}/../../`);
 
 /**
 * Modified root module from NestJS. Parameters are defined by the ModuleMetadata interface.

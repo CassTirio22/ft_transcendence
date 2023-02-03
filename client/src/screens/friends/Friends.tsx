@@ -107,6 +107,7 @@ const Friends = (props: Props) => {
     set_toast(TOAST_LVL.SUCCESS, "Success", `You are up to date`)
     await props.fetchFriends();
     await props.fetchWatch();
+    setup_lists();
     reload_socket();
   }
 

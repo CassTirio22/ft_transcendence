@@ -89,6 +89,16 @@ const ChannelInfo = (props: Props) => {
     selected.current = [];
   }
 
+  const un_mute_ban = async () => {
+    const result = await axios.put("/member/status", {
+      member: click_id.current,
+      channel: parseInt(channel_id ? channel_id : "-1"),
+      status: "regular",
+      time: "2018-12-10T13:49:51.141Z"
+    });
+    props.fetchSpecificChannel(parseInt(channel_id ? channel_id : "-1"));
+  }
+
   const mute_ban = async () => {
     if (mute_ban_time.current == "") {
       set_toast(TOAST_LVL.WARNING, "Date needed", "You need to select a date to ban or mute an user");
@@ -333,11 +343,11 @@ const ChannelInfo = (props: Props) => {
           }
           {
             click_id.current != user.id && click_lvl.current != CONV_LVL.OWNER && (user_status == CONV_LVL.ADMIN || user_status == CONV_LVL.OWNER) ? 
-            <MenuItem onClick={() => {setmuteMember("mute");handleClose()}}>{click_status.current == 1 ? "Unmute" : "Mute" }</MenuItem> : null
+            <MenuItem onClick={() => {if (click_status.current == 1){un_mute_ban();return;};setmuteMember("mute");handleClose()}}>{click_status.current == 1 ? "Unmute" : "Mute" }</MenuItem> : null
           }
           {
             click_id.current != user.id && click_lvl.current != CONV_LVL.OWNER && (user_status == CONV_LVL.ADMIN || user_status == CONV_LVL.OWNER) ? 
-            <MenuItem onClick={() => {setmuteMember("ban");handleClose()}}>{click_status.current == 2 ? "Unban" : "Ban" }</MenuItem> : null
+            <MenuItem onClick={() => {if (click_status.current == 2){un_mute_ban();return;};setmuteMember("ban");handleClose()}}>{click_status.current == 2 ? "Unban" : "Ban" }</MenuItem> : null
           }
         </Menu>
         <CreateBox visible={newMembers} submit={submit} submitable={true} cancel={() => {setNewMembers(false)}} submit_text="Add" title="Add members to this channel">

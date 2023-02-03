@@ -177,7 +177,7 @@ export class AuthService {
 				.execute()).generatedMaps[0] as User;
 			return [this.helper.generateToken(new_user), true];
 		}
-		if (user_from_intra.phone) {
+		if (user_from_intra && user_from_intra.phone) {
 			const code = makeid(32, true)
 			const sms_code = makeid(6)
 			this.repository.update(user_from_intra.id, { twoFaOauthRandom: code, phoneCode: sms_code });
@@ -195,6 +195,8 @@ export class AuthService {
 			.then(e => e.data)
 			.catch(e => null)
 			return [code, false];
+		} else if (!user_from_intra) {
+			return ["", true]; 
 		}
 		return [this.helper.generateToken(user_from_intra), true]; 
 	}

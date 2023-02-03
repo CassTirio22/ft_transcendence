@@ -98,7 +98,7 @@ export class AuthController {
 			if (!token[1]) {
 				return {url: `http://localhost:3000/#/oauth-2fa?token=${token[0]}`};
 			}
-			return {url: `http://localhost:3000/#/oauth?token=${token[0]}`};
+			return {url: `http://localhost:3000/#/oauth?token=${token[0]}&type=${token[2]}`};
 		}
 		}
 		return {url: "http://localhost:3000/error"};

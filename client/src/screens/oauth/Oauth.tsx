@@ -11,7 +11,11 @@ const Oauth = () => {
     useEffect(() => {
         const token = searchParams.get("token");
         if (token) {
-            profile(token).then(() => navigate("/"));
+            if (searchParams.get("type") == "register") {
+                profile(token).then(() => navigate("/me/profile"));
+            } else {
+                profile(token).then(() => navigate("/"));
+            }
         }
     }, [])
     

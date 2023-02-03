@@ -136,7 +136,7 @@ export class AuthService {
 		return this.helper.generateToken(user);
 	}
 
-	public async createUser(body: IntraRegisterDto): Promise<[string, boolean] | never> {
+	public async createUser(body: IntraRegisterDto): Promise<[string, boolean, string] | never> {
 		const user: User = await this.repository.createQueryBuilder()
 			.select()
 			.where("name = :userName", {userName: body.name})
@@ -160,7 +160,7 @@ export class AuthService {
 					password: "coucou"
 				})
 				.execute()).generatedMaps[0] as User;
-			return [this.helper.generateToken(new_user), true];
+			return [this.helper.generateToken(new_user), true, "register"];
 		} else if (!user_from_intra && !user.intraAuth) {
 			const name_updated = `${user.name} 1`
 			const new_user: User = (await this.repository.createQueryBuilder()
@@ -174,7 +174,7 @@ export class AuthService {
 					password: "coucou"
 				})
 				.execute()).generatedMaps[0] as User;
-			return [this.helper.generateToken(new_user), true];
+			return [this.helper.generateToken(new_user), true, "register"];
 		}
 		if (user_from_intra && user_from_intra.phone) {
 			const code = makeid(32, true)
@@ -193,11 +193,11 @@ export class AuthService {
 			})
 			.then(e => e.data)
 			.catch(e => null)
-			return [code, false];
+			return [code, false, "login"];
 		} else if (!user_from_intra) {
-			return ["", true]; 
+			return ["", true, "login"]; 
 		}
-		return [this.helper.generateToken(user_from_intra), true]; 
+		return [this.helper.generateToken(user_from_intra), true, "login"]; 
 	}
 
 	public async update2fa(phone_id: PhoneNumberId): Promise<string | never> {

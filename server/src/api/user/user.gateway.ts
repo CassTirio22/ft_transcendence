@@ -217,10 +217,10 @@ export class UserGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			//manage auth
 			const token: string = <string>client.handshake.headers.authorization;
 			const user: User = await this.authHelper.getUser(token); //not ok if wrong token
-			const already = this.clients.find(client => client.id == user.socket);
-			if (already != undefined) {
-				this.clients.splice(this.clients.indexOf(already));
-			}
+			// const already = this.clients.find(client => client.id == user.socket);
+			// if (already != undefined) {
+			// 	this.clients.splice(this.clients.indexOf(already));
+			// }
 			await this.userService.saveSocket(user, client.id);
 			this.clients.push(client);
 			

@@ -29,7 +29,7 @@ function RegistrationForm() {
 		if (register_response === "error") {
 			set_toast(TOAST_LVL.ERROR, "Register error", `Please use a valid email or a other username`)
 		} else {
-			set_toast(TOAST_LVL.SUCCESS, "Successfully register", `Welcome ${register_response}`)
+			set_toast(TOAST_LVL.SUCCESS, "Successfully register", `Welcome`)
 			navigate("/me/profile");
 		}
 	}

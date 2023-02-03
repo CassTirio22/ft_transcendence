@@ -41,7 +41,7 @@ function LogInForm()
 				settwoFa("");
 			}
 		} else {
-			set_toast(TOAST_LVL.SUCCESS, "Successfully login", `Welcome ${response.substring(20)}`)
+			set_toast(TOAST_LVL.SUCCESS, "Successfully login", `Welcome`)
 			navigate("/");
 		}
 	}
